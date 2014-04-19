@@ -5,21 +5,42 @@ import org.gradle.api.reporting.SingleFileReport;
 
 /**
  * The reporting configuration for the {@link Cpd} task.
+ * <p>
+ * One of
+ * <ul>
+ * <li>csv
+ * <li>text (default)
+ * <li>xml
+ * <p>
+ * The reporting aspects of a {@link Cpd} task can be configured as such:
+ * <pre>
+ * tasks.cpd {
+ *     reports {
+ *         csv.enabled = false
+ *         text {
+ *             enabled = true
+ *             destination = file("${buildDir}/cpd.txt"
+ *         }
+ *     }
+ * }
+ * </pre>
+ *
+ * @see Cpd
  */
 public interface CpdReports extends ReportContainer<SingleFileReport> {
 
     /**
-     * @return The cpd (single file) CSV report
+     * @return The CPD (single file) 'CSV' report
      */
     SingleFileReport getCsv();
 
     /**
-     * @return The cpd (single file) text report
+     * @return The CPD (single file) 'text' report
      */
     SingleFileReport getText();
 
     /**
-     * @return The cpd (single file) XML report
+     * @return The CPD (single file) 'XML' report
      */
     SingleFileReport getXml();
 }

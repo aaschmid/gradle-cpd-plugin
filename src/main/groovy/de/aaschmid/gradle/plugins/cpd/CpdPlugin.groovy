@@ -1,29 +1,57 @@
 package de.aaschmid.gradle.plugins.cpd
 
+import org.gradle.api.Incubating
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.plugins.ReportingBasePlugin
 import org.gradle.api.reporting.ReportingExtension
-import org.gradle.util.VersionNumber
 
 
 /**
- *  A plugin for the <a href="http://pmd.sourceforge.net/cpd-usage.html">CPD</a> detection
- *  (which is a part of <a href="http://pmd.sourceforge.net/">PMD</a>).
+ * A plugin for the finding duplicate code using <a href="http://pmd.sourceforge.net/cpd-usage.html">CPD</a> source
+ * code analyzer (which is a part of <a href="http://pmd.sourceforge.net/">PMD</a>).
  * <p>
- * Declares a <tt>cpd</tt> configuration which needs to be configured with the CPD library to be used.
+ * Creates and registers a {@code cpd} extension with the default task options for every task of type
+ * {@link Cpd}.
  * <p>
- * A {@link Cpd} task is created and configured to analyze complete source code at once.
+ * Declares a {@code cpd} configuration which needs to be configured with the
+ * <a href="http://pmd.sourceforge.net/">PMD</a> library containing the
+ * <a href="http://pmd.sourceforge.net/cpd-usage.html">CPD</a> library to be used.
  * <p>
- * The created {@link Cpd} tasks is added to the <tt>check</tt> lifecycle task.
+ * A {@link Cpd} task named {@code cpd} is created and configured with default options. It can be further configured
+ * to analyze the source code you want, e.g. {@code source = project.files('src')}.
  * <p>
- * Copied partly from {@link org.gradle.api.plugins.quality.PmdPlugin} and adjusted
+ * The created {@link Cpd} task is added to the {@code check} lifecycle task of {@link JavaBasePlugin} if it is also
+ * applied, e.g. using {@link org.gradle.api.plugins.JavaPlugin}.
+ * <p>
+ * Sample:
+ *
+ * <pre autoTested=''>
+ * apply plugin: 'cpd'
+ *
+ * repositories{
+ *     mavenCentral()
+ * }
+ *
+ * cpd {
+ *     minimumTokenCount = 25
+ *     toolVersion = 5.0.1
+ * }
+ *
+ * tasks.cpd {
+ *     source files{
+ *         allprojects.findAll{ p -> p.hasProperty('sourceSets') }.collect { p -> p.sourceSets.collect { it.java }
+ *     }
+ * }
+ * </pre>
  *
  * @see CpdExtension
  * @see Cpd
  */
+@Incubating
 class CpdPlugin implements Plugin<Project> {
-
 
     protected Project project
     protected CpdExtension extension
@@ -32,49 +60,68 @@ class CpdPlugin implements Plugin<Project> {
     void apply(Project project) {
         this.project = project
 
-        this.extension = project.extensions.create('cpd', CpdExtension, project)
+        project.plugins.apply(ReportingBasePlugin)
+
+        extension = createExtension(project)
+        createConfiguration(project, extension)
+        setupTaskDefaults(project, extension)
+
+        Cpd task = project.tasks.create(name: 'cpd', type: Cpd, description: 'Run CPD analysis for all sources')
+        project.plugins.withType(JavaBasePlugin){
+            project.tasks.findByName('check').dependsOn(task)
+        }
+
+    }
+
+    private CpdExtension createExtension(Project project) {
+        CpdExtension extension = project.extensions.create('cpd', CpdExtension, project)
+
+        // set constant values directly
         extension.with{
             toolVersion = '5.1.0'
         }
-
-        project.configurations.create('cpd').with{
-            visible = false
-            transitive = true
-            description = "The CPD libraries to be used for this project."
-            // Don't need these things, they're provided by the runtime
-            exclude group: 'ant', module: 'ant'
-            exclude group: 'org.apache.ant', module: 'ant'
-        }
-
-        Cpd task = project.tasks.create(name: 'cpd', type: Cpd, group: 'check', description: 'Run CPD analysis for all sources')
-
-        project.plugins.apply(ReportingBasePlugin)
+        // use conventionMapping for values derived based on some external value
         extension.conventionMapping.with{
             reportsDir = { project.extensions.getByType(ReportingExtension).baseDir }
         }
-
-        configureTaskDefaults(task)
+        return extension
     }
 
-    protected void configureTaskDefaults(Cpd task) {
-        def config = project.configurations['cpd']
-        config.incoming.beforeResolve{
-            if (config.dependencies.empty) {
-                VersionNumber version = VersionNumber.parse(extension.toolVersion)
-                String dependency = (version < VersionNumber.parse('5.0.0')) ?
-                        "pmd:pmd:${extension.toolVersion}" : "net.sourceforge.pmd:pmd:${extension.toolVersion}"
-                config.dependencies.add(project.dependencies.create(dependency))
+    /** Set up task defaults for every created {@link Cpd} task. */
+    private void setupTaskDefaults(Project project, CpdExtension extension) {
+        project.tasks.withType(Cpd){ Cpd task ->
+            task.conventionMapping.with{
+                encoding = { extension.encoding }
+                minimumTokenCount = { extension.minimumTokenCount }
+                pmdClasspath = { project.configurations.findByName('cpd') }
             }
-        }
-        task.conventionMapping.with{
-            classpath = { config }
-            ignoreFailures = { extension.ignoreFailures }
             task.reports.all{ report ->
                 report.conventionMapping.with{
-                    enabled = { true }
+                    enabled = { report.name == 'xml' }
                     destination = { new File(extension.reportsDir, "cpd.${report.name}") }
                 }
             }
         }
     }
+
+    private Configuration createConfiguration(Project project, CpdExtension extension) {
+        Configuration configuration = project.configurations.create('cpd')
+        configuration.with{
+            description = 'The CPD libraries to be used for this project.'
+            incoming.beforeResolve{
+                if (dependencies.isEmpty()) {
+                    dependencies.add(project.dependencies.create("net.sourceforge.pmd:pmd:${extension.toolVersion}"))
+                }
+            }
+            transitive = true
+            visible = false
+
+            // don't need these dependencies, they're provided by the runtime
+            exclude group: 'ant', module: 'ant'
+            exclude group: 'org.apache.ant', module: 'ant'
+            exclude group: 'org.apache.ant', module: 'ant-launcher'
+        }
+        return configuration
+    }
+
 }

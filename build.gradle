@@ -1,5 +1,22 @@
 apply plugin: 'groovy'
 apply plugin: 'eclipse'
+apply plugin: 'jacoco'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:0.2.1'
+    }
+}
+
+description = 'Gradle plugin to find duplicate code using PMDs copy/paste detection (= CPD)'
+group = 'de.aaschmid.gradle.plugins'
+version = '0.1-SNAPSHOT'
+
+sourceCompatibility = '1.6'
 
 repositories {
     mavenCentral()
@@ -15,7 +32,6 @@ sourceSets {
 }
 
 dependencies {
-
     provided 'javax.inject:javax.inject:1'
 
     compile gradleApi()
@@ -26,4 +42,48 @@ dependencies {
 
 task wrapper(type: Wrapper) {
     gradleVersion = '1.10'
+}
+
+jar {
+    manifest {
+        attributes (
+            'Built-By': "Gradle ${gradle.gradleVersion}",
+            'Built-Date': new Date(),
+            'Specification-Title': 'gradle-cpd-plugin',
+            'Specification-Version': version,
+            'Specification-Vendor': 'Andreas Schmid, service@aaschmid.de',
+            'Implementation-Title': 'gradle-cpd-plugin',
+            'Implementation-Version': version,
+            'Implementation-Vendor': 'Andreas Schmid, service@aaschmid.de',
+        )
+    }
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+test {
+    ignoreFailures = true
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled = true // coveralls plugin depends on xml format report
+    }
+}
+jacoco {
+    toolVersion = '0.6.5.201403032054'
+}
+
+artifacts {
+    archives jar
+    archives javadocJar
+    archives sourcesJar
 }
