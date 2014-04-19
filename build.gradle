@@ -1,17 +1,6 @@
-apply plugin: 'coveralls'
 apply plugin: 'groovy'
 apply plugin: 'eclipse'
 apply plugin: 'jacoco'
-
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:0.2.1'
-    }
-}
 
 description = 'Gradle plugin to find duplicate code using PMDs copy/paste detection (= CPD)'
 group = 'de.aaschmid.gradle.plugins'
@@ -74,11 +63,6 @@ test {
     ignoreFailures = true
 }
 
-jacocoTestReport {
-    reports {
-        xml.enabled = true // coveralls plugin depends on xml format report
-    }
-}
 jacoco {
     toolVersion = '0.6.5.201403032054'
 }

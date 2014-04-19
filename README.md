@@ -1,5 +1,4 @@
 [![Build Status](https://travis-ci.org/aaschmid/gradle-cpd-plugin.png?branch=master)](https://travis-ci.org/aaschmid/gradle-cpd-plugin)
-[![Coverage Status](https://coveralls.io/repos/aaschmid/gradle-cpd-plugin/badge.png?branch=master)](https://coveralls.io/r/aaschmid/gradle-cpd-plugin)
 
 
 Gradle CPD plugin
