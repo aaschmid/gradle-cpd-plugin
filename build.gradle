@@ -4,7 +4,7 @@ apply plugin: 'jacoco'
 
 description = 'Gradle plugin to find duplicate code using PMDs copy/paste detection (= CPD)'
 group = 'de.aaschmid.gradle.plugins'
-version = '0.1-SNAPSHOT'
+version = '0.1'
 
 sourceCompatibility = '1.6'
 
@@ -71,4 +71,75 @@ artifacts {
     archives jar
     archives javadocJar
     archives sourcesJar
+}
+
+// -- build and publish artifacts -------------------------------------------------------------------------------------
+
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+
+signing {
+    // requires gradle.properties, see http://www.gradle.org/docs/current/userguide/signing_plugin.html
+    required {
+        gradle.taskGraph.hasTask('uploadArchives')
+    }
+    sign configurations.archives
+}
+
+if (!hasProperty('sonatypeUsername')) {
+	ext.sonatypeUsername = ''
+}
+if (!hasProperty('sonatypePassword')) {
+	ext.sonatypePassword = ''
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { deployment ->
+                signing.signPom(deployment)
+            }
+            repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
+                // username and password from gradle.properties
+                authentication(userName: sonatypeUsername, password: sonatypePassword )
+            }
+            snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
+                authentication(userName: sonatypeUsername, password: sonatypePassword )
+            }
+
+            pom {
+                project {
+                    name 'gradle-cpd-plugin'
+                    packaging 'jar'
+                    description project.description
+                    url 'https://github.com/aaschmid/gradle-cpd-plugin'
+
+                    scm {
+                        url 'scm:git@github.com:aaschmid/gradle-cpd-plugin.git'
+                        connection 'scm:git@github.com:aaschmid/gradle-cpd-plugin.git'
+                        developerConnection 'scm:git@github.com:aaschmid/gradle-cpd-plugin.git'
+                    }
+
+                    licenses {
+                        license {
+                            name 'The Apache Software License, Version 2.0'
+                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            distribution 'repo'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id 'aaschmid'
+                            name 'Andreas Schmid'
+                        }
+                    }
+                }
+                whenConfigured { pom ->
+                    pom.dependencies.removeAll(pom.dependencies.findAll{ dep -> dep.scope in [ 'compile', 'test' ] })
+                }
+            }
+        }
+    }
 }
