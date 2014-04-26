@@ -5,10 +5,10 @@ Gradle CPD plugin
 =================
 
 ##### Table of Contents
-[What is it](#what-is-it)
-[Requirements](#requirements)
-[Usage](#usage)
-[Contributing](#contributing)
+* [What is it](#what-is-it)
+* [Requirements](#requirements)
+* [Usage](#usage)
+* [Contributing](#contributing)
 
 
 What is it
@@ -32,15 +32,11 @@ dependencies {
 Usage
 -----
 
-*Information:* Downloading from [Maven Central](http://search.maven.org/) is coming soon.
+This plugin is available from [Maven Central](http://search.maven.org/), see [here](http://search.maven.org/#search|ga|1|gradle-cpd-plugin).
 
-1. Clone this repository: ```git clone git@github.com:aaschmid/gradle-cpd-plugin.git```
-2. Change to clone repository: ```cd gradle-cpd-plugin/```
-3. Build project:
-    * Windowns: ```gradlew.bat build```
-    * Unix: ```./gradlew build```
 
-This example assumes the former cloned ```gradle-cpd-plugin``` project to be in the same folder as the project to be checked for duplicates (otherwise change path to ```classpath```):
+This example shows a project which ```src/main/java``` folder should be checked for duplicates:
+
 
 ```groovy
 apply plugin: 'cpd'
@@ -51,7 +47,7 @@ buildscript {
     }
 
     dependencies {
-        classpath files('../gradle-cpd-plugin/build/libs/gradle-cpd-plugin-0.1.jar')
+        classpath 'de.aaschmid.gradle.plugins:gradle-cpd-plugin:0.1'
     }
 }
 
