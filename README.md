@@ -34,6 +34,7 @@ Usage
 
 This plugin is available from [Maven Central](http://search.maven.org/), see [here](http://search.maven.org/#search|ga|1|gradle-cpd-plugin).
 
+*Note:* I am just not happy with the naming of ```cpd``` extension (see toolVersion) and task, as it is the same currently and the task has to be referenced as ```tasks.cpd```. Suggestions welcome via issue ([here](https://github.com/aaschmid/gradle-cpd-plugin/issues/new)). Thanks in advance. ;-)
 
 This example shows a project which ```src/main/java``` folder should be checked for duplicates:
 
