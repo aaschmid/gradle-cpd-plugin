@@ -8,6 +8,7 @@ Gradle CPD plugin
 * [What is it](#what-is-it)
 * [Requirements](#requirements)
 * [Usage](#usage)
+* [Release notes](#release-notes)
 * [Contributing](#contributing)
 
 
@@ -65,6 +66,13 @@ tasks.cpd {
     source = files('src/main/java')
 }
 ```
+
+Release notes
+-------------
+
+### v0.1 (25-Apr-2014)
+
+* initial release
 
 
 Contributing
