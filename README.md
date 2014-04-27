@@ -51,8 +51,9 @@ buildscript {
     }
 }
 
+// optional - default is 5.1.0
 cpd {
-    toolVersion = '5.1.0'
+    toolVersion = '5.0.5'
 }
 
 tasks.cpd {
