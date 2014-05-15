@@ -34,7 +34,7 @@ class CpdExtension extends CodeQualityExtension {
      * <p>
      * Example: {@code encoding = UTF-8}
      */
-    String encoding = ''
+    String encoding = System.getProperty('file.encoding')
 
     /**
      * A positive integer indicating the minimum token count to trigger a CPD match; defaults to {@code 50}.

@@ -1,11 +1,15 @@
 package de.aaschmid.gradle.plugins.cpd
 
+import de.aaschmid.gradle.plugins.cpd.internal.CpdExecutor
+import de.aaschmid.gradle.plugins.cpd.internal.CpdReporter
 import de.aaschmid.gradle.plugins.cpd.internal.CpdReportsImpl
+import net.sourceforge.pmd.cpd.Match
 import org.gradle.api.GradleException
 import org.gradle.api.Incubating
 import org.gradle.api.file.FileCollection
 import org.gradle.api.internal.project.IsolatedAntBuilder
 import org.gradle.api.reporting.Reporting
+import org.gradle.api.reporting.SingleFileReport
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Nested
@@ -13,6 +17,7 @@ import org.gradle.api.tasks.SourceTask
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.VerificationTask
 import org.gradle.internal.reflect.Instantiator
+import org.gradle.logging.ConsoleRenderer
 
 import javax.inject.Inject
 
@@ -56,6 +61,9 @@ class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> 
 
     private final IsolatedAntBuilder antBuilder
 
+    private final CpdExecutor executor
+    private final CpdReporter reporter
+
     /**
      * The character set encoding (e.g., UTF-8) to use when reading the source code files but also when producing the
      * report.
@@ -65,17 +73,12 @@ class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> 
     @Input
     String encoding
 
-    @Nested
-    private final CpdReportsImpl reports
-
     /**
-     * <b>NOT SUPPORTED currently!</b>
-     * <p>
      * Whether or not to allow the build to continue if there are warnings.
      * <p>
      * Example: {@code ignoreFailures = true}
      */
-//    @Input
+    @Input
     boolean ignoreFailures
 
     /**
@@ -92,36 +95,49 @@ class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> 
     @InputFiles
     FileCollection pmdClasspath
 
+    @Nested
+    private final CpdReportsImpl reports
+
     @Inject
     Cpd(Instantiator instantiator, IsolatedAntBuilder antBuilder) {
         this.reports = instantiator.newInstance(CpdReportsImpl, this)
         this.antBuilder = antBuilder
+
+        this.executor = new CpdExecutor(this)
+        this.reporter = new CpdReporter(this)
     }
 
     @TaskAction
     void run() {
-        def cpdArgs = [
-                // use getter to access properties that they are resolved correctly using conventionMapping
-                minimumtokencount: getMinimumTokenCount(),
-        ]
-        if (getEncoding()) {
-            cpdArgs += [ encoding: getEncoding() ]
-        }
+        executor.canRun();
+        reporter.canGenerate();
 
-        if (reports.enabled.isEmpty() || reports.enabled.size() > 1) {
-            throw new GradleException("Task '${name}' requires exactly one report to be enabled but was: ${reports.enabled*.name}.")
-        } else {
-            cpdArgs += [ format: reports.firstEnabled.name, outputfile: reports.firstEnabled.destination ]
-        }
+        // use getter to access properties that they are resolved correctly using conventionMapping
 
-        antBuilder.withClasspath(getPmdClasspath()).execute{
-            ant.taskdef(name: 'cpd', classname: 'net.sourceforge.pmd.cpd.CPDTask')
+        List<Match> matches = executor.run()
+        reporter.generate(matches)
+        logResult(matches)
+    }
 
-            if (logger.debugEnabled) {
-                logger.debug("Starting CPD by 'ant.cpd' using ${cpdArgs} ...")
+    private void logResult(List<Match> matches) {
+        if (matches.isEmpty()) {
+            if (logger.isInfoEnabled()) {
+                logger.info("No duplicates over ${getMinimumTokenCount()} tokens found.")
             }
-            ant.cpd(cpdArgs){
-                getSource().addToAntBuilder(ant, 'fileset', FileCollection.AntType.FileSet)
+
+        } else {
+            String message = "CPD found duplicate code.";
+            SingleFileReport report = reports.getFirstEnabled();
+            if (report != null) {
+                String reportUrl = new ConsoleRenderer().asClickableFileUrl(report.getDestination());
+                message += " See the report at $reportUrl";
+            }
+            if (getIgnoreFailures()) {
+                if (logger.isWarnEnabled()) {
+                    logger.warn(message);
+                }
+            } else {
+                throw new GradleException(message);
             }
         }
     }
@@ -138,12 +154,5 @@ class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> 
      */
     CpdReports getReports() {
         return reports
-    }
-
-    void setIgnoreFailures(boolean ignoreFailures) {
-        if (logger.isLifecycleEnabled()) {
-            logger.lifecycle("Property 'ignoreFailures' of task 'cpd' has no effect because it is not support in this version.")
-        }
-        this.ignoreFailures = ignoreFailures
     }
 }
