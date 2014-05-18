@@ -7,9 +7,10 @@ import spock.lang.Specification
 
 abstract class BaseSpec extends Specification {
 
-    public Project project = ProjectBuilder.builder().build()
+    public Project project
 
     def setup() {
+        project = ProjectBuilder.builder().build()
         project.plugins.apply(CpdPlugin)
     }
 

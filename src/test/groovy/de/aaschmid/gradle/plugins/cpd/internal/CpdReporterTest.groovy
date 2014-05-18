@@ -7,6 +7,7 @@ import net.sourceforge.pmd.cpd.TokenEntry
 import org.gradle.api.GradleException
 
 import java.nio.file.Files
+import de.aaschmid.gradle.plugins.cpd.test.BaseSpec
 
 class CpdReporterTest extends BaseSpec {
 
@@ -96,7 +97,7 @@ class CpdReporterTest extends BaseSpec {
         notThrown GradleException
     }
 
-    def "test 'generate' should ..."() { // TODO more and better tests
+    def "test 'generate' should ..."() { // TODO more and better tests or let is be as acceptance test? otherweise also do for executor => integration test
         given:
         tasks.cpd.reports{
             text{

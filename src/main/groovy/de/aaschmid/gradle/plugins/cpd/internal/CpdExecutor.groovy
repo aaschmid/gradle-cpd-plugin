@@ -8,8 +8,12 @@ import net.sourceforge.pmd.cpd.Match
 import net.sourceforge.pmd.cpd.ReportException
 import org.apache.tools.ant.BuildException
 import org.gradle.api.GradleException
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
 
 public class CpdExecutor {
+
+    private static final Logger logger = Logging.getLogger(CpdExecutor.class);
 
     private final Cpd task;
 
@@ -29,45 +33,45 @@ public class CpdExecutor {
     public List<Match> run() {
         Properties p = new Properties();
         try {
-            if (task.logger.isInfoEnabled()) {
-                task.logger.info("Starting CPD, minimumTokenCount is ${task.getMinimumTokenCount()}");
+            if (logger.isInfoEnabled()) {
+                logger.info("Starting CPD, minimumTokenCount is {}", task.getMinimumTokenCount());
             }
             def language = new LanguageFactory().createLanguage("java", p);
             def config = new CPDConfiguration(task.getMinimumTokenCount(), language, task.getEncoding());
             def cpd = new CPD(config);
 
-            if (task.logger.isInfoEnabled()) {
-                task.logger.info("Tokenizing files");
+            if (logger.isInfoEnabled()) {
+                logger.info("Tokenizing files");
             }
             for (File file : task.getSource()) {
-                if (task.logger.isDebugEnabled()) {
-                    task.logger.debug("Tokenizing ${file.getAbsolutePath()}");
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Tokenizing {}", file.getAbsolutePath());
                 }
                 cpd.add(file);
             }
 
-            if (task.logger.isInfoEnabled()) {
-                task.logger.info("Starting to analyze code");
+            if (logger.isInfoEnabled()) {
+                logger.info("Starting to analyze code");
             }
             long start = System.currentTimeMillis();
             cpd.go();
             long stop = System.currentTimeMillis();
             long timeTaken = stop - start;
-            if (task.logger.isInfoEnabled()) {
-                task.logger.info("Done analyzing code; took ${timeTaken} milliseconds");
+            if (logger.isInfoEnabled()) {
+                logger.info("Done analyzing code; took {} milliseconds", timeTaken);
             }
             return cpd.getMatches().toList();
 
-        } catch (IOException ioe) {
-            if (task.logger.isErrorEnabled()) {
-                task.logger.error(ioe.getMessage(), ioe);
+        } catch (IOException e) {
+            if (logger.isErrorEnabled()) {
+                logger.error(e.getMessage(), e);
             }
-            throw new BuildException("IOException during task execution", ioe);
-        } catch (ReportException re) {
-            if (task.logger.isErrorEnabled()) {
-                task.logger.error(re.toString(), re);
+            throw new BuildException("IOException during task execution", e);
+        } catch (ReportException e) {
+            if (logger.isErrorEnabled()) {
+                logger.error(e.toString(), e);
             }
-            throw new BuildException("ReportException during task execution", re);
+            throw new BuildException("ReportException during task execution", e);
         } catch (Throwable t) {
             t.printStackTrace();
         }

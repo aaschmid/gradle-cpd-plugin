@@ -42,5 +42,5 @@ public interface CpdReports extends ReportContainer<SingleFileReport> {
     /**
      * @return The CPD (single file) 'XML' report
      */
-    SingleFileReport getXml();
+    CpdXmlFileReport getXml();
 }

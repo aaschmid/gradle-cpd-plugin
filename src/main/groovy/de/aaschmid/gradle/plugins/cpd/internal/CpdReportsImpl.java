@@ -4,8 +4,8 @@ import de.aaschmid.gradle.plugins.cpd.Cpd;
 import de.aaschmid.gradle.plugins.cpd.CpdCsvFileReport;
 import de.aaschmid.gradle.plugins.cpd.CpdReports;
 import de.aaschmid.gradle.plugins.cpd.CpdTextFileReport;
+import de.aaschmid.gradle.plugins.cpd.CpdXmlFileReport;
 import org.gradle.api.reporting.SingleFileReport;
-import org.gradle.api.reporting.internal.TaskGeneratedSingleFileReport;
 import org.gradle.api.reporting.internal.TaskReportContainer;
 
 public class CpdReportsImpl extends TaskReportContainer<SingleFileReport> implements CpdReports {
@@ -15,7 +15,7 @@ public class CpdReportsImpl extends TaskReportContainer<SingleFileReport> implem
 
         add(CpdCsvFileReportImpl.class, "csv", task);
         add(CpdTextFileReportImpl.class, "text", task);
-        add(TaskGeneratedSingleFileReport.class, "xml", task);
+        add(CpdXmlFileReportImpl.class, "xml", task);
     }
 
     @Override
@@ -29,7 +29,7 @@ public class CpdReportsImpl extends TaskReportContainer<SingleFileReport> implem
     }
 
     @Override
-    public SingleFileReport getXml() {
-        return getByName("xml");
+    public CpdXmlFileReport getXml() {
+        return (CpdXmlFileReport) getByName("xml");
     }
 }

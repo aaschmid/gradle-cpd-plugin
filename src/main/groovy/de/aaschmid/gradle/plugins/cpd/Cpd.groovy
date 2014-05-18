@@ -20,7 +20,8 @@ import org.gradle.internal.reflect.Instantiator
 import org.gradle.logging.ConsoleRenderer
 
 import javax.inject.Inject
-
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
 
 /**
  * Runs static code/paste (= duplication) detection on supplied source code files and generates a report of duplications
@@ -59,14 +60,14 @@ import javax.inject.Inject
 @Incubating
 class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> {
 
-    private final IsolatedAntBuilder antBuilder
+    private static final Logger logger = Logging.getLogger(Cpd.class);
 
     private final CpdExecutor executor
     private final CpdReporter reporter
 
     /**
      * The character set encoding (e.g., UTF-8) to use when reading the source code files but also when producing the
-     * report.
+     * report; defaults to {@link CpdExtension#getEncoding()}.
      * <p>
      * Example: {@code encoding = UTF-8}
      */
@@ -82,7 +83,8 @@ class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> 
     boolean ignoreFailures
 
     /**
-     * A positive integer indicating the minimum token count to trigger a CPD match.
+     * A positive integer indicating the minimum token count to trigger a CPD match; defaults to
+     * {@link CpdExtension#getMinimumTokenCount()}.
      * <p>
      * Example: {@code minimumTokenCount = 25}
      */
@@ -99,9 +101,8 @@ class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> 
     private final CpdReportsImpl reports
 
     @Inject
-    Cpd(Instantiator instantiator, IsolatedAntBuilder antBuilder) {
+    Cpd(Instantiator instantiator) {
         this.reports = instantiator.newInstance(CpdReportsImpl, this)
-        this.antBuilder = antBuilder
 
         this.executor = new CpdExecutor(this)
         this.reporter = new CpdReporter(this)
@@ -122,7 +123,7 @@ class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> 
     private void logResult(List<Match> matches) {
         if (matches.isEmpty()) {
             if (logger.isInfoEnabled()) {
-                logger.info("No duplicates over ${getMinimumTokenCount()} tokens found.")
+                logger.info('No duplicates over {} tokens found.', getMinimumTokenCount())
             }
 
         } else {
@@ -130,7 +131,7 @@ class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> 
             SingleFileReport report = reports.getFirstEnabled();
             if (report != null) {
                 String reportUrl = new ConsoleRenderer().asClickableFileUrl(report.getDestination());
-                message += " See the report at $reportUrl";
+                message += " See the report at ${reportUrl}";
             }
             if (getIgnoreFailures()) {
                 if (logger.isWarnEnabled()) {

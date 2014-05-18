@@ -70,7 +70,6 @@ class CpdPlugin implements Plugin<Project> {
         project.plugins.withType(JavaBasePlugin){
             project.tasks.findByName('check').dependsOn(task)
         }
-
     }
 
     private CpdExtension createExtension(Project project) {
@@ -123,5 +122,4 @@ class CpdPlugin implements Plugin<Project> {
         }
         return configuration
     }
-
 }

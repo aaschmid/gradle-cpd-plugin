@@ -41,6 +41,10 @@ task wrapper(type: Wrapper) {
     gradleVersion = '1.10'
 }
 
+javadoc {
+    classpath += configurations.provided
+}
+
 jar {
     manifest {
         attributes (

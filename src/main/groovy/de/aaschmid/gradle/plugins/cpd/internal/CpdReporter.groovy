@@ -1,19 +1,19 @@
 package de.aaschmid.gradle.plugins.cpd.internal
 
 import de.aaschmid.gradle.plugins.cpd.Cpd
-import de.aaschmid.gradle.plugins.cpd.CpdCsvFileReport
-import de.aaschmid.gradle.plugins.cpd.CpdTextFileReport
-import net.sourceforge.pmd.cpd.CSVRenderer
+import de.aaschmid.gradle.plugins.cpd.CpdFileReport
 import net.sourceforge.pmd.cpd.FileReporter
 import net.sourceforge.pmd.cpd.Match
 import net.sourceforge.pmd.cpd.Renderer
 import net.sourceforge.pmd.cpd.ReportException
-import net.sourceforge.pmd.cpd.SimpleRenderer
-import net.sourceforge.pmd.cpd.XMLRenderer
 import org.gradle.api.GradleException
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
 import org.gradle.api.reporting.internal.TaskGeneratedSingleFileReport
 
 public class CpdReporter {
+
+    private static final Logger logger = Logging.getLogger(CpdReporter.class);
 
     private final Cpd task;
 
@@ -41,22 +41,19 @@ public class CpdReporter {
     }
 
     public void generate(List<Match> matches) {
-        if (task.logger.isInfoEnabled()) {
-            task.logger.info("Generating report");
+
+        if (logger.isInfoEnabled()) {
+            logger.info("Generating report");
         }
 
         TaskGeneratedSingleFileReport report = (TaskGeneratedSingleFileReport) task.reports.getFirstEnabled();
 
         FileReporter reporter = new FileReporter(report.getDestination(), task.getEncoding());
         Renderer renderer;
-        if (report instanceof CpdCsvFileReport) {
-            renderer = new CSVRenderer(((CpdCsvFileReport) report).getSeparator());
-
-        } else if (report instanceof CpdTextFileReport) {
-            renderer = new SimpleRenderer(((CpdTextFileReport) report).getLineSeparator());
-
+        if (report instanceof CpdFileReport) {
+            renderer = ((CpdFileReport) report).createRenderer();
         } else {
-            renderer = new XMLRenderer(task.getEncoding());
+            throw new GradleException("Tried to create report for unsupported class ${report.class.canonicalName}");
         }
         String renderedMatches = renderer.render(matches.iterator());
 
