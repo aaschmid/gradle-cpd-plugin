@@ -7,6 +7,7 @@ import net.sourceforge.pmd.cpd.Match
 import net.sourceforge.pmd.cpd.Renderer
 import net.sourceforge.pmd.cpd.ReportException
 import org.gradle.api.GradleException
+import org.gradle.api.InvalidUserDataException
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.reporting.internal.TaskGeneratedSingleFileReport
@@ -26,17 +27,17 @@ public class CpdReporter {
 
     public void canGenerate() {
         if (task.getEncoding() == null) {
-            throw new GradleException(
+            throw new InvalidUserDataException(
                     "Task '${task.name}' requires encoding but was: ${task.getEncoding()}.");
         }
 
         CpdReportsImpl reports = task.reports;
         if (reports.getEnabled().isEmpty() || reports.getEnabled().size() > 1) {
-            throw new GradleException(
+            throw new InvalidUserDataException(
                     "Task '${task.name}' requires exactly one report to be enabled but was: ${reports.enabled*.name}.");
         }
         if (reports.getFirstEnabled().getDestination() == null) {
-            throw new GradleException("'${reports.firstEnabled}' requires valid destination but was 'null'.");
+            throw new InvalidUserDataException("'${reports.firstEnabled}' requires valid destination but was 'null'.");
         }
     }
 

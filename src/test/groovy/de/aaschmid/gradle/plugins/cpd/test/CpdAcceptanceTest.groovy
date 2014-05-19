@@ -1,6 +1,7 @@
 package de.aaschmid.gradle.plugins.cpd.test
 
 import org.gradle.api.GradleException
+import org.gradle.api.InvalidUserDataException
 import org.gradle.api.tasks.TaskExecutionException
 
 class CpdAcceptanceTest extends BaseSpec {
@@ -78,7 +79,7 @@ class CpdAcceptanceTest extends BaseSpec {
 
     // TODO use pmd dependency if pmd plugin applied?
 
-    def "executing 'Cpd' task throws wrapped GradleException if no report is enabled"() {
+    def "executing 'Cpd' task throws wrapped 'InvalidUserDataException' if no report is enabled"() {
         given:
         project.tasks.cpd{
             reports{
@@ -96,11 +97,11 @@ class CpdAcceptanceTest extends BaseSpec {
         !project.file('build/reports/cpd.csv').exists()
 
         def e = thrown(TaskExecutionException)
-        e.cause instanceof GradleException
+        e.cause instanceof InvalidUserDataException
         e.cause.message == '''Task 'cpd' requires exactly one report to be enabled but was: [].'''
     }
 
-    def "executing 'Cpd' task throws wrapped GradleException if more than one report is enabled"() {
+    def "executing 'Cpd' task throws wrapped 'InvalidUserDataException' if more than one report is enabled"() {
         given:
         project.tasks.cpd{
             reports{
@@ -118,7 +119,7 @@ class CpdAcceptanceTest extends BaseSpec {
         !project.file('build/reports/cpd.csv').exists()
 
         def e = thrown(TaskExecutionException)
-        e.cause instanceof GradleException
+        e.cause instanceof InvalidUserDataException
         e.cause.message == '''Task 'cpd' requires exactly one report to be enabled but was: [text, xml].'''
     }
 

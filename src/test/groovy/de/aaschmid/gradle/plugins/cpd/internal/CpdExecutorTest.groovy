@@ -1,7 +1,7 @@
 package de.aaschmid.gradle.plugins.cpd.internal
 
 import de.aaschmid.gradle.plugins.cpd.test.BaseSpec
-import org.gradle.api.GradleException
+import org.gradle.api.InvalidUserDataException
 
 class CpdExecutorTest extends BaseSpec {
 
@@ -20,7 +20,7 @@ class CpdExecutorTest extends BaseSpec {
         e.getMessage() ==~ /task must not be null/
     }
 
-    def "test 'canRun()' should throw 'GradleException' if minimumTokenCount is '-1'"() {
+    def "test 'canRun()' should throw 'InvalidUserDataException' if minimumTokenCount is '-1'"() {
         given:
         tasks.cpd{
             minimumTokenCount = -1
@@ -30,8 +30,7 @@ class CpdExecutorTest extends BaseSpec {
         underTest.canRun()
 
         then:
-        def e = thrown GradleException
+        def e = thrown InvalidUserDataException
         e.getMessage() ==~ /'minimumTokenCount' must be greater than zero./
     }
-
 }

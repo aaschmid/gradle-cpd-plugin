@@ -7,7 +7,7 @@ import net.sourceforge.pmd.cpd.LanguageFactory
 import net.sourceforge.pmd.cpd.Match
 import net.sourceforge.pmd.cpd.ReportException
 import org.apache.tools.ant.BuildException
-import org.gradle.api.GradleException
+import org.gradle.api.InvalidUserDataException
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 
@@ -26,7 +26,7 @@ public class CpdExecutor {
 
     public void canRun() {
         if (task.getMinimumTokenCount() <= 0) {
-            throw new GradleException("'minimumTokenCount' must be greater than zero.");
+            throw new InvalidUserDataException("'minimumTokenCount' must be greater than zero.");
         }
     }
 
