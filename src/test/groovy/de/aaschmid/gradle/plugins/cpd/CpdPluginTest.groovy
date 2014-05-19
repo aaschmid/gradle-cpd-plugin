@@ -7,7 +7,6 @@ import org.gradle.api.artifacts.Configuration.State
 import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.plugins.ReportingBasePlugin
 import org.gradle.testfixtures.ProjectBuilder
-import de.aaschmid.gradle.plugins.cpd.test.BaseSpec
 
 class CpdPluginTest extends BaseSpec {
 

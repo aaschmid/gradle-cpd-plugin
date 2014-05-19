@@ -1,11 +1,13 @@
 package de.aaschmid.gradle.plugins.cpd;
 
+import org.gradle.api.reporting.SingleFileReport;
+
 /**
  * The single file CSV report for code/paste (= duplication) detection.
  *
  * @see CpdPlugin
  */
-public interface CpdCsvFileReport extends CpdFileReport {
+public interface CpdCsvFileReport extends SingleFileReport {
 
     /** Default CSV separator. */
     char DEFAULT_SEPARATOR = ',';

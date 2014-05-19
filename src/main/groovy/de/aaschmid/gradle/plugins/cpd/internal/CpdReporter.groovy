@@ -1,16 +1,23 @@
 package de.aaschmid.gradle.plugins.cpd.internal
 
 import de.aaschmid.gradle.plugins.cpd.Cpd
-import de.aaschmid.gradle.plugins.cpd.CpdFileReport
+import de.aaschmid.gradle.plugins.cpd.CpdCsvFileReport
+import de.aaschmid.gradle.plugins.cpd.CpdTextFileReport
+import de.aaschmid.gradle.plugins.cpd.CpdXmlFileReport
+import net.sourceforge.pmd.cpd.CSVRenderer
 import net.sourceforge.pmd.cpd.FileReporter
 import net.sourceforge.pmd.cpd.Match
 import net.sourceforge.pmd.cpd.Renderer
 import net.sourceforge.pmd.cpd.ReportException
+import net.sourceforge.pmd.cpd.SimpleRenderer
+import net.sourceforge.pmd.cpd.XMLRenderer
 import org.gradle.api.GradleException
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
-import org.gradle.api.reporting.internal.TaskGeneratedSingleFileReport
+import org.gradle.api.reporting.SingleFileReport
+
+import java.lang.reflect.Field
 
 public class CpdReporter {
 
@@ -46,23 +53,74 @@ public class CpdReporter {
         if (logger.isInfoEnabled()) {
             logger.info("Generating report");
         }
+        SingleFileReport report = task.reports.getFirstEnabled()
 
-        TaskGeneratedSingleFileReport report = (TaskGeneratedSingleFileReport) task.reports.getFirstEnabled();
-
-        FileReporter reporter = new FileReporter(report.getDestination(), task.getEncoding());
-        Renderer renderer;
-        if (report instanceof CpdFileReport) {
-            renderer = ((CpdFileReport) report).createRenderer();
-        } else {
-            throw new GradleException("Tried to create report for unsupported class ${report.class.canonicalName}");
-        }
+        Renderer renderer = createRendererFor(report)
         String renderedMatches = renderer.render(matches.iterator());
 
+        FileReporter reporter = new FileReporter(report.getDestination(), task.getEncoding());
         try {
             reporter.report(renderedMatches);
 
         } catch (ReportException e) {
             throw new GradleException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * @param the configured {@link SingleFileReport} used {@code tasks.cpd.reports{ ... }}
+     * @return a full configured {@link Renderer} to generate a CPD single file report.
+     */
+    public Renderer createRendererFor(SingleFileReport report) {
+        if (report instanceof CpdCsvFileReport) {
+            char separator = ((CpdCsvFileReport) report).getSeparator();
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Creating renderer to generate CSV file separated by '{}'.", separator);
+            }
+            return new CSVRenderer(separator);
+
+        } else if (report instanceof CpdTextFileReport) {
+            String lineSeparator = ((CpdTextFileReport) report).getLineSeparator();
+            boolean trimLeadingCommonSourceWhitespaces = ((CpdTextFileReport) report).getTrimLeadingCommonSourceWhitespaces();
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Creating renderer to generate simple text file separated by '{}' and trimmed '{}'.", lineSeparator, trimLeadingCommonSourceWhitespaces);
+            }
+            Renderer result = new SimpleRenderer(lineSeparator);
+            setTrimLeadingWhitespacesByReflection(result, trimLeadingCommonSourceWhitespaces);
+            return result;
+
+        } else if (report instanceof CpdXmlFileReport) {
+            String encoding = ((CpdXmlFileReportImpl) report).getXmlRendererEncoding(); // TODO unchecked cast!
+            if (logger.isDebugEnabled()) {
+                logger.debug("Creating renderer to generate XML file with encoding '{}'.", encoding);
+            }
+            return new XMLRenderer(encoding);
+        }
+        throw new GradleException(String.format("Cannot create report for unsupported %s", report.getClass().getCanonicalName()));
+    }
+
+    /**
+     * Also set second field to trim leading whitespaces.
+     * <p/>
+     * <i>Information:</i> Use reflection because neither proper constructor for setting both fields nor setter are
+     * available.
+     */
+    private void setTrimLeadingWhitespacesByReflection(Renderer result, boolean trimLeadingCommonSourceWhitespaces) {
+        String fieldName = "trimLeadingWhitespace";
+        if (logger.isDebugEnabled()) {
+            logger.debug("Try setting '{}' field to '{}' for '{}' by reflection.", fieldName, trimLeadingCommonSourceWhitespaces, result);
+        }
+        try {
+            Field field = SimpleRenderer.class.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(result, trimLeadingCommonSourceWhitespaces);
+
+        } catch (Exception e) {
+            if (logger.isWarnEnabled()) { // TODO test if it is really logged?
+                logger.warn(String.format("Could not set field '%s' on created SimpleRenderer by reflection due to:", fieldName), e);
+            }
         }
     }
 }

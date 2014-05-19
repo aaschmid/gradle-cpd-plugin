@@ -1,62 +1,16 @@
 package de.aaschmid.gradle.plugins.cpd.internal
 
+import de.aaschmid.gradle.plugins.cpd.CpdTextFileReport
 import de.aaschmid.gradle.plugins.cpd.test.BaseSpec
-import net.sourceforge.pmd.cpd.CSVRenderer
-import net.sourceforge.pmd.cpd.*
 
 class CpdTextFileReportImplTest extends BaseSpec {
 
-    def underTest
-
-    def setup() {
-        underTest = new CpdTextFileReportImpl('text', tasks.cpd)
-    }
-
-    def "test 'createRenderer()' should return 'SimpleRenderer' with default 'lineSeparator' and 'trimLeadingCommonSourceWhitespaces'"() {
+    def "test 'new CpdTextFileReportImpl(...)' should have default 'lineSeparator' and 'trimLeading...'"() {
         when:
-        def result = underTest.createRenderer()
+        def result = new CpdTextFileReportImpl('text', tasks.cpd)
 
         then:
-        result instanceof SimpleRenderer
-        result.separator == '====================================================================='
-        result.trimLeadingWhitespace == false
-    }
-
-    def "test 'createRenderer()' should return 'SimpleRenderer' with set 'lineSeparator'"() {
-        given:
-        underTest.lineSeparator = '---------------------------------------------------------------------'
-
-        when:
-        def result = underTest.createRenderer()
-
-        then:
-        result instanceof SimpleRenderer
-        result.separator == '---------------------------------------------------------------------'
-    }
-
-    def "test 'createRenderer()' should return 'SimpleRenderer' with set 'trimLeadingCommonSourceWhitespaces'"() {
-        given:
-        underTest.trimLeadingCommonSourceWhitespaces = true
-
-        when:
-        def result = underTest.createRenderer()
-
-        then:
-        result instanceof SimpleRenderer
-        result.trimLeadingWhitespace == true
-    }
-
-    def "test 'createRenderer()' should return 'SimpleRenderer' with set 'lineSeparator' and 'trimLeadingCommonSourceWhitespaces'"() {
-        given:
-        underTest.lineSeparator = '/////////////////////////////////////////////////////////////////////'
-        underTest.trimLeadingCommonSourceWhitespaces = true
-
-        when:
-        def result = underTest.createRenderer()
-
-        then:
-        result instanceof SimpleRenderer
-        result.separator == '/////////////////////////////////////////////////////////////////////'
-        result.trimLeadingWhitespace == true
+        result.lineSeparator == CpdTextFileReport.DEFAULT_LINE_SEPARATOR
+        result.trimLeadingCommonSourceWhitespaces == CpdTextFileReport.DEFAULT_TRIM_LEADING_COMMON_SOURCE_WHITESPACE
     }
 }

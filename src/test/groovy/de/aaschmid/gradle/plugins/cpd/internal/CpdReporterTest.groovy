@@ -1,8 +1,11 @@
 package de.aaschmid.gradle.plugins.cpd.internal
 
 import de.aaschmid.gradle.plugins.cpd.test.BaseSpec
+import net.sourceforge.pmd.cpd.CSVRenderer
 import net.sourceforge.pmd.cpd.Match
+import net.sourceforge.pmd.cpd.SimpleRenderer
 import net.sourceforge.pmd.cpd.TokenEntry
+import net.sourceforge.pmd.cpd.XMLRenderer
 import org.gradle.api.InvalidUserDataException
 
 import java.nio.file.Files
@@ -93,6 +96,104 @@ class CpdReporterTest extends BaseSpec {
 
         then:
         notThrown InvalidUserDataException
+    }
+
+    def "test 'createRendererFor(...)' should return 'CsvRenderer' with default 'separator'"() {
+        when:
+        def result = underTest.createRendererFor(tasks.cpd.reports.csv)
+
+        then:
+        result instanceof CSVRenderer
+        result.separator == ','
+    }
+
+    def "test 'createRendererFor(...)' should return 'CsvRenderer' with set 'separator'"() {
+        given:
+        tasks.cpd.reports.csv.separator = ';'
+
+        when:
+        def result = underTest.createRendererFor(tasks.cpd.reports.csv)
+
+        then:
+        result instanceof CSVRenderer
+        result.separator == ';'
+    }
+
+    def "test 'createRendererFor(...)' should return 'SimpleRenderer' with default 'lineSeparator' and 'trimLeadingCommonSourceWhitespaces'"() {
+        when:
+        def result = underTest.createRendererFor(tasks.cpd.reports.text)
+
+        then:
+        result instanceof SimpleRenderer
+        result.separator == '====================================================================='
+        result.trimLeadingWhitespace == false
+    }
+
+    def "test 'createRendererFor(...)' should return 'SimpleRenderer' with set 'lineSeparator'"() {
+        given:
+        tasks.cpd.reports.text.lineSeparator = '---------------------------------------------------------------------'
+
+        when:
+        def result = underTest.createRendererFor(tasks.cpd.reports.text)
+
+        then:
+        result instanceof SimpleRenderer
+        result.separator == '---------------------------------------------------------------------'
+    }
+
+    def "test 'createRendererFor(...)' should return 'SimpleRenderer' with set 'trimLeadingCommonSourceWhitespaces'"() {
+        given:
+        tasks.cpd.reports.text.trimLeadingCommonSourceWhitespaces = true
+
+        when:
+        def result = underTest.createRendererFor(tasks.cpd.reports.text)
+
+        then:
+        result instanceof SimpleRenderer
+        result.trimLeadingWhitespace == true
+    }
+
+    def "test 'createRendererFor(...)' should return 'SimpleRenderer' with set 'lineSeparator' and 'trimLeadingCommonSourceWhitespaces'"() {
+        given:
+        tasks.cpd.reports.text{
+            lineSeparator = '/////////////////////////////////////////////////////////////////////'
+            trimLeadingCommonSourceWhitespaces = true
+        }
+
+        when:
+        def result = underTest.createRendererFor(tasks.cpd.reports.text)
+
+        then:
+        result instanceof SimpleRenderer
+        result.separator == '/////////////////////////////////////////////////////////////////////'
+        result.trimLeadingWhitespace == true
+    }
+
+    def "test 'createRendererFor(...)' should return 'XmlRenderer' with set 'encoding'"() {
+        given:
+        tasks.cpd.reports.xml.encoding = 'ISO-8859-1'
+
+        when:
+        def result = underTest.createRendererFor(tasks.cpd.reports.xml)
+
+        then:
+        result instanceof XMLRenderer
+        result.encoding == 'ISO-8859-1'
+    }
+
+    def "test 'createRendererFor(...)' should return 'XmlRenderer' with task 'encoding'"() {
+        given:
+        tasks.cpd {
+            encoding = 'US-ASCII'
+            reports.xml.encoding = null
+        }
+
+        when:
+        def result = underTest.createRendererFor(tasks.cpd.reports.xml)
+
+        then:
+        result instanceof XMLRenderer
+        result.encoding == 'US-ASCII'
     }
 
     def "test 'generate' should ..."() { // TODO more and better tests or let is be as acceptance test? otherweise also do for executor => integration test

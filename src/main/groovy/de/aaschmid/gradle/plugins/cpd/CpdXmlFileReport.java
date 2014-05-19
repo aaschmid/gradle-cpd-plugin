@@ -1,11 +1,13 @@
 package de.aaschmid.gradle.plugins.cpd;
 
+import org.gradle.api.reporting.SingleFileReport;
+
 /**
  * The single file simple text report for code/paste (= duplication) detection.
  *
  * @see de.aaschmid.gradle.plugins.cpd.CpdPlugin
  */
-public interface CpdXmlFileReport extends CpdFileReport {
+public interface CpdXmlFileReport extends SingleFileReport {
 
     /**
      * @return the encoding used to generate XML report; defaults to

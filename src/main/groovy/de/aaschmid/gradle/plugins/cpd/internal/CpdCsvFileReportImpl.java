@@ -1,8 +1,6 @@
 package de.aaschmid.gradle.plugins.cpd.internal;
 
 import de.aaschmid.gradle.plugins.cpd.CpdCsvFileReport;
-import net.sourceforge.pmd.cpd.CSVRenderer;
-import net.sourceforge.pmd.cpd.Renderer;
 import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.Task;
 import org.gradle.api.logging.Logger;
@@ -17,14 +15,6 @@ public class CpdCsvFileReportImpl extends TaskGeneratedSingleFileReport implemen
 
     public CpdCsvFileReportImpl(String name, Task task) {
         super(name, task);
-    }
-
-    @Override
-    public Renderer createRenderer() {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Creating renderer to generate CSV file separated by '{}'.", getSeparator());
-        }
-        return new CSVRenderer(getSeparator());
     }
 
     @Override

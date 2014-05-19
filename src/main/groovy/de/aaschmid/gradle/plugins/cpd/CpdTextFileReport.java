@@ -1,13 +1,13 @@
 package de.aaschmid.gradle.plugins.cpd;
 
-import net.sourceforge.pmd.cpd.SimpleRenderer;
+import org.gradle.api.reporting.SingleFileReport;
 
 /**
  * The single file simple text report for code/paste (= duplication) detection.
  *
  * @see CpdPlugin
  */
-public interface CpdTextFileReport extends CpdFileReport {
+public interface CpdTextFileReport extends SingleFileReport {
 
     /** Default line separator */
     String DEFAULT_LINE_SEPARATOR = "=====================================================================";
