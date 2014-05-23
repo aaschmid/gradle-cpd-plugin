@@ -27,19 +27,19 @@ class CpdReporterTest extends BaseSpec {
         e.getMessage() ==~ /task must not be null/
     }
 
-    def "test 'canGenerate()' should throw 'InvalidUserDataException' if encoding is 'null'"() {
+    def "test 'new CpdReporter(...)' should throw 'InvalidUserDataException' if encoding is 'null'"() {
         given:
-        underTest.task.encoding = null
+        tasks.cpd.encoding = null
 
         when:
-        underTest.canGenerate()
+        new CpdReporter(tasks.cpd)
 
         then:
         def e = thrown InvalidUserDataException
         e.getMessage() ==~ /Task '.+' requires encoding but was: null./
     }
 
-    def "test 'canGenerate()' should throw 'InvalidUserDataException' if no report is enabled"() {
+    def "test 'new CpdReporter(...)' should throw 'InvalidUserDataException' if no report is enabled"() {
         given:
         tasks.cpd.reports{
             csv.enabled = false
@@ -48,14 +48,14 @@ class CpdReporterTest extends BaseSpec {
         }
 
         when:
-        underTest.canGenerate()
+        new CpdReporter(tasks.cpd)
 
         then:
         def e = thrown InvalidUserDataException
         e.getMessage() ==~ /Task '.+' requires exactly one report to be enabled but was: \[\]\./
     }
 
-    def "test 'canGenerate()' should throw 'InvalidUserDataException' if two reports are enabled"() {
+    def "test 'new CpdReporter(...)' should throw 'InvalidUserDataException' if two reports are enabled"() {
         given:
         tasks.cpd.reports{
             csv.enabled = true
@@ -64,14 +64,14 @@ class CpdReporterTest extends BaseSpec {
         }
 
         when:
-        underTest.canGenerate()
+        new CpdReporter(tasks.cpd)
 
         then:
         def e = thrown InvalidUserDataException
         e.getMessage() ==~ /Task '.+' requires exactly one report to be enabled but was: \[csv, xml\]\./
     }
 
-    def "test 'canGenerate()' should throw 'InvalidUserDataException' if destination of enabled report is 'null'"() {
+    def "test 'new CpdReporter(...)' should throw 'InvalidUserDataException' if destination of enabled report is 'null'"() {
         given:
         tasks.cpd.reports{
             csv{
@@ -83,19 +83,30 @@ class CpdReporterTest extends BaseSpec {
         }
 
         when:
-        underTest.canGenerate()
+        new CpdReporter(tasks.cpd)
 
         then:
         def e = thrown InvalidUserDataException
         e.getMessage() ==~ /'.*csv' requires valid destination but was 'null'\./
     }
 
-    def "test 'canGenerate()' should not throw 'InvalidUserDataException' for default task arguments"() {
+    def "test 'new CpdReporter(...)' should get correct values from task"() {
+        given:
+        tasks.cpd{
+            encoding = 'ISO-8859-1'
+            reports{
+                csv.enabled = false
+                text.enabled = true
+                xml.enabled = false
+            }
+        }
+
         when:
-        underTest.canGenerate()
+        def result = new CpdReporter(tasks.cpd)
 
         then:
-        notThrown InvalidUserDataException
+        result.encoding == 'ISO-8859-1'
+        result.report == tasks.cpd.reports.text
     }
 
     def "test 'createRendererFor(...)' should return 'CsvRenderer' with default 'separator'"() {
@@ -196,7 +207,7 @@ class CpdReporterTest extends BaseSpec {
         result.encoding == 'US-ASCII'
     }
 
-    def "test 'generate' should ..."() { // TODO more and better tests or let is be as acceptance test? otherweise also do for executor => integration test
+    def "test 'generate' should ..."() { // TODO more and better tests or let is be as acceptance test? otherwise also do for executor => integration test
         given:
         tasks.cpd.reports{
             text{
@@ -204,11 +215,14 @@ class CpdReporterTest extends BaseSpec {
                 enabled = true
                 destination = Files.createTempFile("test", "text")
             }
+            xml.enabled = false
         }
 
         def tokenEntry1 = new TokenEntry('1', 'Clazz1.java', 5)
         def tokenEntry2 = new TokenEntry('2', 'Clazz2.java', 7)
         def match = new Match(5, tokenEntry1, tokenEntry2)
+
+        def underTest = new CpdReporter(tasks.cpd)
 
         when:
         underTest.generate([ match, match ])

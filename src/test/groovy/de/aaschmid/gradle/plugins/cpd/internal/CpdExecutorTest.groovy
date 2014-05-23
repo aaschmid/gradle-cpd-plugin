@@ -5,12 +5,6 @@ import org.gradle.api.InvalidUserDataException
 
 class CpdExecutorTest extends BaseSpec {
 
-    def underTest
-
-    def setup() {
-        underTest = new CpdExecutor(tasks.cpd)
-    }
-
     def "test 'new CpdExecutor(null)' should throw 'NullPointerException'"() {
         when:
         new CpdExecutor(null)
@@ -20,17 +14,34 @@ class CpdExecutorTest extends BaseSpec {
         e.getMessage() ==~ /task must not be null/
     }
 
-    def "test 'canRun()' should throw 'InvalidUserDataException' if minimumTokenCount is '-1'"() {
+    def "test 'new CpdExecutor(...)' should throw 'InvalidUserDataException' if 'minimumTokenCount' is '-1'"() {
         given:
         tasks.cpd{
             minimumTokenCount = -1
         }
 
         when:
-        underTest.canRun()
+        new CpdExecutor(tasks.cpd)
 
         then:
         def e = thrown InvalidUserDataException
         e.getMessage() ==~ /'minimumTokenCount' must be greater than zero./
+    }
+
+    def "test 'new CpdExecutor(...)' should get correct values from task"() {
+        given:
+        tasks.cpd{
+            encoding = 'US-ASCII'
+            minimumTokenCount = 15
+            source = testFile('de/aaschmid/clazz/Clazz.java')
+        }
+
+        when:
+        def result = new CpdExecutor(tasks.cpd)
+
+        then:
+        result.encoding == 'US-ASCII'
+        result.minimumTokenCount == 15
+        result.source.files == [ testFile('de/aaschmid/clazz/Clazz.java') ] as Set
     }
 }

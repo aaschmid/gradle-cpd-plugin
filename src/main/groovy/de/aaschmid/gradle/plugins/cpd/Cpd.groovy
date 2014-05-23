@@ -7,7 +7,8 @@ import net.sourceforge.pmd.cpd.Match
 import org.gradle.api.GradleException
 import org.gradle.api.Incubating
 import org.gradle.api.file.FileCollection
-import org.gradle.api.internal.project.IsolatedAntBuilder
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
 import org.gradle.api.reporting.Reporting
 import org.gradle.api.reporting.SingleFileReport
 import org.gradle.api.tasks.Input
@@ -16,12 +17,11 @@ import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.SourceTask
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.VerificationTask
+import org.gradle.internal.classloader.MutableURLClassLoader
 import org.gradle.internal.reflect.Instantiator
 import org.gradle.logging.ConsoleRenderer
 
 import javax.inject.Inject
-import org.gradle.api.logging.Logger
-import org.gradle.api.logging.Logging
 
 /**
  * Runs static code/paste (= duplication) detection on supplied source code files and generates a report of duplications
@@ -62,9 +62,6 @@ class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> 
 
     private static final Logger logger = Logging.getLogger(Cpd.class);
 
-    private final CpdExecutor executor
-    private final CpdReporter reporter
-
     /**
      * The character set encoding (e.g., UTF-8) to use when reading the source code files but also when producing the
      * report; defaults to {@link CpdExtension#getEncoding()}.
@@ -104,16 +101,17 @@ class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> 
     Cpd(Instantiator instantiator) {
         this.reports = instantiator.newInstance(CpdReportsImpl, this)
 
-        this.executor = new CpdExecutor(this)
-        this.reporter = new CpdReporter(this)
     }
 
     @TaskAction
     void run() {
-        executor.canRun();
-        reporter.canGenerate();
+        // TODO very ugly class loading hack but as using org.gradle.process.internal.WorkerProcess does not work due to classpath problems using my own classes, this is the only why for now :-(
+        def contextClassLoader = Thread.currentThread().contextClassLoader
+        getPmdClasspath().files.each{ file -> contextClassLoader.addURL(file.toURI().toURL()) }
 
         // use getter to access properties that they are resolved correctly using conventionMapping
+        CpdReporter reporter = new CpdReporter(this)
+        CpdExecutor executor = new CpdExecutor(this)
 
         List<Match> matches = executor.run()
         reporter.generate(matches)

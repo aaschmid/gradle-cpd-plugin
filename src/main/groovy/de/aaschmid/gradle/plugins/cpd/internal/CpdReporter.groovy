@@ -23,16 +23,14 @@ public class CpdReporter {
 
     private static final Logger logger = Logging.getLogger(CpdReporter.class);
 
-    private final Cpd task;
+    private final String encoding;
+    private final SingleFileReport report;
 
     public CpdReporter(Cpd task) {
         if (task == null) {
             throw new NullPointerException("task must not be null");
         }
-        this.task = task;
-    }
 
-    public void canGenerate() {
         if (task.getEncoding() == null) {
             throw new InvalidUserDataException(
                     "Task '${task.name}' requires encoding but was: ${task.getEncoding()}.");
@@ -46,6 +44,9 @@ public class CpdReporter {
         if (reports.getFirstEnabled().getDestination() == null) {
             throw new InvalidUserDataException("'${reports.firstEnabled}' requires valid destination but was 'null'.");
         }
+
+        this.encoding = task.getEncoding();
+        this.report = (SingleFileReport) task.getReports().getFirstEnabled();
     }
 
     public void generate(List<Match> matches) {
@@ -53,12 +54,9 @@ public class CpdReporter {
         if (logger.isInfoEnabled()) {
             logger.info("Generating report");
         }
-        SingleFileReport report = task.reports.getFirstEnabled()
+        String renderedMatches = createRendererFor(report).render(matches.iterator());
 
-        Renderer renderer = createRendererFor(report)
-        String renderedMatches = renderer.render(matches.iterator());
-
-        FileReporter reporter = new FileReporter(report.getDestination(), task.getEncoding());
+        FileReporter reporter = new FileReporter(report.getDestination(), encoding);
         try {
             reporter.report(renderedMatches);
 
