@@ -8,8 +8,6 @@ import net.sourceforge.pmd.cpd.TokenEntry
 import net.sourceforge.pmd.cpd.XMLRenderer
 import org.gradle.api.InvalidUserDataException
 
-import java.nio.file.Files
-
 class CpdReporterTest extends BaseSpec {
 
     def underTest
@@ -213,7 +211,7 @@ class CpdReporterTest extends BaseSpec {
             text{
                 lineSeparator = "----------------------"
                 enabled = true
-                destination = Files.createTempFile("test", "text")
+                destination = File.createTempFile("test", "text")
             }
             xml.enabled = false
         }
