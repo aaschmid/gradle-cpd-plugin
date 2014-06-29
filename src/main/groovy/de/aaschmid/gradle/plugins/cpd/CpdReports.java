@@ -32,15 +32,15 @@ public interface CpdReports extends ReportContainer<SingleFileReport> {
     /**
      * @return The CPD (single file) 'CSV' report
      */
-    SingleFileReport getCsv();
+    CpdCsvFileReport getCsv();
 
     /**
      * @return The CPD (single file) 'text' report
      */
-    SingleFileReport getText();
+    CpdTextFileReport getText();
 
     /**
      * @return The CPD (single file) 'XML' report
      */
-    SingleFileReport getXml();
+    CpdXmlFileReport getXml();
 }

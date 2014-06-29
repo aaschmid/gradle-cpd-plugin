@@ -2,7 +2,7 @@ package de.aaschmid.foo;
 
 public class Baz {
 
-    private Integer integer;
+    private final Integer integer;
 
     public Baz(Integer integer) {
         this.integer = integer;

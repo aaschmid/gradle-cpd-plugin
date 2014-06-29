@@ -1,20 +1,14 @@
 package de.aaschmid.gradle.plugins.cpd
 
+import de.aaschmid.gradle.plugins.cpd.test.BaseSpec
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration.State
 import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.plugins.ReportingBasePlugin
 import org.gradle.testfixtures.ProjectBuilder
-import spock.lang.Specification
 
-class CpdPluginTest extends Specification {
-
-    Project project = ProjectBuilder.builder().build()
-
-    def setup() {
-        project.plugins.apply(CpdPlugin)
-    }
+class CpdPluginTest extends BaseSpec {
 
     def "applying 'CpdPlugin' applies required reporting-base plugin"() {
         expect:
@@ -26,7 +20,7 @@ class CpdPluginTest extends Specification {
         CpdExtension ext = project.extensions.findByName('cpd')
 
         expect:
-        ext.encoding == ''
+        ext.encoding == System.getProperty('file.encoding')
         ext.minimumTokenCount == 50
         ext.reportsDir == project.file('build/reports')
         ext.toolVersion == '5.1.0'
@@ -55,7 +49,7 @@ class CpdPluginTest extends Specification {
         task.description == 'Run CPD analysis for all sources'
         task.group == null
 
-        task.encoding == ''
+        task.encoding == System.getProperty('file.encoding')
         task.minimumTokenCount == 50
 
         task.pmdClasspath == project.configurations.findByName('cpd')
@@ -79,7 +73,7 @@ class CpdPluginTest extends Specification {
         task.description == null
         task.group == null
 
-        task.encoding == ''
+        task.encoding == System.getProperty('file.encoding')
         task.minimumTokenCount == 50
 
         task.pmdClasspath == project.configurations.cpd

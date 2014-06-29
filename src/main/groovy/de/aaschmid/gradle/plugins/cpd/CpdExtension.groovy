@@ -30,11 +30,11 @@ class CpdExtension extends CodeQualityExtension {
 
     /**
      * The character set encoding (e.g., UTF-8) to use when reading the source code files but also when producing the
-     * report.
+     * report; defaults to {@code System.getProperty("file.encoding")}.
      * <p>
      * Example: {@code encoding = UTF-8}
      */
-    String encoding = ''
+    String encoding = System.getProperty('file.encoding')
 
     /**
      * A positive integer indicating the minimum token count to trigger a CPD match; defaults to {@code 50}.

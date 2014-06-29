@@ -17,12 +17,19 @@ configurations {
 }
 
 sourceSets {
-    main.compileClasspath += configurations.provided
-    test.compileClasspath += configurations.provided
+    main {
+        compileClasspath += configurations.provided
+        runtimeClasspath += configurations.provided
+    }
+    test {
+        compileClasspath += configurations.provided
+        runtimeClasspath += configurations.provided
+    }
 }
 
 dependencies {
     provided 'javax.inject:javax.inject:1'
+    provided 'net.sourceforge.pmd:pmd:5.1.0'
 
     compile gradleApi()
     compile localGroovy()
@@ -32,6 +39,10 @@ dependencies {
 
 task wrapper(type: Wrapper) {
     gradleVersion = '1.10'
+}
+
+javadoc {
+    classpath += configurations.provided
 }
 
 jar {

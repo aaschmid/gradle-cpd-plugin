@@ -1,21 +1,27 @@
 package de.aaschmid.gradle.plugins.cpd
 
+import de.aaschmid.gradle.plugins.cpd.internal.CpdExecutor
+import de.aaschmid.gradle.plugins.cpd.internal.CpdReporter
 import de.aaschmid.gradle.plugins.cpd.internal.CpdReportsImpl
+import net.sourceforge.pmd.cpd.Match
 import org.gradle.api.GradleException
 import org.gradle.api.Incubating
 import org.gradle.api.file.FileCollection
-import org.gradle.api.internal.project.IsolatedAntBuilder
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
 import org.gradle.api.reporting.Reporting
+import org.gradle.api.reporting.SingleFileReport
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.SourceTask
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.VerificationTask
+import org.gradle.internal.classloader.MutableURLClassLoader
 import org.gradle.internal.reflect.Instantiator
+import org.gradle.logging.ConsoleRenderer
 
 import javax.inject.Inject
-
 
 /**
  * Runs static code/paste (= duplication) detection on supplied source code files and generates a report of duplications
@@ -54,32 +60,28 @@ import javax.inject.Inject
 @Incubating
 class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> {
 
-    private final IsolatedAntBuilder antBuilder
+    private static final Logger logger = Logging.getLogger(Cpd.class);
 
     /**
      * The character set encoding (e.g., UTF-8) to use when reading the source code files but also when producing the
-     * report.
+     * report; defaults to {@link CpdExtension#getEncoding()}.
      * <p>
      * Example: {@code encoding = UTF-8}
      */
     @Input
     String encoding
 
-    @Nested
-    private final CpdReportsImpl reports
-
     /**
-     * <b>NOT SUPPORTED currently!</b>
-     * <p>
      * Whether or not to allow the build to continue if there are warnings.
      * <p>
      * Example: {@code ignoreFailures = true}
      */
-//    @Input
+    @Input
     boolean ignoreFailures
 
     /**
-     * A positive integer indicating the minimum token count to trigger a CPD match.
+     * A positive integer indicating the minimum token count to trigger a CPD match; defaults to
+     * {@link CpdExtension#getMinimumTokenCount()}.
      * <p>
      * Example: {@code minimumTokenCount = 25}
      */
@@ -92,36 +94,49 @@ class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> 
     @InputFiles
     FileCollection pmdClasspath
 
+    @Nested
+    private final CpdReportsImpl reports
+
     @Inject
-    Cpd(Instantiator instantiator, IsolatedAntBuilder antBuilder) {
+    Cpd(Instantiator instantiator) {
         this.reports = instantiator.newInstance(CpdReportsImpl, this)
-        this.antBuilder = antBuilder
+
     }
 
     @TaskAction
     void run() {
-        def cpdArgs = [
-                // use getter to access properties that they are resolved correctly using conventionMapping
-                minimumtokencount: getMinimumTokenCount(),
-        ]
-        if (getEncoding()) {
-            cpdArgs += [ encoding: getEncoding() ]
-        }
+        // TODO very ugly class loading hack but as using org.gradle.process.internal.WorkerProcess does not work due to classpath problems using my own classes, this is the only why for now :-(
+        def contextClassLoader = Thread.currentThread().contextClassLoader
+        getPmdClasspath().files.each{ file -> contextClassLoader.addURL(file.toURI().toURL()) }
 
-        if (reports.enabled.isEmpty() || reports.enabled.size() > 1) {
-            throw new GradleException("Task '${name}' requires exactly one report to be enabled but was: ${reports.enabled*.name}.")
-        } else {
-            cpdArgs += [ format: reports.firstEnabled.name, outputfile: reports.firstEnabled.destination ]
-        }
+        // use getter to access properties that they are resolved correctly using conventionMapping
+        CpdReporter reporter = new CpdReporter(this)
+        CpdExecutor executor = new CpdExecutor(this)
 
-        antBuilder.withClasspath(getPmdClasspath()).execute{
-            ant.taskdef(name: 'cpd', classname: 'net.sourceforge.pmd.cpd.CPDTask')
+        List<Match> matches = executor.run()
+        reporter.generate(matches)
+        logResult(matches)
+    }
 
-            if (logger.debugEnabled) {
-                logger.debug("Starting CPD by 'ant.cpd' using ${cpdArgs} ...")
+    private void logResult(List<Match> matches) {
+        if (matches.isEmpty()) {
+            if (logger.isInfoEnabled()) {
+                logger.info('No duplicates over {} tokens found.', getMinimumTokenCount())
             }
-            ant.cpd(cpdArgs){
-                getSource().addToAntBuilder(ant, 'fileset', FileCollection.AntType.FileSet)
+
+        } else {
+            String message = "CPD found duplicate code.";
+            SingleFileReport report = reports.getFirstEnabled();
+            if (report != null) {
+                String reportUrl = new ConsoleRenderer().asClickableFileUrl(report.getDestination());
+                message += " See the report at ${reportUrl}";
+            }
+            if (getIgnoreFailures()) {
+                if (logger.isWarnEnabled()) {
+                    logger.warn(message);
+                }
+            } else {
+                throw new GradleException(message);
             }
         }
     }
@@ -129,6 +144,7 @@ class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> 
     /**
      * Configures the reports to be generated by this task.
      */
+    @Override
     CpdReports reports(Closure closure) {
         return reports.configure(closure)
     }
@@ -136,14 +152,8 @@ class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> 
     /**
      * Returns the reports to be generated by this task.
      */
+    @Override
     CpdReports getReports() {
         return reports
-    }
-
-    void setIgnoreFailures(boolean ignoreFailures) {
-        if (logger.isLifecycleEnabled()) {
-            logger.lifecycle("Property 'ignoreFailures' of task 'cpd' has no effect because it is not support in this version.")
-        }
-        this.ignoreFailures = ignoreFailures
     }
 }
