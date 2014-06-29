@@ -70,6 +70,11 @@ tasks.cpd {
 Release notes
 -------------
 
+### tbd. (tbd.)
+
+* directly call CPD instead of using Gradle's ```AntBuilder``` ([#1](/../../issues/1))
+* ...
+
 ### v0.1 (25-Apr-2014)
 
 * initial release
