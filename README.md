@@ -63,9 +63,28 @@ tasks.cpd {
         text.enabled = true
         xml.enabled = false
     }
-    source = files('src/main/java')
+    source = sourceSets.main.allJava // only java, groovy and scala classes in 'main' sourceSets
 }
 ```
+
+If you want to run one copy-paste-detection for all subprojects which have got sourceSets, you can configure the cpd task as follows:
+
+```groovy
+tasks.cpd {
+    allprojects?.sourceSets.all{ sourceSet ->
+        source sourceSet.allJava
+    }
+}
+```
+
+If all the subprojects has a ```java```, ```groovy``` or ```scala``` plugin applied:
+
+```groovy
+tasks.cpd {
+    source subprojects?.sourceSets*.allJava
+}
+```
+
 
 Release notes
 -------------
