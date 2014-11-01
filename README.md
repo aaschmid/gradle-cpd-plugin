@@ -77,14 +77,6 @@ tasks.cpd {
 }
 ```
 
-If all the subprojects has a ```java```, ```groovy``` or ```scala``` plugin applied:
-
-```groovy
-tasks.cpd {
-    source subprojects?.sourceSets*.allJava
-}
-```
-
 
 Release notes
 -------------
