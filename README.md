@@ -72,8 +72,8 @@ If you want to run one copy-paste-detection for all subprojects which have got s
 
 ```groovy
 tasks.cpd {
-    allprojects?.sourceSets.all{ sourceSet ->
-        source sourceSet.allJava
+    allprojects.findAll{ p -> p.hasProperty('sourceSets') }.each{ p ->
+        p.sourceSets.all{ sourceSet -> source sourceSet.allJava }
     }
 }
 ```
