@@ -1,6 +1,7 @@
 package de.aaschmid.gradle.plugins.cpd.test
 
 import de.aaschmid.gradle.plugins.cpd.CpdPlugin
+import groovy.io.FileType
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.Specification
@@ -30,6 +31,12 @@ abstract class BaseSpec extends Specification {
         assert file.exists(): "${file} does not exist"
 
         return file
+    }
+
+    List<File> testFilesRecurseIn(String relativePath) {
+        def result = [ ]
+        testFile(relativePath).eachFileRecurse(FileType.FILES){ file -> result << file }
+        return result;
     }
 
     // -- helper methods -----------------------------------------------------------------------------------------------

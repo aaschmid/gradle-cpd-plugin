@@ -4,7 +4,9 @@ import de.aaschmid.gradle.plugins.cpd.test.BaseSpec
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration.State
+import org.gradle.api.plugins.GroovyPlugin
 import org.gradle.api.plugins.JavaBasePlugin
+import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.ReportingBasePlugin
 import org.gradle.testfixtures.ProjectBuilder
 
@@ -101,12 +103,50 @@ class CpdPluginTest extends BaseSpec {
         }
     }
 
-    def "applying 'CpdPlugin' and 'JavaBasePlugin' adds cpd tasks to check lifecycle task if 'JavaBasePlugin' is applied first"() {
+    def "applying 'CpdPlugin' and 'JavaPlugin' sets source with 'main' and 'test' sourceSets of Java project"() {
+        given:
+        project.plugins.apply(JavaPlugin)
+        project.sourceSets{
+            main{
+                java.srcDir testFile('de/aaschmid/clazz')
+                resources.srcDir testFile('de/aaschmid/foo')
+            }
+            test.java.srcDir testFile('de/aaschmid/test')
+        }
+
+        def cpdTask = project.tasks.findByName('cpd')
+
+        expect:
+        cpdTask.source.files == [ *testFilesRecurseIn('de/aaschmid/clazz'), *testFilesRecurseIn('de/aaschmid/test') ] as Set
+    }
+
+    def "applying 'CpdPlugin' and 'GroovyPlugin' sets source with 'main' and 'test' sourceSets of Groovy project"() {
+        given:
+        project.plugins.apply(GroovyPlugin)
+        project.sourceSets{
+            main{
+                groovy.srcDir testFile('de/aaschmid/clazz')
+                resources.srcDir testFile('de/aaschmid/foo')
+            }
+            test.groovy.srcDir testFile('de/aaschmid/test')
+        }
+
+        def cpdTask = project.tasks.findByName('cpd')
+
+        expect:
+        cpdTask.source.files == [ *testFilesRecurseIn('de/aaschmid/clazz'), *testFilesRecurseIn('de/aaschmid/test') ] as Set
+    }
+
+    def "applying 'JavaBasePlugin' and 'CpdPlugin' adds dependency to check task and configures source"() {
         given:
         Project project = ProjectBuilder.builder().build()
 
         project.plugins.apply(JavaBasePlugin)
         project.plugins.apply(CpdPlugin)
+
+        project.sourceSets{
+            tmp.java.srcDir testFile('')
+        }
 
         def checkTask = project.tasks.findByName('check')
         def cpdTask = project.tasks.findByName('cpd')
@@ -115,6 +155,7 @@ class CpdPluginTest extends BaseSpec {
         checkTask.taskDependencies.getDependencies(checkTask).find{ Task task ->
             task == cpdTask
         }
+        cpdTask.source.files == testFilesRecurseIn('') as Set
     }
 
     def "'Cpd' task can be customized via extension"() {

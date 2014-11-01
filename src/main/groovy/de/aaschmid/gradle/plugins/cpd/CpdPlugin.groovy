@@ -68,6 +68,7 @@ class CpdPlugin implements Plugin<Project> {
 
         Cpd task = project.tasks.create(name: 'cpd', type: Cpd, description: 'Run CPD analysis for all sources')
         project.plugins.withType(JavaBasePlugin){
+            project.sourceSets.all{ sourceSet -> task.source(sourceSet.allJava) }
             project.tasks.findByName('check').dependsOn(task)
         }
     }
