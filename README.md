@@ -84,7 +84,9 @@ Release notes
 
 ### tbd. (tbd.)
 
-* directly call CPD instead of using Gradle's ```AntBuilder``` ([#1](/../../issues/1))
+* Directly call CPD instead of using Gradle's ```AntBuilder``` ([#1](/../../issues/1))
+* Use ```sourceSets``` of the project which is plugin applied to by default ([#4](/../../issues/4))
+* Added docu for multi-module build and CPD for the whole project ([#6](/../../issues/6))
 * ...
 
 ### v0.1 (25-Apr-2014)
