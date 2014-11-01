@@ -11,6 +11,7 @@ import org.gradle.api.reporting.SingleFileReport;
  * <li>csv
  * <li>text (default)
  * <li>xml
+ * </ul>
  * <p>
  * The reporting aspects of a {@link Cpd} task can be configured as such:
  * <pre>

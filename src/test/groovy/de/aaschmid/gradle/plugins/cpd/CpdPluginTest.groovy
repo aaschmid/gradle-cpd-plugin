@@ -229,7 +229,6 @@ class CpdPluginTest extends BaseSpec {
         !task.reports.xml.enabled
 
         task.source.empty
-
     }
 
     def "custom 'Cpd' task can be customized via extension if task is created before extension is configured"() {

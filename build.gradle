@@ -1,5 +1,5 @@
 apply plugin: 'groovy'
-apply plugin: 'eclipse'
+apply plugin: 'idea'
 apply plugin: 'jacoco'
 
 description = 'Gradle plugin to find duplicate code using PMDs copy/paste detection (= CPD)'
@@ -28,17 +28,19 @@ sourceSets {
 }
 
 dependencies {
+    provided gradleApi()
+    provided localGroovy()
+
     provided 'javax.inject:javax.inject:1'
     provided 'net.sourceforge.pmd:pmd:5.1.0'
 
-    compile gradleApi()
-    compile localGroovy()
-
-    testCompile 'org.spockframework:spock-core:0.7-groovy-1.8'
+    testCompile('org.spockframework:spock-core:0.7-groovy-2.0') {
+        exclude group: 'org.codehaus.groovy'
+    }
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '1.10'
+    gradleVersion = '2.0'
 }
 
 javadoc {
@@ -75,13 +77,19 @@ test {
 }
 
 jacoco {
-    toolVersion = '0.6.5.201403032054'
+    toolVersion = '0.7.2.201409121644'
 }
 
 artifacts {
     archives jar
     archives javadocJar
     archives sourcesJar
+}
+
+idea {
+    module {
+        scopes.PROVIDED.plus += [ configurations.provided ]
+    }
 }
 
 // -- build and publish artifacts -------------------------------------------------------------------------------------

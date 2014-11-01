@@ -11,4 +11,6 @@ build/
 # IDEA
 .idea/
 *.iml
+*.ipr
+*.iws
 
