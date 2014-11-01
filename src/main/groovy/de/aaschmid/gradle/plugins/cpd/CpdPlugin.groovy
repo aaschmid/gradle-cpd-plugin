@@ -41,8 +41,8 @@ import org.gradle.api.reporting.ReportingExtension
  * }
  *
  * tasks.cpd {
- *     allprojects?.sourceSets.all{ sourceSet ->
- *         source sourceSet.allJava
+ *     allprojects.findAll{ p -> p.hasProperty('sourceSets') }.each{ p ->
+ *         p.sourceSets.all{ sourceSet -> source sourceSet.allJava }
  *     }
  * }
  * </pre>
