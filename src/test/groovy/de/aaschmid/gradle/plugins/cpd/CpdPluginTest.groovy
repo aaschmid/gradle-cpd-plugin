@@ -80,11 +80,11 @@ class CpdPluginTest extends BaseSpec {
 
         task.pmdClasspath == project.configurations.cpd
 
-        task.reports.csv.destination == project.file('build/reports/cpd/cpd.csv')
+        task.reports.csv.destination == project.file('build/reports/cpd/cpdCustom.csv')
         !task.reports.csv.enabled
-        task.reports.text.destination == project.file('build/reports/cpd/cpd.text')
+        task.reports.text.destination == project.file('build/reports/cpd/cpdCustom.text')
         !task.reports.text.enabled
-        task.reports.xml.destination == project.file('build/reports/cpd/cpd.xml')
+        task.reports.xml.destination == project.file('build/reports/cpd/cpdCustom.xml')
         task.reports.xml.enabled
 
         task.source.empty

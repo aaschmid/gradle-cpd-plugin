@@ -98,7 +98,7 @@ class CpdPlugin implements Plugin<Project> {
             task.reports.all{ report ->
                 report.conventionMapping.with{
                     enabled = { report.name == 'xml' }
-                    destination = { new File(extension.reportsDir, "cpd.${report.name}") }
+                    destination = { new File(extension.reportsDir, "${task.name}.${report.name}") }
                 }
             }
         }
