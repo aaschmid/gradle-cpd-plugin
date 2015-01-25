@@ -7,10 +7,10 @@ class CpdXmlFileReportImplTest extends BaseSpec {
 
     def "test 'new CpdXmlFileReportImpl(...)' should keep 'Cpd' task and have 'null' default 'encoding'"() {
         when:
-        def result = new CpdXmlFileReportImpl('csv', tasks.cpd)
+        def result = new CpdXmlFileReportImpl('csv', project.cpdCheck)
 
         then:
-        result.task == tasks.cpd
+        result.task == project.cpdCheck
         result.encoding == null
     }
 

@@ -35,8 +35,6 @@ Usage
 
 This plugin is available from [Maven Central](http://search.maven.org/), see [here](http://search.maven.org/#search|ga|1|gradle-cpd-plugin).
 
-*Note:* I am just not happy with the naming of ```cpd``` extension (see toolVersion) and task, as it is the same currently and the task has to be referenced as ```tasks.cpd```. Suggestions welcome via issue ([here](https://github.com/aaschmid/gradle-cpd-plugin/issues/new)). Thanks in advance. ;-)
-
 This example shows a project where only  ```main``` sources should be checked for duplicates:
 
 
@@ -60,7 +58,7 @@ cpd {
 }
 
 // optional - default report is xml and default source is 'main' and 'test' 
-tasks.cpd {
+cpdCheck {
     reports {
         text.enabled = true
         xml.enabled = false
@@ -72,7 +70,7 @@ tasks.cpd {
 If you want to run one copy-paste-detection for all subprojects which have got sourceSets, you can configure the cpd task as follows:
 
 ```groovy
-tasks.cpd {
+cpdCheck {
     allprojects.findAll{ p -> p.hasProperty('sourceSets') }.each{ p ->
         p.sourceSets.all{ sourceSet -> source sourceSet.allJava }
     }

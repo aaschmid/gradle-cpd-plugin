@@ -6,17 +6,17 @@ class CpdTest extends BaseSpec {
 
     def "'Cpd' task inputs are set correctly"() {
         given:
-        project.tasks.cpd{
+        project.cpdCheck{
             reports{
                 text{
                     enabled = true
-                    destination = project.file("${project.buildDir}/cpd.text")
+                    destination = project.file("${project.buildDir}/cpdCheck.text")
                 }
             }
             source = testFile('de/aaschmid/clazz/')
         }
 
-        def task = project.tasks.findByName('cpd')
+        def task = project.tasks.findByName('cpdCheck')
 
         expect:
         task.inputs.sourceFiles.files == project.files(
@@ -29,14 +29,14 @@ class CpdTest extends BaseSpec {
 
     def "'Cpd' task is aware of includes and excludes"() {
         given:
-        project.tasks.cpd{
+        project.cpdCheck{
             include '**/*.java'
             exclude '**/*1.java'
             exclude '**/*z.java'
             source = testFile('.')
         }
 
-        def task = project.tasks.findByName('cpd')
+        def task = project.tasks.findByName('cpdCheck')
 
         expect:
         task.inputs.sourceFiles.files == project.files(
@@ -48,19 +48,19 @@ class CpdTest extends BaseSpec {
 
     def "'Cpd' task outputs are set correctly"() {
         given:
-        project.tasks.cpd{
+        project.cpdCheck{
             reports{
                 text{
                     enabled = true
-                    destination = project.file("${project.buildDir}/cpd.text")
+                    destination = project.file("${project.buildDir}/cpdCheck.text")
                 }
             }
             source = testFile('.')
         }
 
-        def task = project.tasks.findByName('cpd')
+        def task = project.tasks.findByName('cpdCheck')
 
         expect:
-        task.outputs.files.files == project.files("${project.buildDir}/cpd.text", "${project.buildDir}/reports/cpd/cpd.xml") as Set
+        task.outputs.files.files == project.files("${project.buildDir}/cpdCheck.text", "${project.buildDir}/reports/cpd/cpdCheck.xml") as Set
     }
 }

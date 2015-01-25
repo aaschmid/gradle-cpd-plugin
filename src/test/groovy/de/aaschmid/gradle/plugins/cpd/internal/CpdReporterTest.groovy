@@ -13,7 +13,7 @@ class CpdReporterTest extends BaseSpec {
     def underTest
 
     def setup() {
-        underTest = new CpdReporter(project.tasks.findByName('cpd'))
+        underTest = new CpdReporter(project.tasks.findByName('cpdCheck'))
     }
 
     def "test 'new CpdReporter(null)' should throw 'NullPointerException'"() {
@@ -27,10 +27,10 @@ class CpdReporterTest extends BaseSpec {
 
     def "test 'new CpdReporter(...)' should throw 'InvalidUserDataException' if encoding is 'null'"() {
         given:
-        tasks.cpd.encoding = null
+        project.cpdCheck.encoding = null
 
         when:
-        new CpdReporter(tasks.cpd)
+        new CpdReporter(project.cpdCheck)
 
         then:
         def e = thrown InvalidUserDataException
@@ -39,14 +39,14 @@ class CpdReporterTest extends BaseSpec {
 
     def "test 'new CpdReporter(...)' should throw 'InvalidUserDataException' if no report is enabled"() {
         given:
-        tasks.cpd.reports{
+        project.cpdCheck.reports{
             csv.enabled = false
             text.enabled = false
             xml.enabled = false
         }
 
         when:
-        new CpdReporter(tasks.cpd)
+        new CpdReporter(project.cpdCheck)
 
         then:
         def e = thrown InvalidUserDataException
@@ -55,14 +55,14 @@ class CpdReporterTest extends BaseSpec {
 
     def "test 'new CpdReporter(...)' should throw 'InvalidUserDataException' if two reports are enabled"() {
         given:
-        tasks.cpd.reports{
+        project.cpdCheck.reports{
             csv.enabled = true
             text.enabled = false
             xml.enabled = true
         }
 
         when:
-        new CpdReporter(tasks.cpd)
+        new CpdReporter(project.cpdCheck)
 
         then:
         def e = thrown InvalidUserDataException
@@ -71,7 +71,7 @@ class CpdReporterTest extends BaseSpec {
 
     def "test 'new CpdReporter(...)' should throw 'InvalidUserDataException' if destination of enabled report is 'null'"() {
         given:
-        tasks.cpd.reports{
+        project.cpdCheck.reports{
             csv{
                 enabled = true
                 destination = null
@@ -81,7 +81,7 @@ class CpdReporterTest extends BaseSpec {
         }
 
         when:
-        new CpdReporter(tasks.cpd)
+        new CpdReporter(project.cpdCheck)
 
         then:
         def e = thrown InvalidUserDataException
@@ -90,7 +90,7 @@ class CpdReporterTest extends BaseSpec {
 
     def "test 'new CpdReporter(...)' should get correct values from task"() {
         given:
-        tasks.cpd{
+        project.cpdCheck{
             encoding = 'ISO-8859-1'
             reports{
                 csv.enabled = false
@@ -100,16 +100,16 @@ class CpdReporterTest extends BaseSpec {
         }
 
         when:
-        def result = new CpdReporter(tasks.cpd)
+        def result = new CpdReporter(project.cpdCheck)
 
         then:
         result.encoding == 'ISO-8859-1'
-        result.report == tasks.cpd.reports.text
+        result.report == project.cpdCheck.reports.text
     }
 
     def "test 'createRendererFor(...)' should return 'CsvRenderer' with default 'separator'"() {
         when:
-        def result = underTest.createRendererFor(tasks.cpd.reports.csv)
+        def result = underTest.createRendererFor(project.cpdCheck.reports.csv)
 
         then:
         result instanceof CSVRenderer
@@ -118,10 +118,10 @@ class CpdReporterTest extends BaseSpec {
 
     def "test 'createRendererFor(...)' should return 'CsvRenderer' with set 'separator'"() {
         given:
-        tasks.cpd.reports.csv.separator = ';'
+        project.cpdCheck.reports.csv.separator = ';'
 
         when:
-        def result = underTest.createRendererFor(tasks.cpd.reports.csv)
+        def result = underTest.createRendererFor(project.cpdCheck.reports.csv)
 
         then:
         result instanceof CSVRenderer
@@ -130,7 +130,7 @@ class CpdReporterTest extends BaseSpec {
 
     def "test 'createRendererFor(...)' should return 'SimpleRenderer' with default 'lineSeparator' and 'trimLeadingCommonSourceWhitespaces'"() {
         when:
-        def result = underTest.createRendererFor(tasks.cpd.reports.text)
+        def result = underTest.createRendererFor(project.cpdCheck.reports.text)
 
         then:
         result instanceof SimpleRenderer
@@ -140,10 +140,10 @@ class CpdReporterTest extends BaseSpec {
 
     def "test 'createRendererFor(...)' should return 'SimpleRenderer' with set 'lineSeparator'"() {
         given:
-        tasks.cpd.reports.text.lineSeparator = '---------------------------------------------------------------------'
+        project.cpdCheck.reports.text.lineSeparator = '---------------------------------------------------------------------'
 
         when:
-        def result = underTest.createRendererFor(tasks.cpd.reports.text)
+        def result = underTest.createRendererFor(project.cpdCheck.reports.text)
 
         then:
         result instanceof SimpleRenderer
@@ -152,10 +152,10 @@ class CpdReporterTest extends BaseSpec {
 
     def "test 'createRendererFor(...)' should return 'SimpleRenderer' with set 'trimLeadingCommonSourceWhitespaces'"() {
         given:
-        tasks.cpd.reports.text.trimLeadingCommonSourceWhitespaces = true
+        project.cpdCheck.reports.text.trimLeadingCommonSourceWhitespaces = true
 
         when:
-        def result = underTest.createRendererFor(tasks.cpd.reports.text)
+        def result = underTest.createRendererFor(project.cpdCheck.reports.text)
 
         then:
         result instanceof SimpleRenderer
@@ -164,13 +164,13 @@ class CpdReporterTest extends BaseSpec {
 
     def "test 'createRendererFor(...)' should return 'SimpleRenderer' with set 'lineSeparator' and 'trimLeadingCommonSourceWhitespaces'"() {
         given:
-        tasks.cpd.reports.text{
+        project.cpdCheck.reports.text{
             lineSeparator = '/////////////////////////////////////////////////////////////////////'
             trimLeadingCommonSourceWhitespaces = true
         }
 
         when:
-        def result = underTest.createRendererFor(tasks.cpd.reports.text)
+        def result = underTest.createRendererFor(project.cpdCheck.reports.text)
 
         then:
         result instanceof SimpleRenderer
@@ -180,10 +180,10 @@ class CpdReporterTest extends BaseSpec {
 
     def "test 'createRendererFor(...)' should return 'XmlRenderer' with set 'encoding'"() {
         given:
-        tasks.cpd.reports.xml.encoding = 'ISO-8859-1'
+        project.cpdCheck.reports.xml.encoding = 'ISO-8859-1'
 
         when:
-        def result = underTest.createRendererFor(tasks.cpd.reports.xml)
+        def result = underTest.createRendererFor(project.cpdCheck.reports.xml)
 
         then:
         result instanceof XMLRenderer
@@ -192,13 +192,13 @@ class CpdReporterTest extends BaseSpec {
 
     def "test 'createRendererFor(...)' should return 'XmlRenderer' with task 'encoding'"() {
         given:
-        tasks.cpd {
+        project.cpdCheck {
             encoding = 'US-ASCII'
             reports.xml.encoding = null
         }
 
         when:
-        def result = underTest.createRendererFor(tasks.cpd.reports.xml)
+        def result = underTest.createRendererFor(project.cpdCheck.reports.xml)
 
         then:
         result instanceof XMLRenderer
@@ -207,7 +207,7 @@ class CpdReporterTest extends BaseSpec {
 
     def "test 'generate' should ..."() { // TODO more and better tests or let is be as acceptance test? otherwise also do for executor => integration test
         given:
-        tasks.cpd.reports{
+        project.cpdCheck.reports{
             text{
                 lineSeparator = "----------------------"
                 enabled = true
@@ -220,12 +220,12 @@ class CpdReporterTest extends BaseSpec {
         def tokenEntry2 = new TokenEntry('2', 'Clazz2.java', 7)
         def match = new Match(5, tokenEntry1, tokenEntry2)
 
-        def underTest = new CpdReporter(tasks.cpd)
+        def underTest = new CpdReporter(project.cpdCheck)
 
         when:
         underTest.generate([ match, match ])
 
         then:
-        tasks.cpd.reports.text.destination.text
+        project.cpdCheck.reports.text.destination.text
     }
 }

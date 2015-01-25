@@ -7,7 +7,7 @@ class CpdTextFileReportImplTest extends BaseSpec {
 
     def "test 'new CpdTextFileReportImpl(...)' should have default 'lineSeparator' and 'trimLeading...'"() {
         when:
-        def result = new CpdTextFileReportImpl('text', tasks.cpd)
+        def result = new CpdTextFileReportImpl('text', project.cpdCheck)
 
         then:
         result.lineSeparator == CpdTextFileReport.DEFAULT_LINE_SEPARATOR

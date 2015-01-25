@@ -42,9 +42,9 @@ class CpdPluginTest extends BaseSpec {
         !config.visible
     }
 
-    def "applying 'CpdPlugin' creates and configures task 'cpd' with correct default values"() {
+    def "applying 'CpdPlugin' creates and configures task 'cpdCheck' with correct default values"() {
         given:
-        Cpd task = project.tasks.findByName('cpd')
+        Cpd task = project.tasks.findByName('cpdCheck')
 
         expect:
         task instanceof Cpd
@@ -56,11 +56,11 @@ class CpdPluginTest extends BaseSpec {
 
         task.pmdClasspath == project.configurations.findByName('cpd')
 
-        task.reports.csv.destination == project.file('build/reports/cpd/cpd.csv')
+        task.reports.csv.destination == project.file('build/reports/cpd/cpdCheck.csv')
         !task.reports.csv.enabled
-        task.reports.text.destination == project.file('build/reports/cpd/cpd.text')
+        task.reports.text.destination == project.file('build/reports/cpd/cpdCheck.text')
         !task.reports.text.enabled
-        task.reports.xml.destination == project.file('build/reports/cpd/cpd.xml')
+        task.reports.xml.destination == project.file('build/reports/cpd/cpdCheck.xml')
         task.reports.xml.enabled
 
         task.source.empty
@@ -95,7 +95,7 @@ class CpdPluginTest extends BaseSpec {
         project.plugins.apply(JavaBasePlugin)
 
         def checkTask = project.tasks.findByName('check')
-        def cpdTask = project.tasks.findByName('cpd')
+        def cpdTask = project.tasks.findByName('cpdCheck')
 
         expect:
         checkTask.taskDependencies.getDependencies(checkTask).find{ Task task ->
@@ -114,7 +114,7 @@ class CpdPluginTest extends BaseSpec {
             test.java.srcDir testFile('de/aaschmid/test')
         }
 
-        def cpdTask = project.tasks.findByName('cpd')
+        def cpdTask = project.tasks.findByName('cpdCheck')
 
         expect:
         cpdTask.source.files == [ *testFilesRecurseIn('de/aaschmid/clazz'), *testFilesRecurseIn('de/aaschmid/test') ] as Set
@@ -131,7 +131,7 @@ class CpdPluginTest extends BaseSpec {
             test.groovy.srcDir testFile('de/aaschmid/test')
         }
 
-        def cpdTask = project.tasks.findByName('cpd')
+        def cpdTask = project.tasks.findByName('cpdCheck')
 
         expect:
         cpdTask.source.files == [ *testFilesRecurseIn('de/aaschmid/clazz'), *testFilesRecurseIn('de/aaschmid/test') ] as Set
@@ -149,7 +149,7 @@ class CpdPluginTest extends BaseSpec {
         }
 
         def checkTask = project.tasks.findByName('check')
-        def cpdTask = project.tasks.findByName('cpd')
+        def cpdTask = project.tasks.findByName('cpdCheck')
 
         expect:
         checkTask.taskDependencies.getDependencies(checkTask).find{ Task task ->
@@ -166,7 +166,7 @@ class CpdPluginTest extends BaseSpec {
             reportsDir = project.file('cpd-reports')
         }
 
-        def task = project.tasks.findByName('cpd')
+        def task = project.tasks.findByName('cpdCheck')
 
         expect:
         task instanceof Cpd
@@ -178,29 +178,29 @@ class CpdPluginTest extends BaseSpec {
 
         task.pmdClasspath == project.configurations.findByName('cpd')
 
-        task.reports.csv.destination == project.file('cpd-reports/cpd.csv')
+        task.reports.csv.destination == project.file('cpd-reports/cpdCheck.csv')
         !task.reports.csv.enabled
-        task.reports.text.destination == project.file('cpd-reports/cpd.text')
+        task.reports.text.destination == project.file('cpd-reports/cpdCheck.text')
         !task.reports.text.enabled
-        task.reports.xml.destination == project.file('cpd-reports/cpd.xml')
+        task.reports.xml.destination == project.file('cpd-reports/cpdCheck.xml')
         task.reports.xml.enabled
 
         task.source.empty
     }
 
-    def "'Cpd' task can be customized via 'cpd' task"() {
+    def "'Cpd' task can be customized via 'cpdCheck' task"() {
         given:
-        project.tasks.cpd{
+        project.cpdCheck{
             encoding = 'ISO-8859-1'
             minimumTokenCount = 10
             reports{
                 csv{
                     enabled = true
-                    destination = project.file("${project.buildDir}/cpd.csv")
+                    destination = project.file("${project.buildDir}/cpdCheck.csv")
                 }
                 text{
                     enabled = false
-                    destination = project.file("${project.buildDir}/cpd.text")
+                    destination = project.file("${project.buildDir}/cpdCheck.text")
                 }
                 xml.enabled = false
             }
@@ -209,7 +209,7 @@ class CpdPluginTest extends BaseSpec {
             source = project.file('src/')
         }
 
-        def task = project.tasks.findByName('cpd')
+        def task = project.tasks.findByName('cpdCheck')
 
         expect:
         task instanceof Cpd
@@ -221,11 +221,11 @@ class CpdPluginTest extends BaseSpec {
 
         task.pmdClasspath == project.configurations.findByName('cpd')
 
-        task.reports.csv.destination == project.file('build/cpd.csv')
+        task.reports.csv.destination == project.file('build/cpdCheck.csv')
         task.reports.csv.enabled
-        task.reports.text.destination == project.file('build/cpd.text')
+        task.reports.text.destination == project.file('build/cpdCheck.text')
         !task.reports.text.enabled
-        task.reports.xml.destination == project.file('build/reports/cpd/cpd.xml')
+        task.reports.xml.destination == project.file('build/reports/cpd/cpdCheck.xml')
         !task.reports.xml.enabled
 
         task.source.empty

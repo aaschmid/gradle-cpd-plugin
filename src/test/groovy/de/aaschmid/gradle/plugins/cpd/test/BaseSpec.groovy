@@ -38,14 +38,4 @@ abstract class BaseSpec extends Specification {
         testFile(relativePath).eachFileRecurse(FileType.FILES){ file -> result << file }
         return result;
     }
-
-    // -- helper methods -----------------------------------------------------------------------------------------------
-
-    def getTasks() {
-        return project.tasks
-    }
-
-    def cpd(Closure closure) {
-        return project.extensions.getByName('cpd')
-    }
 }

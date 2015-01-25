@@ -8,7 +8,7 @@ class CpdCsvFileReportImplTest extends BaseSpec {
 
     def "test 'new CpdCsvFileReportImpl(...)' should have default 'separator'"() {
         when:
-        def result = new CpdCsvFileReportImpl('csv', tasks.cpd)
+        def result = new CpdCsvFileReportImpl('csv', project.cpdCheck)
 
         then:
         result.separator == CpdCsvFileReport.DEFAULT_SEPARATOR
@@ -16,7 +16,7 @@ class CpdCsvFileReportImplTest extends BaseSpec {
 
     def "test 'setSeparator(Character)' should throw 'InvalidUserDataException' if 'separator' is set to 'null'"() {
         given:
-        def underTest = new CpdCsvFileReportImpl('csv', tasks.cpd)
+        def underTest = new CpdCsvFileReportImpl('csv', project.cpdCheck)
 
         when:
         underTest.separator = null

@@ -16,12 +16,12 @@ class CpdExecutorTest extends BaseSpec {
 
     def "test 'new CpdExecutor(...)' should throw 'InvalidUserDataException' if 'minimumTokenCount' is '-1'"() {
         given:
-        tasks.cpd{
+        project.cpdCheck{
             minimumTokenCount = -1
         }
 
         when:
-        new CpdExecutor(tasks.cpd)
+        new CpdExecutor(project.cpdCheck)
 
         then:
         def e = thrown InvalidUserDataException
@@ -30,14 +30,14 @@ class CpdExecutorTest extends BaseSpec {
 
     def "test 'new CpdExecutor(...)' should get correct values from task"() {
         given:
-        tasks.cpd{
+        project.cpdCheck{
             encoding = 'US-ASCII'
             minimumTokenCount = 15
             source = testFile('de/aaschmid/clazz/Clazz.java')
         }
 
         when:
-        def result = new CpdExecutor(tasks.cpd)
+        def result = new CpdExecutor(project.cpdCheck)
 
         then:
         result.encoding == 'US-ASCII'

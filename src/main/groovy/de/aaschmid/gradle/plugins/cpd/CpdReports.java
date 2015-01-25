@@ -15,7 +15,7 @@ import org.gradle.api.reporting.SingleFileReport;
  * <p>
  * The reporting aspects of a {@link Cpd} task can be configured as such:
  * <pre>
- * tasks.cpd {
+ * cpdCheck {
  *     reports {
  *         csv.enabled = false
  *         text {

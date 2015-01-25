@@ -66,7 +66,7 @@ public class CpdReporter {
     }
 
     /**
-     * @param the configured {@link SingleFileReport} used {@code tasks.cpd.reports{ ... }}
+     * @param the configured {@link SingleFileReport} used {@code cpdCheck.reports{ ... }}
      * @return a full configured {@link Renderer} to generate a CPD single file report.
      */
     public Renderer createRendererFor(SingleFileReport report) {
