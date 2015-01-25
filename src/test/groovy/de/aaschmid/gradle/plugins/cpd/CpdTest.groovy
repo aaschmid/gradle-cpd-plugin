@@ -61,6 +61,6 @@ class CpdTest extends BaseSpec {
         def task = project.tasks.findByName('cpd')
 
         expect:
-        task.outputs.files.files == project.files("${project.buildDir}/cpd.text", "${project.buildDir}/reports/cpd.xml") as Set
+        task.outputs.files.files == project.files("${project.buildDir}/cpd.text", "${project.buildDir}/reports/cpd/cpd.xml") as Set
     }
 }

@@ -24,7 +24,7 @@ class CpdPluginTest extends BaseSpec {
         expect:
         ext.encoding == System.getProperty('file.encoding')
         ext.minimumTokenCount == 50
-        ext.reportsDir == project.file('build/reports')
+        ext.reportsDir == project.file('build/reports/cpd')
         ext.toolVersion == '5.2.1'
     }
 
@@ -56,11 +56,11 @@ class CpdPluginTest extends BaseSpec {
 
         task.pmdClasspath == project.configurations.findByName('cpd')
 
-        task.reports.csv.destination == project.file('build/reports/cpd.csv')
+        task.reports.csv.destination == project.file('build/reports/cpd/cpd.csv')
         !task.reports.csv.enabled
-        task.reports.text.destination == project.file('build/reports/cpd.text')
+        task.reports.text.destination == project.file('build/reports/cpd/cpd.text')
         !task.reports.text.enabled
-        task.reports.xml.destination == project.file('build/reports/cpd.xml')
+        task.reports.xml.destination == project.file('build/reports/cpd/cpd.xml')
         task.reports.xml.enabled
 
         task.source.empty
@@ -80,11 +80,11 @@ class CpdPluginTest extends BaseSpec {
 
         task.pmdClasspath == project.configurations.cpd
 
-        task.reports.csv.destination == project.file('build/reports/cpd.csv')
+        task.reports.csv.destination == project.file('build/reports/cpd/cpd.csv')
         !task.reports.csv.enabled
-        task.reports.text.destination == project.file('build/reports/cpd.text')
+        task.reports.text.destination == project.file('build/reports/cpd/cpd.text')
         !task.reports.text.enabled
-        task.reports.xml.destination == project.file('build/reports/cpd.xml')
+        task.reports.xml.destination == project.file('build/reports/cpd/cpd.xml')
         task.reports.xml.enabled
 
         task.source.empty
@@ -225,7 +225,7 @@ class CpdPluginTest extends BaseSpec {
         task.reports.csv.enabled
         task.reports.text.destination == project.file('build/cpd.text')
         !task.reports.text.enabled
-        task.reports.xml.destination == project.file('build/reports/cpd.xml')
+        task.reports.xml.destination == project.file('build/reports/cpd/cpd.xml')
         !task.reports.xml.enabled
 
         task.source.empty

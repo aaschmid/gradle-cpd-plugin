@@ -82,7 +82,7 @@ class CpdPlugin implements Plugin<Project> {
         }
         // use conventionMapping for values derived based on some external value
         extension.conventionMapping.with{
-            reportsDir = { project.extensions.getByType(ReportingExtension).baseDir }
+            reportsDir = { project.extensions.getByType(ReportingExtension).file('cpd') }
         }
         return extension
     }

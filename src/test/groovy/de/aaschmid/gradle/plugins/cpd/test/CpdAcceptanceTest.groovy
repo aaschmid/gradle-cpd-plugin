@@ -135,7 +135,7 @@ class CpdAcceptanceTest extends BaseSpec {
         project.tasks.getByName('cpd').execute()
 
         then:
-        def report = project.file('build/reports/cpd.xml')
+        def report = project.file('build/reports/cpd/cpd.xml')
         report.exists()
         // TODO do better?
         report.text =~ /encoding="ISO-8859-1"/
@@ -160,7 +160,7 @@ class CpdAcceptanceTest extends BaseSpec {
         def e = thrown GradleException
         e.cause.message =~ /CPD found duplicate code\. See the report at file:\/\/.*\/cpd.csv/
 
-        def report = project.file('build/reports/cpd.csv')
+        def report = project.file('build/reports/cpd/cpd.csv')
         report.exists()
         report.text =~ /7,19,2,5,.*Clazz1.java,5,.*Clazz2.java/
     }
@@ -183,7 +183,7 @@ class CpdAcceptanceTest extends BaseSpec {
         then:
         notThrown GradleException
 
-        def report = project.file('build/reports/cpd.csv')
+        def report = project.file('build/reports/cpd/cpd.csv')
         report.exists()
         report.text =~ /7,19,2,5,.*Clazz1.java,5,.*Clazz2.java/
     }
