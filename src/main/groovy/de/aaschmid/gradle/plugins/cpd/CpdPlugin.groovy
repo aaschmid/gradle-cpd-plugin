@@ -7,6 +7,7 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.plugins.ReportingBasePlugin
 import org.gradle.api.reporting.ReportingExtension
+import org.gradle.api.tasks.SourceSet
 
 
 /**
@@ -68,8 +69,19 @@ class CpdPlugin implements Plugin<Project> {
         setupTaskDefaults(project, extension)
 
         Cpd task = project.tasks.create(name: 'cpdCheck', type: Cpd, description: 'Run CPD analysis for all sources')
+        project.getAllprojects().each{ p ->
+            p.plugins.withType(JavaBasePlugin){
+                p.sourceSets.all{ SourceSet sourceSet ->
+                    // task.source(sourceSet.allJava) => does not work if project contains java AND groovy sources
+                    task.source({
+                        sourceSet.allJava.srcDirTrees.each{ srcDirTree ->
+                            task.source(srcDirTree)
+                        }
+                    })
+                }
+            }
+        }
         project.plugins.withType(JavaBasePlugin){
-            project.sourceSets.all{ sourceSet -> task.source(sourceSet.allJava) }
             project.tasks.findByName('check').dependsOn(task)
         }
     }

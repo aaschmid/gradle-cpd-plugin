@@ -137,6 +137,22 @@ class CpdPluginTest extends BaseSpec {
         cpdTask.source.files == [ *testFilesRecurseIn('de/aaschmid/clazz'), *testFilesRecurseIn('de/aaschmid/test') ] as Set
     }
 
+    def "applying 'CpdPlugin', 'JavaPlugin' and 'GroovyPlugin' sets source with 'main' and 'test' sourceSets of Java and Groovy project"() {
+        given:
+        project.plugins.apply(GroovyPlugin)
+        project.sourceSets{
+            main{
+                java.srcDir testFile('de/aaschmid/foo')
+                groovy.srcDir testFile('de/aaschmid/clazz')
+            }
+        }
+
+        def cpdTask = project.tasks.findByName('cpdCheck')
+
+        expect:
+        cpdTask.source.files == [ *testFilesRecurseIn('de/aaschmid/foo'), *testFilesRecurseIn('de/aaschmid/clazz') ] as Set
+    }
+
     def "applying 'JavaBasePlugin' and 'CpdPlugin' adds dependency to check task and configures source"() {
         given:
         Project project = ProjectBuilder.builder().build()
@@ -254,4 +270,38 @@ class CpdPluginTest extends BaseSpec {
         expect:
         task.minimumTokenCount == 250
     }
+
+    def "applying 'Cpd' task to only parent project should also add sources of sub-projects"() {
+        given:
+        def project = ProjectBuilder.builder().build()
+
+        def subProject1 = ProjectBuilder.builder().withName('sub1').withParent(project).build()
+        subProject1.file('src/main/java').mkdirs()
+        subProject1.file('src/main/java/Clazz.java').createNewFile()
+        subProject1.file('src/test/java').mkdirs()
+        subProject1.file('src/test/java/ClazzTest.java').createNewFile()
+        subProject1.plugins.apply(JavaPlugin)
+
+        def subProject2 = ProjectBuilder.builder().withName('sub2').withParent(project).build()
+        subProject2.file('src/main/groovy').mkdirs()
+        subProject2.file('src/main/groovy/Clazz.groovy').createNewFile()
+        subProject2.file('src/main/resources').mkdirs()
+        subProject2.file('src/main/resources/clazz.properties').createNewFile()
+        subProject2.plugins.apply(GroovyPlugin)
+
+        when:
+        project.plugins.apply(CpdPlugin)
+
+        then:
+        def task = project.tasks.getByName('cpdCheck')
+        task.source.files == [
+                subProject1.file('src/main/java/Clazz.java'),
+                subProject1.file('src/test/java/ClazzTest.java'),
+                subProject2.file('src/main/groovy/Clazz.groovy')
+        ] as Set
+
+        !subProject1.tasks.findByName('cpdCheck')
+        !subProject2.tasks.findByName('cpdCheck')
+    }
+
 }

@@ -1,10 +1,40 @@
 package de.aaschmid.gradle.plugins.cpd.test
 
+import de.aaschmid.gradle.plugins.cpd.CpdPlugin
+import org.apache.commons.io.output.TeeOutputStream
 import org.gradle.api.GradleException
 import org.gradle.api.InvalidUserDataException
+import org.gradle.api.plugins.GroovyPlugin
 import org.gradle.api.tasks.TaskExecutionException
+import org.gradle.testfixtures.ProjectBuilder
+import org.junit.Rule
+import org.junit.rules.ExternalResource
 
 class CpdAcceptanceTest extends BaseSpec {
+
+    @Rule
+    public final ExternalResource logCapture = new ExternalResource() {
+
+        private static final String ENCODING = "UTF-8";
+
+        private final ByteArrayOutputStream log = new ByteArrayOutputStream();
+        private PrintStream originalStdOut;
+
+        @Override
+        protected void before() throws Throwable {
+            originalStdOut = System.out;
+            System.setOut(new PrintStream(new TeeOutputStream(originalStdOut, log), false, ENCODING));
+        }
+
+        @Override
+        protected void after() {
+            System.setOut(originalStdOut);
+        }
+
+        public String getLog() throws Exception {
+            return log.toString(ENCODING);
+        }
+    }
 
     def setup() {
         project.repositories{
@@ -12,7 +42,6 @@ class CpdAcceptanceTest extends BaseSpec {
             mavenCentral()
         }
     }
-
 
     def "'Cpd' task inputs are set correctly"() {
         given:
@@ -186,6 +215,47 @@ class CpdAcceptanceTest extends BaseSpec {
         def report = project.file('build/reports/cpd/cpdCheck.csv')
         report.exists()
         report.text =~ /7,19,2,5,.*Clazz1.java,5,.*Clazz2.java/
+    }
+
+    def "applying 'Cpd' task to only parent project if only sub project has 'groovy' plugin"() {
+        given:
+        project = ProjectBuilder.builder().build()
+        project.repositories{
+            mavenLocal()
+            mavenCentral()
+        }
+        def subProject = ProjectBuilder.builder().withParent(project).build()
+
+        project.plugins.apply(CpdPlugin)
+
+        project.cpdCheck{
+            ignoreFailures = true
+            minimumTokenCount = 2
+        }
+
+        subProject.plugins.apply(GroovyPlugin)
+        subProject.sourceSets{
+            main{
+                java.srcDir testFile('de/aaschmid/foo')
+                groovy.srcDir testFile('de/aaschmid/clazz')
+            }
+        }
+
+        when:
+        project.tasks.getByName('cpdCheck').execute()
+
+        then:
+        (testFilesRecurseIn('de/aaschmid/foo') + testFilesRecurseIn('de/aaschmid/clazz')).each{ f ->
+            logCapture.log.contains("Tokenizing ${f.path}")
+        }
+
+        def report = project.file('build/reports/cpd/cpdCheck.xml')
+        report.exists()
+        report.text =~ /Bar.java/
+        report.text =~ /Baz.java/
+        report.text =~ /Clazz.java/
+        report.text =~ /Clazz1.java/
+        report.text =~ /Clazz2.java/
     }
 
     // TODO further tests
