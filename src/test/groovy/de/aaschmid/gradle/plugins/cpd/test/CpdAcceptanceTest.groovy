@@ -55,14 +55,14 @@ class CpdAcceptanceTest extends BaseSpec {
 
     def "'CpdPlugin' allows configuring tool dependencies explicitly via toolVersion property"() {
         given:
-        project.cpd{ toolVersion '5.0.1' }
+        project.cpd{ toolVersion '5.2.1' }
         project.tasks.cpd{ source = testFile('.') }
 
         when:
         def result = project.configurations.cpd.resolve()
 
         then:
-        result.any{ file -> file.name == 'pmd-5.0.1.jar' }
+        result.any{ file -> file.name == 'pmd-core-5.2.1.jar' }
     }
 
     def "'CpdPlugin' allows configuring tool dependencies explicitly via configuration"() {

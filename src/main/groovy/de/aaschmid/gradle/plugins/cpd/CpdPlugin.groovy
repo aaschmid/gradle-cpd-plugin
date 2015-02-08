@@ -37,7 +37,8 @@ import org.gradle.api.reporting.ReportingExtension
  *
  * cpd {
  *     minimumTokenCount = 25
- *     toolVersion = 5.0.1
+ *     // As PMD was split with v5.2.0 and CPD has moved to 'pmd-core', 'toolVersion' is just available for 5.2.0 and higher
+ *     toolVersion = 5.2.1
  * }
  *
  * tasks.cpd {
@@ -78,7 +79,7 @@ class CpdPlugin implements Plugin<Project> {
 
         // set constant values directly
         extension.with{
-            toolVersion = '5.2.1'
+            toolVersion = '5.2.3'
         }
         // use conventionMapping for values derived based on some external value
         extension.conventionMapping.with{
@@ -110,7 +111,7 @@ class CpdPlugin implements Plugin<Project> {
             description = 'The CPD libraries to be used for this project.'
             incoming.beforeResolve{
                 if (dependencies.isEmpty()) {
-                    dependencies.add(project.dependencies.create("net.sourceforge.pmd:pmd:${extension.toolVersion}"))
+                    dependencies.add(project.dependencies.create("net.sourceforge.pmd:pmd-core:${extension.toolVersion}"))
                 }
             }
             transitive = true

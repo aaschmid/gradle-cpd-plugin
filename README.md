@@ -55,6 +55,7 @@ buildscript {
 
 // optional - default is 5.1.0
 cpd {
+    // As PMD was split with v5.2.0 and CPD has moved to 'pmd-core', 'toolVersion' is just available for 5.2.0 and higher
     toolVersion = '5.0.5'
 }
 

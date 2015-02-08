@@ -25,7 +25,7 @@ class CpdPluginTest extends BaseSpec {
         ext.encoding == System.getProperty('file.encoding')
         ext.minimumTokenCount == 50
         ext.reportsDir == project.file('build/reports/cpd')
-        ext.toolVersion == '5.2.1'
+        ext.toolVersion == '5.2.3'
     }
 
     def "applying 'CpdPlugin' creates and configures configuration 'cpd'"() {
