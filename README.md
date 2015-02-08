@@ -51,10 +51,10 @@ buildscript {
     }
 }
 
-// optional - default is 5.1.0
+// optional - default is 5.2.3
 cpd {
     // As PMD was split with v5.2.0 and CPD has moved to 'pmd-core', 'toolVersion' is just available for 5.2.0 and higher
-    toolVersion = '5.0.5'
+    toolVersion = '5.2.1'
 }
 
 // optional - default report is xml and default source is 'main' and 'test' 
@@ -77,18 +77,23 @@ cpdCheck {
 }
 ```
 
+*Note:* With v0.2, I have renamed the default task from ```cpd``` to ```cpdCheck``` that it does no long have a name clash.
 
 Release notes
 -------------
 
 ### tbd. (tbd.)
 
+* ...
+
+### [v0.2](http://search.maven.org/#artifactdetails|de.aaschmid.gradle.plugins|gradle-cpd-plugin|0.2|jar) (8-Feb-2015)
+
 * Directly call CPD instead of using Gradle's ```AntBuilder``` ([#1](/../../issues/1))
 * Use ```sourceSets``` of the project which is plugin applied to by default ([#4](/../../issues/4))
 * Added docu for multi-module build and CPD for the whole project ([#6](/../../issues/6))
-* ...
+* Added warning if cpd task is not executed because only subprojects apply 'java' plugin ([#3](/../../issues/3))
 
-### v0.1 (25-Apr-2014)
+### [v0.1](http://search.maven.org/#artifactdetails|de.aaschmid.gradle.plugins|gradle-cpd-plugin|0.1|jar) (25-Apr-2014)
 
 * initial release
 
