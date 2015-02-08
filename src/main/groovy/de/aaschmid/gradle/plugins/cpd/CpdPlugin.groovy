@@ -4,6 +4,9 @@ import org.gradle.api.Incubating
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.execution.TaskExecutionGraph
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.plugins.ReportingBasePlugin
 import org.gradle.api.reporting.ReportingExtension
@@ -55,6 +58,8 @@ import org.gradle.api.tasks.SourceSet
 @Incubating
 class CpdPlugin implements Plugin<Project> {
 
+    private static final Logger logger = Logging.getLogger(Cpd.class);
+
     protected Project project
     protected CpdExtension extension
 
@@ -83,6 +88,23 @@ class CpdPlugin implements Plugin<Project> {
         }
         project.plugins.withType(JavaBasePlugin){
             project.tasks.findByName('check').dependsOn(task)
+        }
+        project.gradle.taskGraph.whenReady{ TaskExecutionGraph graph ->
+            if (!graph.hasTask(task)) {
+                if (logger.isWarnEnabled()) {
+                    def lastCheckTask = graph.allTasks.reverse().find{ t -> t.name.endsWith('check') }
+                    logger.warn("WARNING: Due to the absense of ${JavaBasePlugin.simpleName} on ${project}" +
+                            " the ${task} could not be added to task graph and therefore will not be executed" +
+                            ". SUGGESTION: add a dependency to ${task} manually to a subprojects 'check' task, e.g. to ${lastCheckTask.project} using\n\n" +
+                            "    ${lastCheckTask.name}.dependsOn('${task.path}')\n\n" +
+                            "or to ${project} using\n\n" +
+                            "    project('${lastCheckTask.project.path}') {\n" +
+                            "        plugins.withType(JavaBasePlugin) { // <- just required if 'java' plugin is applied within subproject\n" +
+                            "            ${lastCheckTask.name}.dependsOn(${task.name})\n" +
+                            "        }\n" +
+                            "    }\n")
+                }
+            }
         }
     }
 
