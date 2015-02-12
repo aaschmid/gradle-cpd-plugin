@@ -93,16 +93,18 @@ class CpdPlugin implements Plugin<Project> {
             if (!graph.hasTask(task)) {
                 if (logger.isWarnEnabled()) {
                     def lastCheckTask = graph.allTasks.reverse().find{ t -> t.name.endsWith('check') }
-                    logger.warn("WARNING: Due to the absense of ${JavaBasePlugin.simpleName} on ${project}" +
-                            " the ${task} could not be added to task graph and therefore will not be executed" +
-                            ". SUGGESTION: add a dependency to ${task} manually to a subprojects 'check' task, e.g. to ${lastCheckTask.project} using\n\n" +
-                            "    ${lastCheckTask.name}.dependsOn('${task.path}')\n\n" +
-                            "or to ${project} using\n\n" +
-                            "    project('${lastCheckTask.project.path}') {\n" +
-                            "        plugins.withType(JavaBasePlugin) { // <- just required if 'java' plugin is applied within subproject\n" +
-                            "            ${lastCheckTask.name}.dependsOn(${task.name})\n" +
-                            "        }\n" +
-                            "    }\n")
+                    if (lastCheckTask) { // it is possible to just execute a task before check, e.g. "compileJava"
+                        logger.warn("WARNING: Due to the absense of ${JavaBasePlugin.simpleName} on ${project}" +
+                                " the ${task} could not be added to task graph and therefore will not be executed" +
+                                ". SUGGESTION: add a dependency to ${task} manually to a subprojects 'check' task, e.g. to ${lastCheckTask.project} using\n\n" +
+                                "    ${lastCheckTask.name}.dependsOn('${task.path}')\n\n" +
+                                "or to ${project} using\n\n" +
+                                "    project('${lastCheckTask.project.path}') {\n" +
+                                "        plugins.withType(JavaBasePlugin) { // <- just required if 'java' plugin is applied within subproject\n" +
+                                "            ${lastCheckTask.name}.dependsOn(${task.name})\n" +
+                                "        }\n" +
+                                "    }\n")
+                    }
                 }
             }
         }
