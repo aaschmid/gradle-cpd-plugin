@@ -86,12 +86,20 @@ Release notes
 
 * ...
 
+### [v0.3](http://search.maven.org/#artifactdetails|de.aaschmid.gradle.plugins|gradle-cpd-plugin|0.3|jar) (12-Feb-2015)
+
+* fixed NPE if a task before 'check' is executed ([#8](/../../issues/8))
+
+
 ### [v0.2](http://search.maven.org/#artifactdetails|de.aaschmid.gradle.plugins|gradle-cpd-plugin|0.2|jar) (8-Feb-2015)
+
+*NOTE*: Unfortunately, this version has introduced [#8](/../../issues/8), therefore please use [#v0.3] instead!
 
 * Directly call CPD instead of using Gradle's ```AntBuilder``` ([#1](/../../issues/1))
 * Use ```sourceSets``` of the project which is plugin applied to by default ([#4](/../../issues/4))
 * Added docu for multi-module build and CPD for the whole project ([#6](/../../issues/6))
 * Added warning if cpd task is not executed because only subprojects apply 'java' plugin ([#3](/../../issues/3))
+
 
 ### [v0.1](http://search.maven.org/#artifactdetails|de.aaschmid.gradle.plugins|gradle-cpd-plugin|0.1|jar) (25-Apr-2014)
 
