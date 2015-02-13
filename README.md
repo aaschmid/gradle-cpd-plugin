@@ -93,7 +93,7 @@ Release notes
 
 ### [v0.2](http://search.maven.org/#artifactdetails|de.aaschmid.gradle.plugins|gradle-cpd-plugin|0.2|jar) (8-Feb-2015)
 
-*NOTE*: Unfortunately, this version has introduced [#8](/../../issues/8), therefore please use [#v0.3] instead!
+**NOTE**: Unfortunately, this version has introduced [#8](/../../issues/8), therefore please use [v.0.3](#v0.3) instead!
 
 * Directly call CPD instead of using Gradle's ```AntBuilder``` ([#1](/../../issues/1))
 * Use ```sourceSets``` of the project which is plugin applied to by default ([#4](/../../issues/4))
