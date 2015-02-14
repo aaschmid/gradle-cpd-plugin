@@ -94,7 +94,7 @@ class CpdPlugin implements Plugin<Project> {
                 if (logger.isWarnEnabled()) {
                     def lastCheckTask = graph.allTasks.reverse().find{ t -> t.name.endsWith('check') }
                     if (lastCheckTask) { // it is possible to just execute a task before check, e.g. "compileJava"
-                        logger.warn("WARNING: Due to the absense of ${JavaBasePlugin.simpleName} on ${project}" +
+                        logger.warn("WARNING: Due to the absence of ${JavaBasePlugin.simpleName} on ${project}" +
                                 " the ${task} could not be added to task graph and therefore will not be executed" +
                                 ". SUGGESTION: add a dependency to ${task} manually to a subprojects 'check' task, e.g. to ${lastCheckTask.project} using\n\n" +
                                 "    ${lastCheckTask.name}.dependsOn('${task.path}')\n\n" +
