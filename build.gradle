@@ -35,6 +35,15 @@ sourceSets {
         compileClasspath += configurations.provided
         runtimeClasspath += configurations.provided
     }
+    integTest {
+        compileClasspath += configurations.provided + main.output + test.output
+        runtimeClasspath += configurations.provided + main.output + test.output
+    }
+}
+
+configurations {
+    integTestCompile.extendsFrom testCompile
+    integTestRuntime.extendsFrom testRuntime
 }
 
 dependencies {
@@ -47,6 +56,8 @@ dependencies {
     testCompile('org.spockframework:spock-core:0.7-groovy-2.0') {
         exclude group: 'org.codehaus.groovy'
     }
+
+    integTestCompile 'org.hamcrest:hamcrest-core:1.3'
 }
 
 task wrapper(type: Wrapper) {
@@ -103,8 +114,36 @@ artifacts {
 idea {
     module {
         scopes.PROVIDED.plus += [ configurations.provided ]
+
+        scopes.TEST.plus.add(configurations.integTestCompile)
+        scopes.TEST.plus.add(configurations.integTestRuntime)
+
+        testSourceDirs += sourceSets.integTest.groovy.srcDirs
+        testSourceDirs += sourceSets.integTest.resources.srcDirs
     }
 }
+
+task integTest(type: Test) {
+    inputs.file jar.archivePath
+
+    dependsOn ':jar'
+    shouldRunAfter 'test'
+
+    testClassesDir = sourceSets.integTest.output.classesDir
+    testSrcDirs = sourceSets.integTest.java.srcDirs as List
+
+    classpath = sourceSets.integTest.runtimeClasspath
+    //jvmArgs '-Xmx512m', '-XX:MaxPermSize=256m', '-XX:+HeapDumpOnOutOfMemoryError'
+
+    reports.junitXml.destination = file("${project.buildDir}/integTest-results")
+    reports.html.destination = file("${project.reportsDir}/${name}")
+
+    // System properties
+    systemProperty 'integTest.cpdPluginJar', jar.archivePath
+    systemProperty 'integTest.gradleHomeDir', gradle.gradleHomeDir
+    systemProperty 'integTest.gradleUserHomeDir', rootProject.file("${rootProject.buildDir}/${name}WorkDir")
+}
+check.dependsOn(integTest)
 
 // -- build and publish artifacts -------------------------------------------------------------------------------------
 
