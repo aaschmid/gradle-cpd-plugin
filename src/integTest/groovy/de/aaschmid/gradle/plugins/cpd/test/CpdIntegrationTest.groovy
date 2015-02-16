@@ -2,9 +2,11 @@ package de.aaschmid.gradle.plugins.cpd.test
 
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
+import org.gradle.testkit.runner.internal.PluginUnderTestMetadataReading
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
-import spock.lang.*
+import spock.lang.Issue
+import spock.lang.Specification
 
 import static org.gradle.testkit.runner.TaskOutcome.*
 
@@ -125,10 +127,25 @@ or to root project '${rootProjectName}' using
         !result.output.contains('WARNING: Due to the absence of JavaBasePlugin on root project')
     }
 
+    @Issue('https://github.com/aaschmid/gradle-cpd-plugin/issues/10')
+    def "CpdPlugin can be added using full qualified name"() {
+        given:
+        buildFile << createBuildscriptWithClasspathOfGradleTestkitMechanism() << """
+            apply plugin: 'de.aaschmid.cpd'
+            """.stripIndent()
+
+        when:
+        def result = run('cpdCheck')
+
+        then:
+        result.output.contains("BUILD SUCCESSFUL")
+        result.task(':cpdCheck').outcome == UP_TO_DATE
+    }
+
     @Issue('https://github.com/aaschmid/gradle-cpd-plugin/issues/16')
     def "CpdPlugin can be disabled"() {
         given:
-        buildFile << """
+        buildFile << """\
             plugins {
                 id 'de.aaschmid.cpd'
             }
@@ -151,5 +168,30 @@ or to root project '${rootProjectName}' using
                 .withPluginClasspath()
                 .withDebug(true)
                 .build()
+    }
+
+    /**
+     * As the Gradle testkit does not support the old plugin mechanism, this method generates a {@code bundlescript}
+     * code block with the same dependencies as {@link GradleRunner#withPluginClasspath()} or
+     * {@link PluginUnderTestMetadataReading#readImplementationClasspath()}, respectively.
+     * <p>
+     * <b>Note:</b> While debugging the problem appears to be that the used {@link org.gradle.api.plugins.PluginManager}
+     * (=> {@link org.gradle.api.internal.plugins.DefaultPluginManager}) does not get the correct
+     * {@link org.gradle.api.internal.plugins.PluginRegistry} containing the correct
+     * {@link org.gradle.api.internal.initialization.ClassLoaderScope} with the injected classpath dependencies ... :-(
+     *
+     * @return a {@link String} containing all the dependencies which {@link GradleRunner#withPluginClasspath()} uses
+     */
+
+    def createBuildscriptWithClasspathOfGradleTestkitMechanism() {
+        """\
+            buildscript {
+                dependencies {
+                    classpath files(
+                        '${PluginUnderTestMetadataReading.readImplementationClasspath().join("',\n                        '")}'
+                    )
+                }
+            }
+            """.stripIndent()
     }
 }
