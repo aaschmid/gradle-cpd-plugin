@@ -6,6 +6,10 @@ description = 'Gradle plugin to find duplicate code using PMDs copy/paste detect
 group = 'de.aaschmid.gradle.plugins'
 version = '0.4-SNAPSHOT'
 
+ext {
+    isBuildOnJenkins = System.getenv('BUILD_TAG')?.startsWith('jenkins-') ?: false
+}
+
 sourceCompatibility = '1.6'
 
 repositories {
@@ -73,7 +77,7 @@ task sourcesJar(type: Jar) {
 }
 
 test {
-    ignoreFailures = true
+    ignoreFailures = isBuildOnJenkins
 }
 
 jacoco {
