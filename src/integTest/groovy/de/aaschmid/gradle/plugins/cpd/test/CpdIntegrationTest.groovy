@@ -81,6 +81,17 @@ or to root project '${rootProjectName}' using
 """)
     }
 
+    @Issue('https://github.com/aaschmid/gradle-cpd-plugin/issues/10')
+    def "CpdPlugin can be added using full qualified name"() {
+        given:
+        addAdditionalBuildClasspath()
+
+        buildFile << "apply plugin: 'de.aaschmid.cpd'"
+
+        expect:
+        succeeds('cpdCheck')
+    }
+
     void assertOutputDoesNotContain(String text) {
         assert !result.output.contains(TextUtil.toPlatformLineSeparators(text.trim()))
     }
