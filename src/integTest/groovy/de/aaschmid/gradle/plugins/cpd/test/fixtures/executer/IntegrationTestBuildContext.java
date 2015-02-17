@@ -2,7 +2,6 @@
 package de.aaschmid.gradle.plugins.cpd.test.fixtures.executer;
 
 import de.aaschmid.gradle.plugins.cpd.test.fixtures.file.TestFile;
-import org.gradle.util.GradleVersion;
 
 import java.io.File;
 
@@ -12,23 +11,27 @@ import java.io.File;
 public class IntegrationTestBuildContext {
 
     public TestFile getGradleHomeDir() {
-        return file("integTest.gradleHomeDir", null); // TODO does not work from IDE
+        return file("integTest.gradleHomeDir", null);
     }
 
-    public TestFile getGradleCpdPluginJar() {
-        return file("integTest.cpdPluginJar", null); // TODO does not work from IDE
+    public String getIntegTestAdditionalClasspath() {
+        return property("integTest.additionalClasspath", null);
     }
 
-    public TestFile getGradleUserHomeDir() {
-        return file("integTest.gradleUserHomeDir", "build/integTestHomeDir").file("worker-1");
+    public TestFile getIntegTestWorkerDir() {
+        return file("integTest.workDir", "build/integTestWorkDir").file("worker-1");
+    }
+
+    private static String property(String propertyName, String defaultString) {
+        String property = System.getProperty(propertyName, defaultString);
+        if (property == null) {
+            throw new RuntimeException(String.format("You must set the '%s' property to run the integration tests. The default passed was: '%s'",
+                    propertyName, defaultString));
+        }
+        return property;
     }
 
     private static TestFile file(String propertyName, String defaultFile) {
-        String path = System.getProperty(propertyName, defaultFile);
-        if (path == null) {
-            throw new RuntimeException(String.format("You must set the '%s' property to run the integration tests. The default passed was: '%s'",
-                    propertyName, defaultFile));
-        }
-        return new TestFile(new File(path));
+        return new TestFile(new File(property(propertyName, defaultFile)));
     }
 }

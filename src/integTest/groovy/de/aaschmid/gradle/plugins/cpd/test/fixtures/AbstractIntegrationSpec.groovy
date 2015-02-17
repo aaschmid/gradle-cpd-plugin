@@ -52,12 +52,12 @@ class AbstractIntegrationSpec extends Specification implements TestDirectoryProv
     /**
      * Adds an init script to the executer which adds the gradle-cpd-plugin to the build scripts classpath.
      */
-    protected void addClasspathDependencyForCpdPlugin() {
-        executer.usingInitScript(file('addClasspathDependencyForCpdPluginInit.gradle') << """
+    protected void addAdditionalBuildClasspath() {
+        executer.usingInitScript(file('initAdditionalClasspath.gradle') << """
             allprojects {
                 buildscript {
                     dependencies {
-                        classpath files('${executer.buildContext.gradleCpdPluginJar}')
+                        classpath files('${executer.buildContext.integTestAdditionalClasspath}'.split(';'))
                     }
                 }
             }

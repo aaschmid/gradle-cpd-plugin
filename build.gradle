@@ -14,6 +14,9 @@ version = '1.0'
 
 ext {
     isBuildOnJenkins = System.getenv('BUILD_TAG')?.startsWith('jenkins-') ?: false
+
+    integTestClasspath = [ sourceSets.main.output.resourcesDir, sourceSets.main.output.classesDir ].join(';')
+    integTestWorkDir = "${rootProject.buildDir}/integTestWorkDir"
 }
 
 sourceCompatibility = '1.6'
@@ -111,6 +114,27 @@ artifacts {
     archives sourcesJar
 }
 
+task integTest(type: Test) {
+    inputs.files jar
+    shouldRunAfter 'test'
+
+    ignoreFailures = isBuildOnJenkins
+
+    testClassesDir = sourceSets.integTest.output.classesDir
+    testSrcDirs = sourceSets.integTest.java.srcDirs as List
+
+    classpath = sourceSets.integTest.runtimeClasspath
+
+    reports.junitXml.destination = file("${project.buildDir}/integTest-results")
+    reports.html.destination = file("${project.reportsDir}/${name}")
+
+    // System properties
+    systemProperty 'integTest.gradleHomeDir', gradle.gradleHomeDir
+    systemProperty 'integTest.additionalClasspath', integTestClasspath
+    systemProperty 'integTest.workDir', integTestWorkDir
+}
+check.dependsOn(integTest)
+
 idea {
     module {
         scopes.PROVIDED.plus += [ configurations.provided ]
@@ -121,29 +145,29 @@ idea {
         testSourceDirs += sourceSets.integTest.groovy.srcDirs
         testSourceDirs += sourceSets.integTest.resources.srcDirs
     }
+
+    workspace.iws.withXml { provider ->
+        Node node = provider.asNode()
+
+        // Add int test configuration to JUnit defaults
+        def defaultTestVmParams = [
+                "-DintegTest.gradleHomeDir=${gradle.gradleHomeDir}",
+                "-DintegTest.additionalClasspath=${integTestClasspath}",
+                "-DintegTest.workDir=${integTestWorkDir}",
+            ]
+
+        Node runManagerConfig = node.component.find { it.'@name' == 'RunManager' }
+        Node runConfig = runManagerConfig.configuration.find { it.'@type' == 'JUnit'}
+        Node vmParameters = runConfig.option.find { it.'@name' == 'VM_PARAMETERS' }
+        vmParameters.'@value' = defaultTestVmParams.collect { it.contains(" ") ? "\"$it\"" : it }.join(" ")
+
+        // Add int test environment variables
+        def lang = System.getenv('LANG') ?: 'en_US.UTF-8'
+        def envVars = runConfig.envs.first()
+        envVars.children.each { child -> envVars.remove(child) }
+        envVars.appendNode('env', [name: 'LANG', value: lang])
+    }
 }
-
-task integTest(type: Test) {
-    inputs.file jar.archivePath
-
-    dependsOn ':jar'
-    shouldRunAfter 'test'
-
-    testClassesDir = sourceSets.integTest.output.classesDir
-    testSrcDirs = sourceSets.integTest.java.srcDirs as List
-
-    classpath = sourceSets.integTest.runtimeClasspath
-    //jvmArgs '-Xmx512m', '-XX:MaxPermSize=256m', '-XX:+HeapDumpOnOutOfMemoryError'
-
-    reports.junitXml.destination = file("${project.buildDir}/integTest-results")
-    reports.html.destination = file("${project.reportsDir}/${name}")
-
-    // System properties
-    systemProperty 'integTest.cpdPluginJar', jar.archivePath
-    systemProperty 'integTest.gradleHomeDir', gradle.gradleHomeDir
-    systemProperty 'integTest.gradleUserHomeDir', rootProject.file("${rootProject.buildDir}/${name}WorkDir")
-}
-check.dependsOn(integTest)
 
 // -- build and publish artifacts -------------------------------------------------------------------------------------
 

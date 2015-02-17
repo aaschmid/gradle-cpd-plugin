@@ -191,8 +191,8 @@ public abstract class GradleExecuter {
     /**
      * The Gradle user home dir that will be used for executions.
      */
-    public TestFile getGradleUserHomeDir() {
-        return buildContext.getGradleUserHomeDir();
+    public TestFile getWorkerDir() {
+        return buildContext.getIntegTestWorkerDir();
     }
 
     public File getUserHomeDir() {
@@ -479,9 +479,9 @@ public abstract class GradleExecuter {
         // We could work around this by setting -Dgradle.user.home but GRADLE-1730 (which affects 1.0-milestone-3) means that that
         // is problematic as well. For now, we just don't support running the int tests from a path with a space in it on Windows.
         // When we stop testing against M3 we should change to use the system property.
-        if (getGradleUserHomeDir() != null) {
+        if (getWorkerDir() != null) {
             allArgs.add("--gradle-user-home");
-            allArgs.add(getGradleUserHomeDir().getAbsolutePath());
+            allArgs.add(getWorkerDir().getAbsolutePath());
         }
 
         allArgs.addAll(args);

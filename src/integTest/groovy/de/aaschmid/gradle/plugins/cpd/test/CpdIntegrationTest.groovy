@@ -8,7 +8,7 @@ class CpdIntegrationTest extends AbstractIntegrationSpec {
 
     def "execution of task 'check' execute 'cpdCheck' and don't show WARNING"() {
         given:
-        addClasspathDependencyForCpdPlugin()
+        addAdditionalBuildClasspath()
 
         buildFile << """\
             apply plugin: 'cpd'
@@ -26,7 +26,7 @@ class CpdIntegrationTest extends AbstractIntegrationSpec {
     @Issue('https://github.com/aaschmid/gradle-cpd-plugin/issues/8')
     def "execution of task before 'check' should not lead to NullPointerException and don't show WARNING"() {
         given:
-        addClasspathDependencyForCpdPlugin()
+        addAdditionalBuildClasspath()
 
         buildFile << """\
             apply plugin: 'cpd'
@@ -43,7 +43,7 @@ class CpdIntegrationTest extends AbstractIntegrationSpec {
 
     def "execution of task 'build' should show WARNING if rootProject does not apply at least 'JavaBasePlugin'"() {
         given:
-        addClasspathDependencyForCpdPlugin()
+        addAdditionalBuildClasspath()
 
         settingsFile << """\
             include 'sub'
