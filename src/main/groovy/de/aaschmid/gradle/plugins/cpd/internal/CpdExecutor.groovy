@@ -78,7 +78,7 @@ public class CpdExecutor {
             }
             throw new GradleException("ReportException during task execution", e);
         } catch (Throwable t) {
-            throw new GradleException(t);
+            throw new GradleException(t.getMessage(), t);
         }
         return [];
     }
