@@ -3,9 +3,11 @@ package de.aaschmid.gradle.plugins.cpd.internal
 import de.aaschmid.gradle.plugins.cpd.Cpd
 import net.sourceforge.pmd.cpd.CPD
 import net.sourceforge.pmd.cpd.CPDConfiguration
+import net.sourceforge.pmd.cpd.Language
 import net.sourceforge.pmd.cpd.LanguageFactory
 import net.sourceforge.pmd.cpd.Match
 import net.sourceforge.pmd.cpd.ReportException
+import net.sourceforge.pmd.cpd.Tokenizer
 import org.gradle.api.GradleException
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.file.FileTree
@@ -17,6 +19,7 @@ public class CpdExecutor {
     private static final Logger logger = Logging.getLogger(CpdExecutor.class);
 
     private final String encoding;
+    private final Language language;
     private final int minimumTokenCount;
     private final FileTree source;
 
@@ -30,19 +33,17 @@ public class CpdExecutor {
         }
 
         this.encoding = task.getEncoding();
+        this.language = createLanguage(task);
         this.minimumTokenCount = task.getMinimumTokenCount();
         this.source = task.getSource();
     }
 
     public List<Match> run() {
-        Properties p = new Properties();
         try {
             if (logger.isInfoEnabled()) {
                 logger.info("Starting CPD, minimumTokenCount is {}", minimumTokenCount);
             }
-            def language = new LanguageFactory().createLanguage("java", p);
-            def config = new CPDConfiguration(minimumTokenCount, language, encoding);
-            def cpd = new CPD(config);
+            def cpd = new CPD(new CPDConfiguration(minimumTokenCount, language, encoding));
 
             if (logger.isInfoEnabled()) {
                 logger.info("Tokenizing files");
@@ -80,5 +81,21 @@ public class CpdExecutor {
             throw new GradleException(t);
         }
         return [];
+    }
+
+    private Language createLanguage(Cpd task) {
+        Properties p = new Properties();
+        if (task.getIgnoreLiterals()) {
+            p.setProperty(Tokenizer.IGNORE_LITERALS, "true");
+        }
+        if (task.getIgnoreIdentifiers()) {
+            p.setProperty(Tokenizer.IGNORE_IDENTIFIERS, "true");
+        }
+        if (task.getIgnoreAnnotations()) {
+            p.setProperty(Tokenizer.IGNORE_ANNOTATIONS, "true");
+        }
+        p.setProperty(Tokenizer.OPTION_SKIP_BLOCKS, Boolean.toString(task.getSkipBlocks()));
+        p.setProperty(Tokenizer.OPTION_SKIP_BLOCKS_PATTERN, task.getSkipBlocksPattern());
+        return LanguageFactory.createLanguage(task.getLanguage(), p);
     }
 }

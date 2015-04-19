@@ -129,9 +129,15 @@ class CpdPlugin implements Plugin<Project> {
         project.tasks.withType(Cpd){ Cpd task ->
             task.conventionMapping.with{
                 encoding = { extension.encoding }
+                ignoreAnnotations = { extension.ignoreAnnotations }
                 ignoreFailures = { extension.ignoreFailures }
+                ignoreIdentifiers = { extension.ignoreIdentifiers }
+                ignoreLiterals = { extension.ignoreLiterals }
+                language = { extension.language }
                 minimumTokenCount = { extension.minimumTokenCount }
                 pmdClasspath = { project.configurations.findByName('cpd') }
+                skipBlocks = { extension.skipBlocks }
+                skipBlocksPattern = { extension.skipBlocksPattern }
             }
             task.reports.all{ report ->
                 report.conventionMapping.with{

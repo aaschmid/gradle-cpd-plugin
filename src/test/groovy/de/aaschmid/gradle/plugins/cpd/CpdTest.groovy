@@ -24,7 +24,7 @@ class CpdTest extends BaseSpec {
                 testFile('de/aaschmid/clazz/impl/Clazz1.java'),
                 testFile('de/aaschmid/clazz/impl/Clazz2.java'),
             ) as Set
-        task.inputs.properties.size() == 5
+        task.inputs.properties.size() == 11
     }
 
     def "'Cpd' task is aware of includes and excludes"() {
@@ -33,6 +33,7 @@ class CpdTest extends BaseSpec {
             include '**/*.java'
             exclude '**/*1.java'
             exclude '**/*z.java'
+            exclude '**/test/*'
             source = testFile('.')
         }
 
@@ -40,9 +41,12 @@ class CpdTest extends BaseSpec {
 
         expect:
         task.inputs.sourceFiles.files == project.files(
+                testFile('de/aaschmid/annotation/Employee.java'),
+                testFile('de/aaschmid/annotation/Person.java'),
                 testFile('de/aaschmid/clazz/impl/Clazz2.java'),
                 testFile('de/aaschmid/foo/Bar.java'),
-                testFile('de/aaschmid/test/Test.java'),
+                testFile('de/aaschmid/identifier/Identifier2.java'),
+                testFile('de/aaschmid/literal/Literal2.java'),
             ) as Set
     }
 

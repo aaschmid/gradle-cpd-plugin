@@ -1,6 +1,7 @@
 package de.aaschmid.gradle.plugins.cpd
 
 import de.aaschmid.gradle.plugins.cpd.test.BaseSpec
+import net.sourceforge.pmd.cpd.Tokenizer
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration.State
@@ -23,9 +24,15 @@ class CpdPluginTest extends BaseSpec {
 
         expect:
         ext.encoding == System.getProperty('file.encoding')
+        !ext.ignoreAnnotations
+        !ext.ignoreIdentifiers
         !ext.ignoreFailures
+        !ext.ignoreLiterals
+        ext.language == 'java'
         ext.minimumTokenCount == 50
         ext.reportsDir == project.file('build/reports/cpd')
+        ext.skipBlocks
+        ext.skipBlocksPattern == Tokenizer.DEFAULT_SKIP_BLOCKS_PATTERN
         ext.toolVersion == '5.3.0'
     }
 
@@ -53,7 +60,11 @@ class CpdPluginTest extends BaseSpec {
         task.group == null
 
         task.encoding == System.getProperty('file.encoding')
+        !task.ignoreAnnotations
         !task.ignoreFailures
+        !task.ignoreIdentifiers
+        !task.ignoreLiterals
+        task.language == 'java'
         task.minimumTokenCount == 50
 
         task.pmdClasspath == project.configurations.findByName('cpd')
@@ -64,6 +75,9 @@ class CpdPluginTest extends BaseSpec {
         !task.reports.text.enabled
         task.reports.xml.destination == project.file('build/reports/cpd/cpdCheck.xml')
         task.reports.xml.enabled
+
+        task.skipBlocks
+        task.skipBlocksPattern == Tokenizer.DEFAULT_SKIP_BLOCKS_PATTERN
 
         task.source.empty
     }
@@ -78,7 +92,11 @@ class CpdPluginTest extends BaseSpec {
         task.group == null
 
         task.encoding == System.getProperty('file.encoding')
+        !task.ignoreAnnotations
         !task.ignoreFailures
+        !task.ignoreIdentifiers
+        !task.ignoreLiterals
+        task.language == 'java'
         task.minimumTokenCount == 50
 
         task.pmdClasspath == project.configurations.cpd
@@ -89,6 +107,9 @@ class CpdPluginTest extends BaseSpec {
         !task.reports.text.enabled
         task.reports.xml.destination == project.file('build/reports/cpd/cpdCustom.xml')
         task.reports.xml.enabled
+
+        task.skipBlocks
+        task.skipBlocksPattern == Tokenizer.DEFAULT_SKIP_BLOCKS_PATTERN
 
         task.source.empty
     }
@@ -181,9 +202,12 @@ class CpdPluginTest extends BaseSpec {
         given:
         project.cpd{
             encoding = 'UTF-8'
+            ignoreAnnotations = true
             ignoreFailures = false
+            language = 'ruby'
             minimumTokenCount = 25
             reportsDir = project.file('cpd-reports')
+            skipBlocks = false
         }
 
         def task = project.tasks.findByName('cpdCheck')
@@ -194,7 +218,11 @@ class CpdPluginTest extends BaseSpec {
         task.group == null
 
         task.encoding == 'UTF-8'
+        task.ignoreAnnotations
         !task.ignoreFailures
+        !task.ignoreIdentifiers
+        !task.ignoreLiterals
+        task.language == 'ruby'
         task.minimumTokenCount == 25
 
         task.pmdClasspath == project.configurations.findByName('cpd')
@@ -206,6 +234,9 @@ class CpdPluginTest extends BaseSpec {
         task.reports.xml.destination == project.file('cpd-reports/cpdCheck.xml')
         task.reports.xml.enabled
 
+        !task.skipBlocks
+        task.skipBlocksPattern == Tokenizer.DEFAULT_SKIP_BLOCKS_PATTERN
+
         task.source.empty
     }
 
@@ -214,6 +245,9 @@ class CpdPluginTest extends BaseSpec {
         project.cpdCheck{
             encoding = 'ISO-8859-1'
             ignoreFailures = false
+            ignoreIdentifiers = false
+            ignoreLiterals = true
+            language = 'cpp'
             minimumTokenCount = 10
             reports{
                 csv{
@@ -226,6 +260,9 @@ class CpdPluginTest extends BaseSpec {
                 }
                 xml.enabled = false
             }
+            skipBlocks = false
+            skipBlocksPattern = '<template|>'
+
             include '**.java'
             exclude '**Test*'
             source = project.file('src/')
@@ -239,7 +276,11 @@ class CpdPluginTest extends BaseSpec {
         task.group == null
 
         task.encoding == 'ISO-8859-1'
+        !task.ignoreAnnotations
         !task.ignoreFailures
+        !task.ignoreIdentifiers
+        task.ignoreLiterals
+        task.language == 'cpp'
         task.minimumTokenCount == 10
 
         task.pmdClasspath == project.configurations.findByName('cpd')
@@ -251,6 +292,8 @@ class CpdPluginTest extends BaseSpec {
         task.reports.xml.destination == project.file('build/reports/cpd/cpdCheck.xml')
         !task.reports.xml.enabled
 
+        !task.skipBlocks
+        task.skipBlocksPattern == '<template|>'
 
         task.source.empty
     }
@@ -258,12 +301,14 @@ class CpdPluginTest extends BaseSpec {
     def "custom 'Cpd' task can be customized via extension if task is created after extension is configured"() {
         given:
         project.cpd{
+            language = 'php'
             minimumTokenCount = 250
         }
 
         def task = project.tasks.create('cpdCustom', Cpd)
 
         expect:
+        task.language == 'php'
         task.minimumTokenCount == 250
     }
 

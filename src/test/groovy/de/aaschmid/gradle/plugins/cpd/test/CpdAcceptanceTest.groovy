@@ -258,5 +258,138 @@ class CpdAcceptanceTest extends BaseSpec {
         report.text =~ /Clazz2.java/
     }
 
+    def "executing 'Cpd' task on duplicate annotations should throw 'GradleException' if not ignoreAnnotations"() {
+        given:
+        project.cpdCheck{
+            ignoreAnnotations = false
+            minimumTokenCount = 40
+            reports{
+                csv.enabled = true
+                xml.enabled = false
+            }
+            source = testFile('de/aaschmid/annotation')
+        }
+
+        when:
+        project.tasks.getByName('cpdCheck').execute()
+
+        then:
+        def e = thrown GradleException
+        e.cause.message =~ /CPD found duplicate code\. See the report at file:\/\/.*\/cpdCheck.csv/
+
+        def report = project.file('build/reports/cpd/cpdCheck.csv')
+        report.exists()
+        report.text =~ /8,53,2,6,.*Employee\.java,6,.*Person\.java/
+        report.text =~ /14,45,2,13,.*Employee\.java,13,.*Person\.java/
+    }
+
+    def "executing 'Cpd' task on duplicate annotations should not throw 'GradleException' if ignoreAnnotations"() {
+        given:
+        project.cpdCheck{
+            ignoreAnnotations = true
+            minimumTokenCount = 40
+            source = testFile('de/aaschmid/annotation')
+        }
+
+        when:
+        project.tasks.getByName('cpdCheck').execute()
+
+        then:
+        notThrown GradleException
+
+        def report = project.file('build/reports/cpd/cpdCheck.xml')
+        report.exists()
+        // TODO do better?
+        report.text =~ /<pmd-cpd\/>/
+    }
+
+    def "executing 'Cpd' task on different identifiers should throw 'GradleException' if ignoreIdentifiers"() {
+        given:
+        project.cpdCheck{
+            ignoreIdentifiers = true
+            minimumTokenCount = 15
+            reports{
+                csv.enabled = true
+                xml.enabled = false
+            }
+            source = testFile('de/aaschmid/identifier')
+        }
+
+        when:
+        project.tasks.getByName('cpdCheck').execute()
+
+        then:
+        def e = thrown GradleException
+        e.cause.message =~ /CPD found duplicate code\. See the report at file:\/\/.*\/cpdCheck.csv/
+
+        def report = project.file('build/reports/cpd/cpdCheck.csv')
+        report.exists()
+        report.text =~ /6,19,2,3,.*Identifier1\.java,3,.*Identifier2\.java/
+    }
+
+    def "executing 'Cpd' task on different annotations should not throw 'GradleException' if not ignoreIdentifiers"() {
+        given:
+        project.cpdCheck{
+            ignoreIdentifiers = false
+            minimumTokenCount = 15
+            source = testFile('de/aaschmid/identifier')
+        }
+
+        when:
+        project.tasks.getByName('cpdCheck').execute()
+
+        then:
+        notThrown GradleException
+
+        def report = project.file('build/reports/cpd/cpdCheck.xml') // TODO file exists always; same as for other tools?
+        report.exists()
+        // TODO do better?
+        report.text =~ /<pmd-cpd\/>/
+    }
+
+    def "executing 'Cpd' task on different literals should throw 'GradleException' if ignoreLiterals"() {
+        given:
+        project.cpdCheck{
+            ignoreLiterals = true
+            minimumTokenCount = 20
+            reports{
+                csv.enabled = true
+                xml.enabled = false
+            }
+            source = testFile('de/aaschmid/literal')
+        }
+
+        when:
+        project.tasks.getByName('cpdCheck').execute()
+
+        then:
+        def e = thrown GradleException
+        e.cause.message =~ /CPD found duplicate code\. See the report at file:\/\/.*\/cpdCheck.csv/
+
+        def report = project.file('build/reports/cpd/cpdCheck.csv')
+        report.exists()
+        report.text =~ /9,27,2,5,.*Literal1\.java,5,.*Literal2\.java/
+    }
+
+    def "executing 'Cpd' task on different literals should not throw 'GradleException' if not ignoreLiterals"() {
+        given:
+        project.cpdCheck{
+            ignoreLiterals = false
+            minimumTokenCount = 20
+            source = testFile('de/aaschmid/literal')
+        }
+
+        when:
+        project.tasks.getByName('cpdCheck').execute()
+
+        then:
+        notThrown GradleException
+
+        def report = project.file('build/reports/cpd/cpdCheck.xml') // TODO file exists always; same as for other tools?
+        report.exists()
+        // TODO do better?
+        report.text =~ /<pmd-cpd\/>/
+    }
+
     // TODO further tests
 }

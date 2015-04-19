@@ -34,6 +34,9 @@ import javax.inject.Inject
  *
  * task cpd(type: Cpd, description: 'Copy/Paste detection for all Ruby scripts') {
  *
+ *     // change language of cpd to Ruby
+ *     language = 'ruby'
+ *
  *     // set minimum token count causing a duplication warning
  *     minimumTokenCount = 10
  *
@@ -72,12 +75,47 @@ class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> 
     String encoding
 
     /**
+     * Ignore annotations because more and more modern frameworks use annotations on classes and methods which can be very
+     * redundant and causes false positives.
+     * <p>
+     * Example: {@code ignoreAnnotations = true}
+     */
+    @Input
+    boolean ignoreAnnotations
+
+    /**
      * Whether or not to allow the build to continue if there are warnings.
      * <p>
      * Example: {@code ignoreFailures = true}
      */
     @Input
     boolean ignoreFailures
+
+    /**
+     * Option if CPD should ignore identifiers differences, i.e. variable names, methods names, and so forth,
+     * when evaluating a duplicate block.
+     * <p>
+     * Example: {@code ignoreIdentifiers = true}
+     */
+    @Input
+    boolean ignoreIdentifiers
+
+    /**
+     * Option if CPD should ignore literal value differences when evaluating a duplicate block. This means e.g. that
+     * {@code foo=42;} and {@code foo=43;} will be seen as equivalent.
+     * <p>
+     * Example: {@code ignoreLiterals = true}
+     */
+    @Input
+    boolean ignoreLiterals
+
+    /**
+     * Flag to select the appropriate language.
+     * <p>
+     * Example: {@code language = 'java'}
+     */
+    @Input
+    String language
 
     /**
      * A positive integer indicating the minimum token count to trigger a CPD match; defaults to
@@ -93,6 +131,27 @@ class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> 
      */
     @InputFiles
     FileCollection pmdClasspath
+
+    /**
+     * Enables or disables skipping of blocks configured by {@link #skipBlocksPattern}.
+     * <p>
+     * Example: {@code skipBlocks = false}
+     * @see #skipBlocksPattern
+     */
+    @Input
+    boolean skipBlocks
+
+    /**
+     * Configures the pattern, to find the blocks to skip if enabled using {@link #skipBlocks}. It is a {@link String}
+     * property and contains of two parts, separated by {@code '|'}. The first part is the start pattern, the second part
+     * is the ending pattern.
+     * <p>
+     * Example: {@code skipBlocksPattern = '#include <|>'}
+     * @see #skipBlocks
+     */
+    @Input
+    String skipBlocksPattern
+
 
     @Nested
     private final CpdReportsImpl reports

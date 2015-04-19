@@ -92,10 +92,17 @@ e.g. using ```cpdCheck { }```:
 | Attribute         | Default              | Applies for ```language``` |
 | ----------------- |:--------------------:|:--------------------------:|
 | encoding          | System default       |                            |
+| ignoreAnnotations | ```false```          | ```'java'```               |
 | ignoreFailures    | ```false```          |                            |
+| ignoreIdentifiers | ```false```          | ```'java'```               |
+| ignoreLiterals    | ```false```          | ```'java'```               |
+| language          | ```'java'```         |                            |
 | minimumTokenCount | ```50```             |                            |
+| skipBlocks        | ```true```           | ```'cpp'```                |
+| skipBlocksPattern | ```'#if 0|#endif'``` | ```'cpp'```                |
 
-For more information about options and their descriptions, see [here](http://pmd.sourceforge.net/usage/cpd-usage.html#Options).
+For more information about options and their descriptions, see [here](http://pmd.sourceforge.net/usage/cpd-usage.html#Options),
+and for the available programming languages have a look on [CPD documentation](http://pmd.sourceforge.net/usage/cpd-usage.html#Supported_Languages).
 To request more options, please file an issue [here](/../../issues).
 
 Additionally, one can configure the following reports for every task analogous to
