@@ -12,6 +12,7 @@ Gradle CPD plugin
 * [What is it](#what-is-it)
 * [Requirements](#requirements)
 * [Usage](#usage)
+* [Options](#options)
 * [Contributing](#contributing)
 * [Release notes](/../../releases)
 
@@ -82,6 +83,30 @@ By default the copy-paste-detection looks at all source code of all subprojects 
 *Note:* With v0.2, I have renamed the default task from ```cpd``` to ```cpdCheck``` that it does not have a name clash anymore.
 
 
+Options
+-------
+
+This plugin supports the following options, either set for the plugin using ```cpd { }``` or for every task explicitly,
+e.g. using ```cpdCheck { }```:
+
+| Attribute         | Default              | Applies for ```language``` |
+| ----------------- |:--------------------:|:--------------------------:|
+| encoding          | System default       |                            |
+| ignoreFailures    | ```false```          |                            |
+| minimumTokenCount | ```50```             |                            |
+
+For more information about options and their descriptions, see [here](http://pmd.sourceforge.net/usage/cpd-usage.html#Options).
+To request more options, please file an issue [here](/../../issues).
+
+Additionally, one can configure the following reports for every task analogous to
+[Reporting](https://gradle.org/docs/current/dsl/org.gradle.api.reporting.Reporting.html) as for any other reporting plugin. See also
+the example in [Usage](#usage) section above.
+
+| Report | Default  | Further options and their defaults    |
+| ------ |:--------:| ------------------------------------- |
+| csv    | disabled | ```separator = ','```                 |
+| text   | disabled | ```lineSeparator = '====================================================================='```, ```trimLeadingCommonSourceWhitespaces = false``` |
+| xml    | enabled  | ```encoding = <<System default>>```   |
 
 
 Contributing

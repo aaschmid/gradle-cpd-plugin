@@ -23,6 +23,7 @@ class CpdPluginTest extends BaseSpec {
 
         expect:
         ext.encoding == System.getProperty('file.encoding')
+        !ext.ignoreFailures
         ext.minimumTokenCount == 50
         ext.reportsDir == project.file('build/reports/cpd')
         ext.toolVersion == '5.3.0'
@@ -52,6 +53,7 @@ class CpdPluginTest extends BaseSpec {
         task.group == null
 
         task.encoding == System.getProperty('file.encoding')
+        !task.ignoreFailures
         task.minimumTokenCount == 50
 
         task.pmdClasspath == project.configurations.findByName('cpd')
@@ -76,6 +78,7 @@ class CpdPluginTest extends BaseSpec {
         task.group == null
 
         task.encoding == System.getProperty('file.encoding')
+        !task.ignoreFailures
         task.minimumTokenCount == 50
 
         task.pmdClasspath == project.configurations.cpd
@@ -178,6 +181,7 @@ class CpdPluginTest extends BaseSpec {
         given:
         project.cpd{
             encoding = 'UTF-8'
+            ignoreFailures = false
             minimumTokenCount = 25
             reportsDir = project.file('cpd-reports')
         }
@@ -190,6 +194,7 @@ class CpdPluginTest extends BaseSpec {
         task.group == null
 
         task.encoding == 'UTF-8'
+        !task.ignoreFailures
         task.minimumTokenCount == 25
 
         task.pmdClasspath == project.configurations.findByName('cpd')
@@ -208,6 +213,7 @@ class CpdPluginTest extends BaseSpec {
         given:
         project.cpdCheck{
             encoding = 'ISO-8859-1'
+            ignoreFailures = false
             minimumTokenCount = 10
             reports{
                 csv{
@@ -233,6 +239,7 @@ class CpdPluginTest extends BaseSpec {
         task.group == null
 
         task.encoding == 'ISO-8859-1'
+        !task.ignoreFailures
         task.minimumTokenCount == 10
 
         task.pmdClasspath == project.configurations.findByName('cpd')
@@ -244,19 +251,8 @@ class CpdPluginTest extends BaseSpec {
         task.reports.xml.destination == project.file('build/reports/cpd/cpdCheck.xml')
         !task.reports.xml.enabled
 
+
         task.source.empty
-    }
-
-    def "custom 'Cpd' task can be customized via extension if task is created before extension is configured"() {
-        given:
-        def task = project.tasks.create('cpdCustom', Cpd)
-
-        project.cpd{
-            minimumTokenCount = 10
-        }
-
-        expect:
-        task.minimumTokenCount == 10
     }
 
     def "custom 'Cpd' task can be customized via extension if task is created after extension is configured"() {

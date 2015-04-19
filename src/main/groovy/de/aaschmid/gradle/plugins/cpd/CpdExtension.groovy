@@ -37,6 +37,14 @@ class CpdExtension extends CodeQualityExtension {
     String encoding = System.getProperty('file.encoding')
 
     /**
+     * Whether or not to allow the build to continue if there are warnings; defaults to {@code false}, as for any other
+     * static code analysis tool.
+     * <p>
+     * Example: {@code ignoreFailures = true}
+     */
+    boolean ignoreFailures = false
+
+    /**
      * A positive integer indicating the minimum token count to trigger a CPD match; defaults to {@code 50}.
      * <p>
      * Example: {@code minimumTokenCount = 25}

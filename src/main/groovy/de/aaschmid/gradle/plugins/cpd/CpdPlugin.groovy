@@ -129,6 +129,7 @@ class CpdPlugin implements Plugin<Project> {
         project.tasks.withType(Cpd){ Cpd task ->
             task.conventionMapping.with{
                 encoding = { extension.encoding }
+                ignoreFailures = { extension.ignoreFailures }
                 minimumTokenCount = { extension.minimumTokenCount }
                 pmdClasspath = { project.configurations.findByName('cpd') }
             }

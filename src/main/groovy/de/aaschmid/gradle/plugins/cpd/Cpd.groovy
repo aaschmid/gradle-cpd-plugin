@@ -100,7 +100,6 @@ class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> 
     @Inject
     Cpd(Instantiator instantiator) {
         this.reports = instantiator.newInstance(CpdReportsImpl, this)
-
     }
 
     @TaskAction
