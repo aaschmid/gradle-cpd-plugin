@@ -19,17 +19,23 @@ Gradle CPD plugin
 What is it
 ----------
 
-A [Gradle](http://gradle.org) plugin to find duplicate code using [PMD](http://pmd.sourceforge.net)s copy/paste detection (= [CPD](http://pmd.sourceforge.net/cpd-usage.html)).
+A [Gradle](http://gradle.org) plugin to find duplicate code using [PMD](http://pmd.sourceforge.net)s copy/paste detection (= [CPD](http://pmd.sourceforge.net/usage/cpd-usage.html)).
 
 
 Requirements
 ------------
 
-Currently this plugin requires [PMD] greater or equal to version 5 such that ```toolVersion >= v5.0.0```. However you can try it with previous versions using
+Currently this plugin requires [PMD]() greater or equal to version 5.2 such that ```toolVersion >= v5.2.0```.
+
+Explaination: As [PMD]()s source code and artifacts were modularized into modules for every language with v5.2.0 (see
+[Changelog - 5.2.0](http://pmd.sourceforge.net/pmd-5.2.0/overview/changelog.html)) this plugin uses the
+'pmd-dist' dependency by default.  This dependency further includes 'pmd-core', 'pmd-java', 'pmd-cpp',
+... transitively. This also forces proper working of ```toolVersion``` to [PMD]() v5.2.0 and higher. If
+you want to use a version prior to v5.2.0, you can use the following snipped
 
 ```groovy
 dependencies {
-    cpd 'pmd:pmd:4.2.5'
+    cpd 'net.sourceforge.pmd:pmd:5.0.5'
 }
 ```
 
@@ -51,17 +57,16 @@ buildscript {
     }
 
     dependencies {
-        classpath 'de.aaschmid.gradle.plugins:gradle-cpd-plugin:0.1'
+        classpath 'de.aaschmid.gradle.plugins:gradle-cpd-plugin:0.4'
     }
 }
 
-// optional - default is 5.2.3
 cpd {
-    // As PMD was split with v5.2.0 and CPD has moved to 'pmd-core', 'toolVersion' is just available for 5.2.0 and higher
-    toolVersion = '5.2.1'
+    language = 'cpp'
+    toolVersion = '5.2.3' // defaults to '5.3.0'; just available for v5.2.0 and higher (see explanation above)
 }
 
-// optional - default report is xml and default source is 'main' and 'test' 
+// optional - default report is xml and default sources are 'main' and 'test'
 cpdCheck {
     reports {
         text.enabled = true
@@ -71,17 +76,12 @@ cpdCheck {
 }
 ```
 
-If you want to run one copy-paste-detection for all subprojects which have got sourceSets, you can configure the cpd task as follows:
+By default the copy-paste-detection looks at all source code of all subprojects which at least apply ```JavaBasePlugin```
+(explicitly or implicitly trough e.g. Java or Groovy plugin).
 
-```groovy
-cpdCheck {
-    allprojects.findAll{ p -> p.hasProperty('sourceSets') }.each{ p ->
-        p.sourceSets.all{ sourceSet -> source sourceSet.allJava }
-    }
-}
-```
+*Note:* With v0.2, I have renamed the default task from ```cpd``` to ```cpdCheck``` that it does not have a name clash anymore.
 
-*Note:* With v0.2, I have renamed the default task from ```cpd``` to ```cpdCheck``` that it does no long have a name clash.
+
 
 
 Contributing

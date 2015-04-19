@@ -8,4 +8,6 @@ public class Clazz1 implements Clazz {
     public boolean isClazz(Clazz clazz) {
         return clazz != null;
     }
+
+    private String functionAfter() { /* ... */ }
 }

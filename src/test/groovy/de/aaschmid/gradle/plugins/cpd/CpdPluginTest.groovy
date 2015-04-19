@@ -25,7 +25,7 @@ class CpdPluginTest extends BaseSpec {
         ext.encoding == System.getProperty('file.encoding')
         ext.minimumTokenCount == 50
         ext.reportsDir == project.file('build/reports/cpd')
-        ext.toolVersion == '5.2.3'
+        ext.toolVersion == '5.3.0'
     }
 
     def "applying 'CpdPlugin' creates and configures configuration 'cpd'"() {
@@ -303,5 +303,4 @@ class CpdPluginTest extends BaseSpec {
         !subProject1.tasks.findByName('cpdCheck')
         !subProject2.tasks.findByName('cpdCheck')
     }
-
 }

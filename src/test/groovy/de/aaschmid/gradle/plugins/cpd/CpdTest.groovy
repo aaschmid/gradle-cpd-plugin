@@ -63,4 +63,9 @@ class CpdTest extends BaseSpec {
         expect:
         task.outputs.files.files == project.files("${project.buildDir}/cpdCheck.text", "${project.buildDir}/reports/cpd/cpdCheck.xml") as Set
     }
+
+    def "'Cpd' task ignoreFailures is 'false' by default"() {
+        expect:
+        !project.tasks.findByName('cpdCheck').ignoreFailures
+    }
 }

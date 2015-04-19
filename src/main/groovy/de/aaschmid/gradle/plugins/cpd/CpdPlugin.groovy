@@ -115,7 +115,7 @@ class CpdPlugin implements Plugin<Project> {
 
         // set constant values directly
         extension.with{
-            toolVersion = '5.2.3'
+            toolVersion = '5.3.0'
         }
         // use conventionMapping for values derived based on some external value
         extension.conventionMapping.with{
@@ -147,7 +147,7 @@ class CpdPlugin implements Plugin<Project> {
             description = 'The CPD libraries to be used for this project.'
             incoming.beforeResolve{
                 if (dependencies.isEmpty()) {
-                    dependencies.add(project.dependencies.create("net.sourceforge.pmd:pmd-core:${extension.toolVersion}"))
+                    dependencies.add(project.dependencies.create("net.sourceforge.pmd:pmd-dist:${extension.toolVersion}"))
                 }
             }
             transitive = true

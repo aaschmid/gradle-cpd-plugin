@@ -191,7 +191,7 @@ class CpdAcceptanceTest extends BaseSpec {
 
         def report = project.file('build/reports/cpd/cpdCheck.csv')
         report.exists()
-        report.text =~ /7,20,2,5,.*Clazz1\.java,5,.*Clazz2\.java/
+        report.text =~ /4,15,2,7,.*Clazz1\.java,9,.*Clazz2\.java/
     }
 
     def "executing 'Cpd' task on duplicate 'java' source should not throw 'GradleException' if 'ignoreFailures' and produce 'cpdCheck.csv' with one warning"() {
@@ -214,7 +214,7 @@ class CpdAcceptanceTest extends BaseSpec {
 
         def report = project.file('build/reports/cpd/cpdCheck.csv')
         report.exists()
-        report.text =~ /7,20,2,5,.*Clazz1\.java,5,.*Clazz2\.java/
+        report.text =~ /4,15,2,7,.*Clazz1\.java,9,.*Clazz2\.java/
     }
 
     def "applying 'Cpd' task to only parent project if only sub project has 'groovy' plugin"() {
