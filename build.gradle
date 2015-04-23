@@ -1,6 +1,13 @@
-apply plugin: 'groovy'
-apply plugin: 'idea'
-apply plugin: 'jacoco'
+plugins {
+  id 'groovy'
+  id 'idea'
+  id 'jacoco'
+
+  id 'maven'
+  id 'signing'
+  id 'com.gradle.plugin-publish' version '0.9.0'
+}
+
 
 description = 'Gradle plugin to find duplicate code using PMDs copy/paste detection (= CPD)'
 group = 'de.aaschmid.gradle.plugins'
@@ -98,10 +105,6 @@ idea {
 
 // -- build and publish artifacts -------------------------------------------------------------------------------------
 
-apply plugin: 'maven'
-apply plugin: 'signing'
-
-
 signing {
     // requires gradle.properties, see http://www.gradle.org/docs/current/userguide/signing_plugin.html
     required {
@@ -164,5 +167,25 @@ uploadArchives {
                 }
             }
         }
+    }
+}
+
+pluginBundle {
+    website = 'https://github.com/aaschmid/gradle-cpd-plugin'
+    vcsUrl = 'https://github.com/aaschmid/gradle-cpd-plugin'
+
+    description = 'A Gradle plugin to find duplicate code using PMDs copy/paste detection (= CPD).'
+    tags = [ 'duplicates', 'cpd', 'copy-paste-detection' ]
+
+    plugins {
+        cpdPlugin {
+            id = 'de.aaschmid.cpd'
+            displayName = 'Gradle CPD plugin'
+        }
+    }
+
+    mavenCoordinates {
+      groupId = project.group
+      artifactId = 'gradle-cpd-plugin'
     }
 }
