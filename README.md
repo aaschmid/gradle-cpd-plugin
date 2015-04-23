@@ -44,24 +44,35 @@ dependencies {
 Usage
 -----
 
-This plugin is available from [Maven Central](http://search.maven.org/), see [here](http://search.maven.org/#search|ga|1|gradle-cpd-plugin).
-
-This example shows a project where only  ```main``` sources should be checked for duplicates:
+This plugin is available using either the new [Gradle plugins DSL](https://gradle.org/docs/current/userguide/plugins.html#sec:plugins_block)
 
 
 ```groovy
-apply plugin: 'cpd'
+plugins {
+    id 'de.aaschmid.cpd' version '0.4'
+}
+```
 
+or the old fashion [buildscript block](https://gradle.org/docs/current/userguide/plugins.html#sec:applying_plugins_buildscript) from [Maven Central](http://search.maven.org/#search|ga|1|gradle-cpd-plugin) or [jCenter](https://bintray.com/aaschmid/gradle-plugins/gradle-cpd-plugin/view).
+```groovy
 buildscript {
     repositories {
+        // choose your prefered one
         mavenCentral()
+        jcenter()
     }
 
     dependencies {
         classpath 'de.aaschmid.gradle.plugins:gradle-cpd-plugin:0.4'
     }
 }
+apply plugin: 'cpd'
+```
 
+This example shows a project where only  ```main``` sources should be checked for duplicates:
+
+```groovy
+// optional - settings for every CPD task
 cpd {
     language = 'cpp'
     toolVersion = '5.2.3' // defaults to '5.3.0'; just available for v5.2.0 and higher (see explanation above)
