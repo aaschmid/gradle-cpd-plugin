@@ -31,6 +31,8 @@ class CpdPluginTest extends BaseSpec {
         ext.language == 'java'
         ext.minimumTokenCount == 50
         ext.reportsDir == project.file('build/reports/cpd')
+        !ext.skipDuplicateFiles
+        !ext.skipLexicalErrors
         ext.skipBlocks
         ext.skipBlocksPattern == Tokenizer.DEFAULT_SKIP_BLOCKS_PATTERN
         ext.toolVersion == '5.3.0'
@@ -76,6 +78,8 @@ class CpdPluginTest extends BaseSpec {
         task.reports.xml.destination == project.file('build/reports/cpd/cpdCheck.xml')
         task.reports.xml.enabled
 
+        !task.skipDuplicateFiles
+        !task.skipLexicalErrors
         task.skipBlocks
         task.skipBlocksPattern == Tokenizer.DEFAULT_SKIP_BLOCKS_PATTERN
 
@@ -108,6 +112,8 @@ class CpdPluginTest extends BaseSpec {
         task.reports.xml.destination == project.file('build/reports/cpd/cpdCustom.xml')
         task.reports.xml.enabled
 
+        !task.skipDuplicateFiles
+        !task.skipLexicalErrors
         task.skipBlocks
         task.skipBlocksPattern == Tokenizer.DEFAULT_SKIP_BLOCKS_PATTERN
 
@@ -207,6 +213,8 @@ class CpdPluginTest extends BaseSpec {
             language = 'ruby'
             minimumTokenCount = 25
             reportsDir = project.file('cpd-reports')
+            skipDuplicateFiles = true
+            skipLexicalErrors = true
             skipBlocks = false
         }
 
@@ -234,6 +242,8 @@ class CpdPluginTest extends BaseSpec {
         task.reports.xml.destination == project.file('cpd-reports/cpdCheck.xml')
         task.reports.xml.enabled
 
+        task.skipDuplicateFiles
+        task.skipLexicalErrors
         !task.skipBlocks
         task.skipBlocksPattern == Tokenizer.DEFAULT_SKIP_BLOCKS_PATTERN
 
@@ -260,6 +270,8 @@ class CpdPluginTest extends BaseSpec {
                 }
                 xml.enabled = false
             }
+            skipDuplicateFiles = true
+            skipLexicalErrors = true
             skipBlocks = false
             skipBlocksPattern = '<template|>'
 

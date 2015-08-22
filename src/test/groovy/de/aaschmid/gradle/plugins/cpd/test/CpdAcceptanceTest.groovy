@@ -279,8 +279,8 @@ class CpdAcceptanceTest extends BaseSpec {
 
         def report = project.file('build/reports/cpd/cpdCheck.csv')
         report.exists()
-        report.text =~ /8,53,2,6,.*Employee\.java,6,.*Person\.java/
-        report.text =~ /14,45,2,13,.*Employee\.java,13,.*Person\.java/
+        report.text =~ /8,53,2,6,.*Person\.java,6,.*Employee\.java/
+        report.text =~ /14,45,2,13,.*Person\.java,13,.*Employee\.java/
     }
 
     def "executing 'Cpd' task on duplicate annotations should not throw 'GradleException' if ignoreAnnotations"() {
@@ -377,6 +377,88 @@ class CpdAcceptanceTest extends BaseSpec {
             ignoreLiterals = false
             minimumTokenCount = 20
             source = testFile('de/aaschmid/literal')
+        }
+
+        when:
+        project.tasks.getByName('cpdCheck').execute()
+
+        then:
+        notThrown GradleException
+
+        def report = project.file('build/reports/cpd/cpdCheck.xml') // TODO file exists always; same as for other tools?
+        report.exists()
+        // TODO do better?
+        report.text =~ /<pmd-cpd\/>/
+    }
+
+    def "executing 'Cpd' task on duplicate files should throw 'GradleException' if not skipDuplicateFiles"() {
+        given:
+        project.cpdCheck{
+            minimumTokenCount = 5
+            reports{
+                csv.enabled = true
+                xml.enabled = false
+            }
+            skipDuplicateFiles = false
+            source testFile('de/aaschmid/duplicate'), testFile('de/aaschmid/test')
+        }
+
+        when:
+        project.tasks.getByName('cpdCheck').execute()
+
+        then:
+        def e = thrown GradleException
+        e.cause.message =~ /CPD found duplicate code\. See the report at file:\/\/.*\/cpdCheck.csv/
+
+        def report = project.file('build/reports/cpd/cpdCheck.csv')
+        report.exists()
+        report.text =~ /6,15,2,5,.*duplicate\/Test\.java,5,.*test\/Test\.java/
+    }
+
+    def "executing 'Cpd' task on duplicate files should not throw 'GradleException' if skipDuplicateFiles"() {
+        given:
+        project.cpdCheck{
+            minimumTokenCount = 5
+            skipDuplicateFiles = true
+            source testFile('de/aaschmid/duplicate'), testFile('de/aaschmid/test')
+        }
+
+        when:
+        project.tasks.getByName('cpdCheck').execute()
+
+        then:
+        notThrown GradleException
+
+        def report = project.file('build/reports/cpd/cpdCheck.xml') // TODO file exists always; same as for other tools?
+        report.exists()
+        // TODO do better?
+        report.text =~ /<pmd-cpd\/>/
+    }
+
+
+    def "executing 'Cpd' task on files containing lexical errors should throw 'GradleException' if not skipLexicalErrors"() {
+        given:
+        project.cpdCheck{
+            skipLexicalErrors = false
+            source testFile('de/aaschmid/lexical')
+        }
+
+        when:
+        project.tasks.getByName('cpdCheck').execute()
+
+        then:
+        def e = thrown GradleException
+        e.cause.message =~ /Lexical error in file .*Error.java at/
+
+        def report = project.file('build/reports/cpd/cpdCheck.csv')
+        !report.exists()
+    }
+
+    def "executing 'Cpd' task on files containing lexical errors should not throw 'GradleException' if skipLexicalErrors"() {
+        given:
+        project.cpdCheck{
+            skipLexicalErrors = true
+            source testFile('de/aaschmid/lexical')
         }
 
         when:

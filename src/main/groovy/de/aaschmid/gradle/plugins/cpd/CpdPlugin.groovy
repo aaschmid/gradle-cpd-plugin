@@ -136,6 +136,8 @@ class CpdPlugin implements Plugin<Project> {
                 language = { extension.language }
                 minimumTokenCount = { extension.minimumTokenCount }
                 pmdClasspath = { project.configurations.findByName('cpd') }
+                skipDuplicateFiles = { extension.skipDuplicateFiles }
+                skipLexicalErrors = { extension.skipLexicalErrors }
                 skipBlocks = { extension.skipBlocks }
                 skipBlocksPattern = { extension.skipBlocksPattern }
             }

@@ -133,6 +133,22 @@ class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> 
     FileCollection pmdClasspath
 
     /**
+     * Ignore multiple copies of files of the same name and length in comparison.
+     * <p>
+     * Example: {@code skipDuplicateFiles = true}
+     */
+    @Input
+    boolean skipDuplicateFiles
+
+    /**
+    * Skip files which cannot be tokenized due to invalid characters instead of aborting CPD.
+     * <p>
+     * Example: {@code skipLexicalErrors = true}
+     */
+    @Input
+    boolean skipLexicalErrors
+
+    /**
      * Enables or disables skipping of blocks configured by {@link #skipBlocksPattern}.
      * <p>
      * Example: {@code skipBlocks = false}

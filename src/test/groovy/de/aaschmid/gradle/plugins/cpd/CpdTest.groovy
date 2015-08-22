@@ -24,7 +24,7 @@ class CpdTest extends BaseSpec {
                 testFile('de/aaschmid/clazz/impl/Clazz1.java'),
                 testFile('de/aaschmid/clazz/impl/Clazz2.java'),
             ) as Set
-        task.inputs.properties.size() == 11
+        task.inputs.properties.size() == 13
     }
 
     def "'Cpd' task is aware of includes and excludes"() {
@@ -44,8 +44,10 @@ class CpdTest extends BaseSpec {
                 testFile('de/aaschmid/annotation/Employee.java'),
                 testFile('de/aaschmid/annotation/Person.java'),
                 testFile('de/aaschmid/clazz/impl/Clazz2.java'),
+                testFile('de/aaschmid/duplicate/Test.java'),
                 testFile('de/aaschmid/foo/Bar.java'),
                 testFile('de/aaschmid/identifier/Identifier2.java'),
+                testFile('de/aaschmid/lexical/Error.java'),
                 testFile('de/aaschmid/literal/Literal2.java'),
             ) as Set
     }

@@ -91,6 +91,21 @@ class CpdExtension extends CodeQualityExtension {
     int minimumTokenCount = 50
 
     /**
+     * Ignore multiple copies of files of the same name and length in comparison; defaults to {@code false}.
+     * <p>
+     * Example: {@code skipDuplicateFiles = true}
+     */
+    boolean skipDuplicateFiles = false
+
+    /**
+     * Skip files which cannot be tokenized due to invalid characters instead of aborting CPD;
+     * defaults to {@code false}.
+     * <p>
+     * Example: {@code skipLexicalErrors = true}
+     */
+    boolean skipLexicalErrors = false
+
+    /**
      * Enables or disables skipping of blocks configured by {@link #skipBlocksPattern} like a pre-processor;
      * defaults to {@code true}.
      * <p>

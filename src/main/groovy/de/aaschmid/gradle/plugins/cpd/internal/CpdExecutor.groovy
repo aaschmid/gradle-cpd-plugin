@@ -21,6 +21,8 @@ public class CpdExecutor {
     private final String encoding;
     private final Language language;
     private final int minimumTokenCount;
+    private final boolean skipDuplicateFiles;
+    private final boolean skipLexicalErrors;
     private final FileTree source;
 
     public CpdExecutor(Cpd task) {
@@ -35,6 +37,8 @@ public class CpdExecutor {
         this.encoding = task.getEncoding();
         this.language = createLanguage(task);
         this.minimumTokenCount = task.getMinimumTokenCount();
+        this.skipLexicalErrors = task.getSkipLexicalErrors();
+        this.skipDuplicateFiles = task.getSkipDuplicateFiles();
         this.source = task.getSource();
     }
 
@@ -43,7 +47,12 @@ public class CpdExecutor {
             if (logger.isInfoEnabled()) {
                 logger.info("Starting CPD, minimumTokenCount is {}", minimumTokenCount);
             }
-            def cpd = new CPD(new CPDConfiguration(minimumTokenCount, language, encoding));
+
+            def cpdConfig = new CPDConfiguration(minimumTokenCount, language, encoding);
+            cpdConfig.setSkipLexicalErrors(skipLexicalErrors);
+            cpdConfig.setSkipDuplicates(skipDuplicateFiles);
+
+            def cpd = new CPD(cpdConfig);
 
             if (logger.isInfoEnabled()) {
                 logger.info("Tokenizing files");

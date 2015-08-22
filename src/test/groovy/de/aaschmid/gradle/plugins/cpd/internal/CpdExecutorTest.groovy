@@ -35,6 +35,7 @@ class CpdExecutorTest extends BaseSpec {
         project.cpdCheck{
             encoding = 'US-ASCII'
             minimumTokenCount = 15
+            skipLexicalErrors = true
             source = testFile('de/aaschmid/clazz/Clazz.java')
         }
 
@@ -45,6 +46,8 @@ class CpdExecutorTest extends BaseSpec {
         result.encoding == 'US-ASCII'
         result.language instanceof JavaLanguage
         result.minimumTokenCount == 15
+        !result.skipDuplicateFiles
+        result.skipLexicalErrors
         result.source.files == [ testFile('de/aaschmid/clazz/Clazz.java') ] as Set
     }
 
