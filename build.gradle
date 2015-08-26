@@ -85,6 +85,10 @@ task sourcesJar(type: Jar) {
 
 test {
     ignoreFailures = isBuildOnJenkins
+
+    testLogging {
+        exceptionFormat "full"
+    }
 }
 
 jacoco {
