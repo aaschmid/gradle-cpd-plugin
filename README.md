@@ -49,7 +49,7 @@ This plugin is available using either the new [Gradle plugins DSL](https://gradl
 
 ```groovy
 plugins {
-    id 'de.aaschmid.cpd' version '0.4'
+    id 'de.aaschmid.cpd' version '0.5'
 }
 ```
 
@@ -63,7 +63,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'de.aaschmid.gradle.plugins:gradle-cpd-plugin:0.4'
+        classpath 'de.aaschmid.gradle.plugins:gradle-cpd-plugin:0.5'
     }
 }
 apply plugin: 'cpd'
