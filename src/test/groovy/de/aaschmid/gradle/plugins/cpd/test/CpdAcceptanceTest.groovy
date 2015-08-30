@@ -279,8 +279,9 @@ class CpdAcceptanceTest extends BaseSpec {
 
         def report = project.file('build/reports/cpd/cpdCheck.csv')
         report.exists()
-        report.text =~ /8,53,2,6,.*Person\.java,6,.*Employee\.java/
-        report.text =~ /14,45,2,13,.*Person\.java,13,.*Employee\.java/
+        // locally Person.java comes before Employee, on travis-ci is Employee first => make it irrelevant
+        report.text =~ /8,53,2,6,.*(Person|Employee)\.java,6,.*(Person|Employee)\.java/
+        report.text =~ /14,45,2,13,.*(Person|Employee)\.java,13,.*(Person|Employee)\.java/
     }
 
     def "executing 'Cpd' task on duplicate annotations should not throw 'GradleException' if ignoreAnnotations"() {
