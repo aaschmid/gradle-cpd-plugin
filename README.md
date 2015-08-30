@@ -100,19 +100,23 @@ Options
 This plugin supports the following options, either set for the plugin using ```cpd { }``` or for every task explicitly,
 e.g. using ```cpdCheck { }```:
 
-| Attribute          | Default              | Applies for ```language``` |
-| ------------------ |:--------------------:|:--------------------------:|
-| encoding           | System default       |                            |
-| ignoreAnnotations  | ```false```          | ```'java'```               |
-| ignoreFailures     | ```false```          |                            |
-| ignoreIdentifiers  | ```false```          | ```'java'```               |
-| ignoreLiterals     | ```false```          | ```'java'```               |
-| language           | ```'java'```         |                            |
-| minimumTokenCount  | ```50```             |                            |
-| skipDuplicateFiles | ```false```          |                            |
-| skipLexicalErrors  | ```false```          |                            |
-| skipBlocks         | ```true```           | ```'cpp'```                |
-| skipBlocksPattern  | ```'#if 0|#endif'``` | ```'cpp'```                |
+| Attribute          | Default              | Applies for ```language``` | since    |
+| ------------------ |:--------------------:|:--------------------------:|:--------:|
+| encoding           | System default       |                            | [v0.1][] |
+| ignoreAnnotations  | ```false```          | ```'java'```               | [v0.4][] |
+| ignoreFailures     | ```false```          |                            | [v0.1][] |
+| ignoreIdentifiers  | ```false```          | ```'java'```               | [v0.4][] |
+| ignoreLiterals     | ```false```          | ```'java'```               | [v0.4][] |
+| language           | ```'java'```         |                            | [v0.4][] |
+| minimumTokenCount  | ```50```             |                            | [v0.1][] |
+| skipDuplicateFiles | ```false```          |                            | [v0.5][] |
+| skipLexicalErrors  | ```false```          |                            | [v0.5][] |
+| skipBlocks         | ```true```           | ```'cpp'```                | [v0.4][] |
+| skipBlocksPattern  | ```'#if 0|#endif'``` | ```'cpp'```                | [v0.4][] |
+
+[v0.1]: /../../releases/tag/v0.1
+[v0.4]: /../../releases/tag/v0.4
+[v0.5]: /../../releases/tag/v0.5
 
 For more information about options and their descriptions, see [here](http://pmd.sourceforge.net/usage/cpd-usage.html#Options),
 and for the available programming languages have a look on [CPD documentation](http://pmd.sourceforge.net/usage/cpd-usage.html#Supported_Languages).
