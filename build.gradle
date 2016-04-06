@@ -146,6 +146,7 @@ idea {
         testSourceDirs += sourceSets.integTest.resources.srcDirs
     }
 
+    // TODO seems to be broken with new version of IntelliJ
     workspace.iws.withXml { provider ->
         Node node = provider.asNode()
 

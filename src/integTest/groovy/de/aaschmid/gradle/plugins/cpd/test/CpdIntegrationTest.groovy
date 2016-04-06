@@ -20,7 +20,7 @@ class CpdIntegrationTest extends AbstractIntegrationSpec {
 
         then:
         executed(':cpdCheck')
-        assertOutputDoesNotContain('WARNING: Due to the absence of JavaBasePlugin on root project')
+        assertThatOutputDoesNotContain('WARNING: Due to the absence of JavaBasePlugin on root project')
     }
 
     @Issue('https://github.com/aaschmid/gradle-cpd-plugin/issues/8')
@@ -38,7 +38,32 @@ class CpdIntegrationTest extends AbstractIntegrationSpec {
 
         then:
         notExecuted(':cpdCheck')
-        assertOutputDoesNotContain('WARNING: Due to the absence of JavaBasePlugin on root project')
+        assertThatOutputDoesNotContain('WARNING: Due to the absence of JavaBasePlugin on root project')
+    }
+
+    def "execution of task 'build' should not show WARNING if rootProject does apply 'JavaBasePlugin'"() {
+        given:
+        addAdditionalBuildClasspath()
+
+        settingsFile << """\
+            include 'sub'
+            """.stripIndent()
+
+        buildFile << """\
+            apply plugin: 'cpd'
+            apply plugin: 'java'
+
+            project(':sub') {
+                apply plugin: 'java'
+            }
+            """.stripIndent()
+
+        when:
+        succeeds('build')
+
+        then:
+        executed(':cpdCheck')
+        assertThatOutputDoesNotContain("WARNING: Due to the absence of JavaBasePlugin")
     }
 
     def "execution of task 'build' should show WARNING if rootProject does not apply at least 'JavaBasePlugin'"() {
@@ -64,7 +89,7 @@ class CpdIntegrationTest extends AbstractIntegrationSpec {
         notExecuted(':cpdCheck')
 
         def rootProjectName = executer.workingDir.name
-        assertOutputContains("""\
+        assertThatOutputContains("""\
 WARNING: Due to the absence of JavaBasePlugin on root project '${rootProjectName}' the task ':cpdCheck' could not be\
  added to task graph and therefore will not be executed. SUGGESTION: add a dependency to task ':cpdCheck' manually to a\
  subprojects 'check' task, e.g. to project ':sub' using
@@ -88,15 +113,18 @@ or to root project '${rootProjectName}' using
 
         buildFile << "apply plugin: 'de.aaschmid.cpd'"
 
-        expect:
+        when:
         succeeds('cpdCheck')
+
+        then:
+        executed(':cpdCheck')
     }
 
-    void assertOutputDoesNotContain(String text) {
-        assert !result.output.contains(TextUtil.toPlatformLineSeparators(text.trim()))
-    }
-
-    void assertOutputContains(String text) {
+    void assertThatOutputContains(String text) {
         assert result.output.contains(TextUtil.toPlatformLineSeparators(text.trim()))
+    }
+
+    void assertThatOutputDoesNotContain(String text) {
+        assert !result.output.contains(TextUtil.toPlatformLineSeparators(text.trim()))
     }
 }
