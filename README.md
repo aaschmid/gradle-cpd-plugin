@@ -69,6 +69,34 @@ buildscript {
 apply plugin: 'cpd'
 ```
 
+By default the copy-paste-detection looks at all source code of all projects which at least apply ```JavaBasePlugin```. If you use a different programming language and want to get it configurated out of the box, please open an issue :-)
+
+### Single module project
+
+If you have a single module project you just need to make sure that the ```JavaBasePlugin``` is also applied to it (explicitly or implicitly through e.g. Java or Groovy plugin). Otherwise you can simply add a dependency to a task you like by 
+
+```groovy
+analyze.dependsOn(cpdCheck)
+```
+
+### Multi module project 
+
+If the root project of your multi-module project applies the ```JavaBasePlugin```, you are done. But most likely this is not how your project looks like. If so, you need to manually add a task graph dependency manually to either one or all of your subprojects such that the ```cpdCheck``` task is executed:
+
+```groovy
+// one single subproject where 'JavaBasePlugin' is available
+subprojectOne.check.dependsOn(':cpdCheck')
+
+// all subprojects where 'check' task is available (which comes with 'JavaBasePlugin')
+subprojects {
+    plugins.withType(JavaBasePlugin) { // <- just if 'JavaBasePlugin' plugin is not applied to all subprojects
+        check.dependsOn(rootProject.cpdCheck)
+    }
+}
+```
+
+### Examples
+
 This example shows a project where only  ```main``` sources should be checked for duplicates:
 
 ```groovy
@@ -87,9 +115,6 @@ cpdCheck {
     source = sourceSets.main.allJava // only java, groovy and scala classes in 'main' sourceSets
 }
 ```
-
-By default the copy-paste-detection looks at all source code of all subprojects which at least apply ```JavaBasePlugin```
-(explicitly or implicitly trough e.g. Java or Groovy plugin).
 
 *Note:* With v0.2, I have renamed the default task from ```cpd``` to ```cpdCheck``` that it does not have a name clash anymore.
 
