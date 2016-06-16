@@ -3,6 +3,7 @@ package de.aaschmid.gradle.plugins.cpd
 import de.aaschmid.gradle.plugins.cpd.internal.CpdExecutor
 import de.aaschmid.gradle.plugins.cpd.internal.CpdReporter
 import de.aaschmid.gradle.plugins.cpd.internal.CpdReportsImpl
+import de.aaschmid.gradle.plugins.cpd.internal.CpdUncheckedException
 import net.sourceforge.pmd.cpd.Match
 import org.gradle.api.GradleException
 import org.gradle.api.Incubating
@@ -221,7 +222,7 @@ class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> 
         try {
             return new URI("file", "", path.toURI().getPath(), null, null).toString();
         } catch (URISyntaxException e) {
-            throw UncheckedException.throwAsUncheckedException(e);
+            throw CpdUncheckedException.throwAsUncheckedException(e);
         }
     }
 
