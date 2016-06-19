@@ -9,8 +9,8 @@ plugins {
 }
 
 description = 'Gradle plugin to find duplicate code using PMDs copy/paste detection (= CPD)'
-group = 'de.aaschmid.gradle.plugins'
-version = '0.6-SNAPSHOT'
+group = 'de.aaschmid'
+version = '1.0'
 
 ext {
     isBuildOnJenkins = System.getenv('BUILD_TAG')?.startsWith('jenkins-') ?: false
