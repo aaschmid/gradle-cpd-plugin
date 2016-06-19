@@ -102,7 +102,7 @@ This example shows a project where only  ```main``` sources should be checked fo
 // optional - settings for every CPD task
 cpd {
     language = 'cpp'
-    toolVersion = '5.2.3' // defaults to '5.3.0'; just available for v5.2.0 and higher (see explanation above)
+    toolVersion = '5.2.3' // defaults to '5.4.2'; just available for v5.2.0 and higher (see explanation above)
 }
 
 // optional - default report is xml and default sources are 'main' and 'test'

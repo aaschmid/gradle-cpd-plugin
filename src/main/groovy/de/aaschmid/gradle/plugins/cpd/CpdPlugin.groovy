@@ -115,7 +115,7 @@ class CpdPlugin implements Plugin<Project> {
 
         // set constant values directly
         extension.with{
-            toolVersion = '5.3.0'
+            toolVersion = '5.4.2'
         }
         // use conventionMapping for values derived based on some external value
         extension.conventionMapping.with{

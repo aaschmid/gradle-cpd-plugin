@@ -42,7 +42,7 @@ dependencies {
     provided localGroovy()
 
     provided 'javax.inject:javax.inject:1'
-    provided 'net.sourceforge.pmd:pmd-dist:5.3.0'
+    provided 'net.sourceforge.pmd:pmd-dist:5.4.2'
 
     testCompile('org.spockframework:spock-core:0.7-groovy-2.0') {
         exclude group: 'org.codehaus.groovy'

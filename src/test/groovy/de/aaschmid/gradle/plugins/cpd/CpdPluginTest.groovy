@@ -35,7 +35,7 @@ class CpdPluginTest extends BaseSpec {
         !ext.skipLexicalErrors
         ext.skipBlocks
         ext.skipBlocksPattern == Tokenizer.DEFAULT_SKIP_BLOCKS_PATTERN
-        ext.toolVersion == '5.3.0'
+        ext.toolVersion == '5.4.2'
     }
 
     def "applying 'CpdPlugin' creates and configures configuration 'cpd'"() {
