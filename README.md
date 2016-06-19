@@ -19,7 +19,7 @@ Gradle CPD plugin
 What is it
 ----------
 
-A [Gradle](http://gradle.org) plugin to find duplicate code using [PMD](http://pmd.sourceforge.net)s copy/paste detection (= [CPD](http://pmd.sourceforge.net/usage/cpd-usage.html)).
+A [Gradle](http://gradle.org) plugin to find duplicate code using [PMD](http://pmd.sourceforge.net)s copy/paste detection (= [CPD][]).
 
 
 Requirements
@@ -67,6 +67,8 @@ buildscript {
 }
 apply plugin: 'cpd'
 ```
+
+**Attention:** The plugins groupId was changed from ```de.aaschmid.gradle.plugins``` to ```de.aaschmid``` in [v1.0][].
 
 By default the copy-paste-detection looks at all source code of all projects which at least apply ```JavaBasePlugin```. If you use a different programming language and want to get it configurated out of the box, please open an issue :-)
 
@@ -138,10 +140,6 @@ e.g. using ```cpdCheck { }```:
 | skipBlocks         | ```true```           | ```'cpp'```                | [v0.4][] |
 | skipBlocksPattern  | ```'#if 0|#endif'``` | ```'cpp'```                | [v0.4][] |
 
-[v0.1]: /../../releases/tag/v0.1
-[v0.4]: /../../releases/tag/v0.4
-[v0.5]: /../../releases/tag/v0.5
-
 For more information about options and their descriptions, see [here](http://pmd.sourceforge.net/usage/cpd-usage.html#Options),
 and for the available programming languages have a look on [CPD documentation](http://pmd.sourceforge.net/usage/cpd-usage.html#Supported_Languages).
 To request more options, please file an issue [here](/../../issues).
@@ -162,3 +160,12 @@ Contributing
 ------------
 
 You are very welcome to contribute by providing a patch/pull request.
+
+Please note that running the test cases my take quite long becuase the acceptance test cases (see ```de.aaschmid.gradle.plugins.cpd.test.CpdAcceptanceTest``` will download [CPD][] and its dependencies for every version. I recommend to get these dependencies in your ```localMaven()``` repository as the test cases look there for it first.
+
+[CPD]: http://pmd.sourceforge.net/usage/cpd-usage.html
+
+[v0.1]: /../../releases/tag/v0.1
+[v0.4]: /../../releases/tag/v0.4
+[v0.5]: /../../releases/tag/v0.5
+[v1.0]: /../../releases/tag/v1.0

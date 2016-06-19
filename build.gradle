@@ -189,7 +189,7 @@ pluginBundle {
     }
 
     mavenCoordinates {
-      groupId = project.group
-      artifactId = 'gradle-cpd-plugin'
+        groupId = project.group
+        artifactId = 'gradle-cpd-plugin'
     }
 }
