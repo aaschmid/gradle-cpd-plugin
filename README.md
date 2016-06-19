@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/aaschmid/gradle-cpd-plugin.svg?branch=master)](https://travis-ci.org/aaschmid/gradle-cpd-plugin)
+[![Coverage Status](https://coveralls.io/repos/github/aaschmid/gradle-cpd-plugin/badge.svg?branch=master)](https://coveralls.io/github/aaschmid/gradle-cpd-plugin?branch=master)
 [![Download](https://api.bintray.com/packages/aaschmid/gradle-plugins/gradle-cpd-plugin/images/download.svg)](https://bintray.com/aaschmid/gradle-plugins/gradle-cpd-plugin/_latestVersion)
 [![Issues](https://img.shields.io/github/issues/aaschmid/gradle-cpd-plugin.svg)](https://github.com/aaschmid/gradle-cpd-plugin/issues)
 [![Forks](https://img.shields.io/github/forks/aaschmid/gradle-cpd-plugin.svg)](https://github.com/aaschmid/gradle-cpd-plugin/network)

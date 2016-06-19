@@ -1,11 +1,12 @@
 plugins {
-  id 'groovy'
-  id 'idea'
-  id 'jacoco'
+    id 'groovy'
+    id 'idea'
+    id 'jacoco'
+    id 'com.github.kt3k.coveralls' version '2.6.3'
 
-  id 'maven'
-  id 'signing'
-  id 'com.gradle.plugin-publish' version '0.9.1'
+    id 'maven'
+    id 'signing'
+    id 'com.gradle.plugin-publish' version '0.9.1'
 }
 
 description = 'Gradle plugin to find duplicate code using PMDs copy/paste detection (= CPD)'
@@ -91,7 +92,14 @@ test {
 }
 
 jacoco {
-    toolVersion = '0.7.2.201409121644'
+    toolVersion = '0.7.7.201606060606'
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled = true // coveralls plugin depends on xml format report
+        html.enabled = false
+    }
 }
 
 artifacts {
