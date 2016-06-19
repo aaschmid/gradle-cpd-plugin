@@ -55,6 +55,76 @@ class CpdIntegrationTest extends Specification {
         !result.output.contains('WARNING: Due to the absence of JavaBasePlugin on root project')
     }
 
+    @Issue('https://github.com/aaschmid/gradle-cpd-plugin/issues/3')
+    def "execution of task 'build' should show WARNING if rootProject does not apply at least 'JavaBasePlugin'"() {
+        given:
+        testProjectDir.newFile("settings.gradle") << """\
+            include 'sub'
+            """.stripIndent()
+
+        buildFile << """\
+            plugins {
+                id 'de.aaschmid.cpd'
+            }
+
+            project(':sub') {
+                apply plugin: 'java'
+            }
+            """.stripIndent()
+
+        when:
+        def result = run('build')
+
+        then:
+        result.output.contains("BUILD SUCCESSFUL")
+        result.task(':cpdCheck') == null
+
+        def rootProjectName = testProjectDir.root.name
+        result.output.contains("""\
+WARNING: Due to the absence of JavaBasePlugin on root project '${rootProjectName}' the task ':cpdCheck' could not be\
+ added to task graph and therefore will not be executed. SUGGESTION: add a dependency to task ':cpdCheck' manually to a\
+ subprojects 'check' task, e.g. to project ':sub' using
+
+    check.dependsOn(':cpdCheck')
+
+or to root project '${rootProjectName}' using
+
+    project(':sub') {
+        plugins.withType(JavaBasePlugin) { // <- just required if 'java' plugin is applied within subproject
+            check.dependsOn(cpdCheck)
+        }
+    }
+""")
+    }
+
+    @Issue('https://github.com/aaschmid/gradle-cpd-plugin/issues/14')
+    def "execution of task 'build' should not show WARNING if a subproject applies 'JavaBasePlugin' and puts a dependency to 'cpdCheck' task"() {
+        given:
+        testProjectDir.newFile("settings.gradle") << """\
+            include 'sub'
+            """.stripIndent()
+
+        buildFile << """\
+            plugins {
+                id 'de.aaschmid.cpd'
+            }
+
+            project(':sub') {
+                apply plugin: 'java'
+
+                check.dependsOn(':cpdCheck')
+            }
+            """.stripIndent()
+
+        when:
+        def result = run('build')
+
+        then:
+        result.output.contains("BUILD SUCCESSFUL")
+        result.task(':cpdCheck').outcome == UP_TO_DATE
+        !result.output.contains('WARNING: Due to the absence of JavaBasePlugin on root project')
+    }
+
     @Issue('https://github.com/aaschmid/gradle-cpd-plugin/issues/16')
     def "CpdPlugin can be disabled"() {
         given:
