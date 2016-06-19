@@ -4,6 +4,8 @@ plugins {
     id 'jacoco'
     id 'com.github.kt3k.coveralls' version '2.6.3'
 
+    id 'java-gradle-plugin'
+
     id 'maven'
     id 'signing'
     id 'com.gradle.plugin-publish' version '0.9.1'
@@ -36,6 +38,15 @@ sourceSets {
         compileClasspath += configurations.provided
         runtimeClasspath += configurations.provided
     }
+    integTest {
+        compileClasspath += configurations.provided + main.output + test.output
+        runtimeClasspath += configurations.provided + main.output + test.output
+    }
+}
+
+configurations {
+    integTestCompile.extendsFrom testCompile
+    integTestRuntime.extendsFrom testRuntime
 }
 
 dependencies {
@@ -45,8 +56,8 @@ dependencies {
     provided 'javax.inject:javax.inject:1'
     provided 'net.sourceforge.pmd:pmd-dist:5.4.2'
 
-    testCompile('org.spockframework:spock-core:0.7-groovy-2.0') {
-        exclude group: 'org.codehaus.groovy'
+    testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
+        exclude module: 'groovy-all'
     }
 }
 
@@ -108,9 +119,31 @@ artifacts {
     archives sourcesJar
 }
 
+task integTest(type: Test) {
+    inputs.files jar
+    shouldRunAfter 'test'
+
+    ignoreFailures = isBuildOnJenkins
+
+    testClassesDir = sourceSets.integTest.output.classesDir
+
+    classpath = sourceSets.integTest.runtimeClasspath
+
+    reports.junitXml.destination = file("${project.buildDir}/integTest-results")
+    reports.html.destination = file("${project.reportsDir}/${name}")
+}
+check.dependsOn integTest
+
+gradlePlugin {
+    testSourceSets sourceSets.integTest
+}
+
 idea {
     module {
         scopes.PROVIDED.plus += [ configurations.provided ]
+
+        scopes.TEST.plus.add(configurations.integTestCompile)
+        scopes.TEST.plus.add(configurations.integTestRuntime)
     }
 }
 
