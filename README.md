@@ -28,20 +28,9 @@ A [Gradle](http://gradle.org) plugin to find duplicate code using [PMD](http://p
 Requirements
 ------------
 
-Currently this plugin requires [PMD]() greater or equal to version 5.2 such that ```toolVersion >= v5.2.0```.
+Currently this plugin requires [PMD]() greater or equal to version 5.2.2 such that ```toolVersion >= '5.2.2'```.
 
-Explaination: As [PMD]()s source code and artifacts were modularized into modules for every language with v5.2.0 (see
-[Changelog - 5.2.0](http://pmd.sourceforge.net/pmd-5.2.0/overview/changelog.html)) this plugin uses the
-'pmd-dist' dependency by default.  This dependency further includes 'pmd-core', 'pmd-java', 'pmd-cpp',
-... transitively. This also forces proper working of ```toolVersion``` to [PMD]() v5.2.0 and higher. If
-you want to use a version prior to v5.2.0, you can use the following snipped
-
-```groovy
-dependencies {
-    cpd 'net.sourceforge.pmd:pmd:5.0.5'
-}
-```
-
+Explaination: v1.0 supports `OPTION_SKIP_BLOCKS` with was introduced in `net.sourceforge.pmd.cpd.Tokenizer` with v5.2.2.
 
 Usage
 -----
