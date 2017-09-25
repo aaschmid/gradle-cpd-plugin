@@ -2,14 +2,15 @@ env:
   global:
       - JAVA_OPTS="-Xmx512m -XX:MaxPermSize=256m"
 
+sudo: false
+
 language: groovy
+
+script:
+  - ./gradlew build
 
 jdk:
   - oraclejdk8
-  - oraclejdk7
-  - openjdk7
 
 after_success:
     - ./gradlew jacocoTestReport coveralls
-
-sudo: false
