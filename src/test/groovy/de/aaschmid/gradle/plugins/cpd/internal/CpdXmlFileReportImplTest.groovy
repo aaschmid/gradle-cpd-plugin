@@ -1,6 +1,5 @@
 package de.aaschmid.gradle.plugins.cpd.internal
 
-import de.aaschmid.gradle.plugins.cpd.CpdCsvFileReport
 import de.aaschmid.gradle.plugins.cpd.test.BaseSpec
 
 class CpdXmlFileReportImplTest extends BaseSpec {
@@ -21,5 +20,38 @@ class CpdXmlFileReportImplTest extends BaseSpec {
 
         then:
         result.task == null
+    }
+
+    def "test 'getXmlRendererEncoding' should return set encoding"() {
+
+        given:
+        project.cpdCheck.encoding = 'ISO-8859-15'
+        def result = new CpdXmlFileReportImpl('xml', project.cpdCheck)
+        result.setEncoding('ISO-8859-1')
+
+        expect:
+        result.xmlRendererEncoding == 'ISO-8859-1'
+    }
+
+    def "test 'getXmlRendererEncoding' should return task encoding if no specific is set"() {
+
+        given:
+        project.cpdCheck.encoding = 'ISO-8859-15'
+        def result = new CpdXmlFileReportImpl('xml', project.cpdCheck)
+        result.setEncoding(null)
+
+        expect:
+        result.xmlRendererEncoding == 'ISO-8859-15'
+    }
+
+    def "test 'getXmlRendererEncoding' should return system encoding if non is set"() {
+
+        given:
+        project.cpdCheck.encoding = null
+        def result = new CpdXmlFileReportImpl('xml', project.cpdCheck)
+        result.setEncoding(null)
+
+        expect:
+        result.xmlRendererEncoding == System.getProperty("file.encoding")
     }
 }

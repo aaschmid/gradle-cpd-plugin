@@ -17,7 +17,6 @@ import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.SourceTask
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.VerificationTask
-import org.gradle.internal.classloader.MutableURLClassLoader
 import org.gradle.internal.reflect.Instantiator
 
 import javax.inject.Inject
