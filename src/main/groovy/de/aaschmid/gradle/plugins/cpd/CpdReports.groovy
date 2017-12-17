@@ -28,7 +28,7 @@ import org.gradle.api.reporting.SingleFileReport;
  *
  * @see Cpd
  */
-public interface CpdReports extends ReportContainer<SingleFileReport> {
+interface CpdReports extends ReportContainer<SingleFileReport> {
 
     /**
      * @return The CPD (single file) 'CSV' report
