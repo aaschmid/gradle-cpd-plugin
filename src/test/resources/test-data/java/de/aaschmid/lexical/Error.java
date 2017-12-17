@@ -1,7 +1,5 @@
 package de.aachmid.lexical;
 
-import javax.persistence._;
-
 class Error {
 
     /**
