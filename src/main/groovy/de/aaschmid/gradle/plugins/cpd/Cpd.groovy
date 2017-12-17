@@ -4,6 +4,7 @@ import de.aaschmid.gradle.plugins.cpd.internal.CpdExecutor
 import de.aaschmid.gradle.plugins.cpd.internal.CpdReporter
 import de.aaschmid.gradle.plugins.cpd.internal.CpdReportsImpl
 import net.sourceforge.pmd.cpd.Match
+import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Incubating
 import org.gradle.api.file.FileCollection
@@ -240,5 +241,11 @@ class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> 
     @Override
     CpdReports getReports() {
         return reports
+    }
+
+    //@Override to be compatible with earlier versions too
+    CpdReports reports(Action<? super CpdReports> action) {
+        action.execute(this.reports);
+        return this.reports;
     }
 }
