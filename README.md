@@ -130,7 +130,7 @@ e.g. using ```cpdCheck { }```:
 | skipDuplicateFiles | ```false```          |                            | [v0.5][] |
 | skipLexicalErrors  | ```false```          |                            | [v0.5][] |
 | skipBlocks         | ```true```           | ```'cpp'```                | [v0.4][] |
-| skipBlocksPattern  | ```'#if 0|#endif'``` | ```'cpp'```                | [v0.4][] |
+| skipBlocksPattern  | ```'#if 0\|#endif'``` | ```'cpp'```                | [v0.4][] |
 
 For more information about options and their descriptions, see [here](http://pmd.sourceforge.net/usage/cpd-usage.html#Options),
 and for the available programming languages have a look on [CPD documentation](http://pmd.sourceforge.net/usage/cpd-usage.html#Supported_Languages).
