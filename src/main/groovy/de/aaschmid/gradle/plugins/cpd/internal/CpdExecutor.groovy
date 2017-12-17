@@ -48,7 +48,10 @@ public class CpdExecutor {
                 logger.info("Starting CPD, minimumTokenCount is {}", minimumTokenCount);
             }
 
-            def cpdConfig = new CPDConfiguration(minimumTokenCount, language, encoding);
+            def cpdConfig = new CPDConfiguration();
+            cpdConfig.setMinimumTileSize(minimumTokenCount);
+            cpdConfig.setLanguage(language);
+            cpdConfig.setEncoding(encoding);
             cpdConfig.setSkipLexicalErrors(skipLexicalErrors);
             cpdConfig.setSkipDuplicates(skipDuplicateFiles);
 
