@@ -8,7 +8,7 @@ plugins {
 
     id 'maven'
     id 'signing'
-    id 'com.gradle.plugin-publish' version '0.9.1'
+    id 'com.gradle.plugin-publish' version '0.9.9'
 }
 
 description = 'Gradle plugin to find duplicate code using PMDs copy/paste detection (= CPD)'
