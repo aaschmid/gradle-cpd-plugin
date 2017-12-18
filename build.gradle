@@ -214,7 +214,7 @@ uploadArchives {
     }
 }
 
-// Note: The plugin has to be uploaded to Maven Central first
+// Note: The plugin has to be uploaded to Bintray first
 pluginBundle {
     website = 'https://github.com/aaschmid/gradle-cpd-plugin'
     vcsUrl = 'https://github.com/aaschmid/gradle-cpd-plugin'
@@ -232,5 +232,6 @@ pluginBundle {
     mavenCoordinates {
         groupId = project.group
         artifactId = 'gradle-cpd-plugin'
+        version = project.version
     }
 }
