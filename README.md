@@ -112,6 +112,14 @@ cpdCheck {
 
 *Note:* With v0.2, I have renamed the default task from ```cpd``` to ```cpdCheck``` that it does not have a name clash anymore.
 
+### Kotlin support
+
+Unfortunately, [CPD][] does not support [Kotlin](https://kotlinlang.org/) such that you have to ignore files manuelly if you mixed it up with your Java files:
+```groovy
+tasks.withType(Cpd) {
+    exclude "*.kt"
+}
+```
 
 Options
 -------
