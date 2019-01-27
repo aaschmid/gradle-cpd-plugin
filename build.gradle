@@ -9,6 +9,7 @@ plugins {
     id 'maven'
     id 'signing'
     id 'com.gradle.plugin-publish' version '0.9.9'
+    id 'com.jfrog.bintray' version '1.8.4'
 }
 
 description = 'Gradle plugin to find duplicate code using PMDs copy/paste detection (= CPD)'
@@ -62,7 +63,7 @@ dependencies {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.14'
+    gradleVersion = '3.5.1'
 }
 
 javadoc {
@@ -211,6 +212,32 @@ uploadArchives {
                 }
             }
         }
+    }
+}
+
+if (!hasProperty('bintrayUser')) {
+    ext.bintrayUser = ''
+}
+if (!hasProperty('bintrayApiKey')) {
+    ext.bintrayApiKey = ''
+}
+bintray {
+    user = bintrayUser
+    key = bintrayApiKey
+    pkg {
+        repo = 'gradle-plugins'
+        name = 'gradle-cpd-plugin'
+        userOrg = bintrayUser
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/aaschmid/gradle-cpd-plugin.git'
+        version {
+            name = project.version
+            desc = "Gradle plugin to find duplicate code using PMDs copy/paste detection (= CPD) in version ${project.version}."
+            released  = new Date()
+            vcsTag = "https://github.com/aaschmid/gradle-cpd-plugin/releases/tag/v${project.version}"
+            attributes = ['gradle-plugin': 'de.aaschmid.cpd:de.aaschmid:gradle-cpd-plugin']
+        }
+        configurations = ['archives']
     }
 }
 
