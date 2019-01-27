@@ -159,10 +159,10 @@ signing {
 }
 
 if (!hasProperty('sonatypeUsername')) {
-	ext.sonatypeUsername = ''
+    ext.sonatypeUsername = ''
 }
 if (!hasProperty('sonatypePassword')) {
-	ext.sonatypePassword = ''
+    ext.sonatypePassword = ''
 }
 
 uploadArchives {
