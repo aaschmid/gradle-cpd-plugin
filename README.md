@@ -41,7 +41,7 @@ This plugin is available using either the new [Gradle plugins DSL](https://gradl
 
 ```groovy
 plugins {
-    id 'de.aaschmid.cpd' version '1.0'
+    id 'de.aaschmid.cpd' version '1.2'
 }
 ```
 
@@ -55,7 +55,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'de.aaschmid:gradle-cpd-plugin:1.0'
+        classpath 'de.aaschmid:gradle-cpd-plugin:1.2'
     }
 }
 apply plugin: 'cpd'
@@ -170,3 +170,4 @@ Please note that running the test cases my take quite long becuase the acceptanc
 [v0.4]: /../../releases/tag/v0.4
 [v0.5]: /../../releases/tag/v0.5
 [v1.0]: /../../releases/tag/v1.0
+[v1.2]: /../../releases/tag/v1.2
