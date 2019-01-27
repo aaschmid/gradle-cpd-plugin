@@ -34,7 +34,7 @@ class CpdIntegrationTest extends Specification {
 
         then:
         result.output.contains("BUILD SUCCESSFUL")
-        result.task(':cpdCheck').outcome == UP_TO_DATE
+        result.task(':cpdCheck').outcome == NO_SOURCE
         !result.output.contains('WARNING: Due to the absence of JavaBasePlugin on root project')
     }
 
@@ -123,7 +123,7 @@ or to root project '${rootProjectName}' using
 
         then:
         result.output.contains("BUILD SUCCESSFUL")
-        result.task(':cpdCheck').outcome == UP_TO_DATE
+        result.task(':cpdCheck').outcome == NO_SOURCE
         !result.output.contains('WARNING: Due to the absence of JavaBasePlugin on root project')
     }
 
@@ -139,7 +139,7 @@ or to root project '${rootProjectName}' using
 
         then:
         result.output.contains("BUILD SUCCESSFUL")
-        result.task(':cpdCheck').outcome == UP_TO_DATE
+        result.task(':cpdCheck').outcome == NO_SOURCE
     }
 
     @Issue('https://github.com/aaschmid/gradle-cpd-plugin/issues/16')
