@@ -191,7 +191,7 @@ class CpdAcceptanceTest extends BaseSpec {
 
         def report = project.file('build/reports/cpd/cpdCheck.csv')
         report.exists()
-        report.text =~ /4,15,2,7,.*Clazz1\.java,9,.*Clazz2\.java/
+        report.text =~ /4,15,2,[79],.*Clazz[12]\.java,[79],.*Clazz[12]\.java/
     }
 
     def "executing 'Cpd' task on duplicate 'java' source should not throw 'GradleException' if 'ignoreFailures' and produce 'cpdCheck.csv' with one warning"() {
@@ -214,7 +214,7 @@ class CpdAcceptanceTest extends BaseSpec {
 
         def report = project.file('build/reports/cpd/cpdCheck.csv')
         report.exists()
-        report.text =~ /4,15,2,7,.*Clazz1\.java,9,.*Clazz2\.java/
+        report.text =~ /4,15,2,[79],.*Clazz[12]\.java,[79],.*Clazz[12]\.java/
     }
 
     def "applying 'Cpd' task to only parent project if only sub project has 'groovy' plugin"() {
@@ -325,7 +325,7 @@ class CpdAcceptanceTest extends BaseSpec {
 
         def report = project.file('build/reports/cpd/cpdCheck.csv')
         report.exists()
-        report.text =~ /6,19,2,3,.*Identifier1\.java,3,.*Identifier2\.java/
+        report.text =~ /6,19,2,3,.*Identifier[12]\.java,3,.*Identifier[12]\.java/
     }
 
     def "executing 'Cpd' task on different annotations should not throw 'GradleException' if not ignoreIdentifiers"() {
@@ -369,7 +369,7 @@ class CpdAcceptanceTest extends BaseSpec {
 
         def report = project.file('build/reports/cpd/cpdCheck.csv')
         report.exists()
-        report.text =~ /9,27,2,5,.*Literal1\.java,5,.*Literal2\.java/
+        report.text =~ /9,27,2,5,.*Literal[12]\.java,5,.*Literal[12]\.java/
     }
 
     def "executing 'Cpd' task on different literals should not throw 'GradleException' if not ignoreLiterals"() {
@@ -413,7 +413,7 @@ class CpdAcceptanceTest extends BaseSpec {
 
         def report = project.file('build/reports/cpd/cpdCheck.csv')
         report.exists()
-        report.text =~ /6,15,2,5,.*duplicate\/Test\.java,5,.*test\/Test\.java/
+        report.text =~ /6,15,2,5,.*(duplicate|test)\/Test\.java,5,.*(duplicate|test)\/Test\.java/
     }
 
     def "executing 'Cpd' task on duplicate files should not throw 'GradleException' if skipDuplicateFiles"() {
