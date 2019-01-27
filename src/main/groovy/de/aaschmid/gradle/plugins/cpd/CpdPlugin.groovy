@@ -154,10 +154,9 @@ class CpdPlugin implements Plugin<Project> {
         Configuration configuration = project.configurations.create('cpd')
         configuration.with{
             description = 'The CPD libraries to be used for this project.'
-            incoming.beforeResolve{
-                if (dependencies.isEmpty()) {
-                    dependencies.add(project.dependencies.create("net.sourceforge.pmd:pmd-dist:${extension.toolVersion}"))
-                }
+
+            configuration.defaultDependencies{ d ->
+                d.add(project.getDependencies().create("net.sourceforge.pmd:pmd-dist:${extension.toolVersion}"))
             }
             transitive = true
             visible = false
