@@ -23,13 +23,13 @@ Gradle CPD plugin
 What is it
 ----------
 
-A [Gradle](http://gradle.org) plugin to find duplicate code using [PMD](http://pmd.sourceforge.net)s copy/paste detection (= [CPD][]).
+A [Gradle](http://gradle.org) plugin to find duplicate code using [PMD](https://pmd.github.io/)s copy/paste detection (= [CPD][]).
 
 
 Requirements
 ------------
 
-Currently this plugin requires [PMD]() greater or equal to version 5.2.2 such that ```toolVersion >= '5.2.2'```.
+Currently this plugin requires [PMD](https://pmd.github.io/) greater or equal to version 5.2.2 such that ```toolVersion >= '5.2.2'```.
 
 Explaination: v1.0 supports `OPTION_SKIP_BLOCKS` with was introduced in `net.sourceforge.pmd.cpd.Tokenizer` with v5.2.2.
 
@@ -141,8 +141,8 @@ e.g. using ```cpdCheck { }```:
 | skipBlocks         | ```true```           | ```'cpp'```                | [v0.4][] |
 | skipBlocksPattern  | ```'#if 0\|#endif'``` | ```'cpp'```                | [v0.4][] |
 
-For more information about options and their descriptions, see [here](http://pmd.sourceforge.net/usage/cpd-usage.html#Options),
-and for the available programming languages have a look on [CPD documentation](http://pmd.sourceforge.net/usage/cpd-usage.html#Supported_Languages).
+For more information about options and their descriptions, see [here](https://pmd.github.io/latest/pmd_userdocs_cpd.html#attribute-reference),
+and for the available programming languages have a look on [CPD documentation](https://pmd.github.io/latest/pmd_userdocs_cpd.html#supported-languages).
 To request more options, please file an issue [here](/../../issues).
 
 
@@ -164,7 +164,7 @@ You are very welcome to contribute by providing a patch/pull request.
 
 Please note that running the test cases my take quite long becuase the acceptance test cases (see ```de.aaschmid.gradle.plugins.cpd.test.CpdAcceptanceTest``` will download [CPD][] and its dependencies for every version. I recommend to get these dependencies in your ```localMaven()``` repository as the test cases look there for it first.
 
-[CPD]: http://pmd.sourceforge.net/usage/cpd-usage.html
+[CPD]: https://pmd.github.io/latest/pmd_userdocs_cpd.html
 
 [v0.1]: /../../releases/tag/v0.1
 [v0.4]: /../../releases/tag/v0.4
