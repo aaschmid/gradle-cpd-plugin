@@ -41,7 +41,11 @@ public class CpdReporter {
             throw new InvalidUserDataException(
                     "Task '${task.name}' requires exactly one report to be enabled but was: ${reports.enabled*.name}.");
         }
-        if (reports.getFirstEnabled().getDestination() == null) {
+        try {
+            if (reports.getFirstEnabled().getDestination() == null) {
+                throw new InvalidUserDataException("'${reports.firstEnabled}' requires valid destination but was 'null'.");
+            }
+        } catch (IllegalArgumentException e) {
             throw new InvalidUserDataException("'${reports.firstEnabled}' requires valid destination but was 'null'.");
         }
 
