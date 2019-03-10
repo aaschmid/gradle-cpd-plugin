@@ -9,6 +9,7 @@ import org.gradle.api.plugins.GroovyPlugin
 import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.ReportingBasePlugin
+import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.gradle.testfixtures.ProjectBuilder
 
 class CpdPluginTest extends BaseSpec {
@@ -120,9 +121,9 @@ class CpdPluginTest extends BaseSpec {
         task.source.empty
     }
 
-    def "applying 'CpdPlugin' and 'JavaBasePlugin' adds cpd tasks to check lifecycle task"() {
+    def "applying 'CpdPlugin' and 'LifecycleBasePlugin' adds cpd tasks to check lifecycle task"() {
         given:
-        project.plugins.apply(JavaBasePlugin)
+        project.plugins.apply(LifecycleBasePlugin)
 
         def checkTask = project.tasks.findByName('check')
         def cpdTask = project.tasks.findByName('cpdCheck')
