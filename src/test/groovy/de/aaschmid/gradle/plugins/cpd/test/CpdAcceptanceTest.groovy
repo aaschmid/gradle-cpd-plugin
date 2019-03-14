@@ -130,28 +130,6 @@ class CpdAcceptanceTest extends BaseSpec {
         e.cause.message == '''Task 'cpdCheck' requires exactly one report to be enabled but was: [].'''
     }
 
-    def "executing 'Cpd' task throws wrapped 'InvalidUserDataException' if more than one report is enabled"() {
-        given:
-        project.cpdCheck{
-            reports{
-                csv.enabled = false
-                text.enabled = true
-                xml.enabled = true
-            }
-            source = testFile('.')
-        }
-
-        when:
-        project.tasks.getByName('cpdCheck').execute()
-
-        then:
-        !project.file('build/reports/cpdCheck.csv').exists()
-
-        def e = thrown(TaskExecutionException)
-        e.cause instanceof InvalidUserDataException
-        e.cause.message == '''Task 'cpdCheck' requires exactly one report to be enabled but was: [text, xml].'''
-    }
-
     def "executing 'Cpd' task on non-duplicate 'java' source will produce empty 'cpdCheck.xml'"() {
         given:
         project.cpd{
