@@ -6,10 +6,13 @@ import de.aaschmid.gradle.plugins.cpd.internal.CpdAction
 import net.sourceforge.pmd.cpd.Tokenizer
 import org.gradle.api.Action
 import org.gradle.api.Incubating
+import org.gradle.api.InvalidUserDataException
+import org.gradle.api.NamedDomainObjectSet
 import org.gradle.api.file.FileCollection
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.reporting.Reporting
+import org.gradle.api.reporting.SingleFileReport
 import org.gradle.api.tasks.*
 import org.gradle.internal.reflect.Instantiator
 import org.gradle.workers.WorkerConfiguration
@@ -191,6 +194,12 @@ class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> 
         languageProperties.setProperty(Tokenizer.OPTION_SKIP_BLOCKS, Boolean.toString(isSkipBlocks()));
         languageProperties.setProperty(Tokenizer.OPTION_SKIP_BLOCKS_PATTERN, getSkipBlocksPattern());
 
+        def enabledReports = getReports().getEnabled()
+
+        if (enabledReports.isEmpty()) {
+            throw new InvalidUserDataException("All reports for task '$name' are disabled.")
+        }
+
         workerExecutor.submit(CpdAction) { WorkerConfiguration config ->
             config.classpath(getPmdClasspath())
             config.setParams(
@@ -201,7 +210,7 @@ class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> 
                     isSkipLexicalErrors(),
                     isSkipDuplicateFiles(),
                     new HashSet<>(getSource().getFiles()),
-                    new ArrayList(getReports().getEnabled()),
+                    new ArrayList(enabledReports),
                     isIgnoreFailures()
             )
         }
