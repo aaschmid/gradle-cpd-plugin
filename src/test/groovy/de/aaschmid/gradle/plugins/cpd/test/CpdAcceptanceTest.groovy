@@ -128,7 +128,7 @@ class CpdAcceptanceTest extends BaseSpec {
 
         def e = thrown(TaskExecutionException)
         e.cause instanceof InvalidUserDataException
-        e.cause.message == '''Task 'cpdCheck' requires exactly one report to be enabled but was: [].'''
+        e.cause.message == '''All reports for task 'cpdCheck' are disabled.'''
     }
 
     def "executing 'Cpd' task throws wrapped 'InvalidUserDataException' if more than one report is enabled"() {
@@ -230,7 +230,7 @@ class CpdAcceptanceTest extends BaseSpec {
 
         then:
         def e = thrown GradleException
-        e.cause.message =~ /CPD found duplicate code\. See the report at file:\/\/.*\/cpdCheck.csv/
+        e.cause.cause.message =~ /CPD found duplicate code\. See the report at file:\/\/.*\/cpdCheck.csv/
 
         def report = project.file('build/reports/cpd/cpdCheck.csv')
         report.exists()
@@ -319,7 +319,7 @@ class CpdAcceptanceTest extends BaseSpec {
 
         then:
         def e = thrown GradleException
-        e.cause.message =~ /CPD found duplicate code\. See the report at file:\/\/.*\/cpdCheck.csv/
+        e.cause.cause.message =~ /CPD found duplicate code\. See the report at file:\/\/.*\/cpdCheck.csv/
 
         def report = project.file('build/reports/cpd/cpdCheck.csv')
         report.exists()
@@ -365,7 +365,7 @@ class CpdAcceptanceTest extends BaseSpec {
 
         then:
         def e = thrown GradleException
-        e.cause.message =~ /CPD found duplicate code\. See the report at file:\/\/.*\/cpdCheck.csv/
+        e.cause.cause.message =~ /CPD found duplicate code\. See the report at file:\/\/.*\/cpdCheck.csv/
 
         def report = project.file('build/reports/cpd/cpdCheck.csv')
         report.exists()
@@ -409,7 +409,7 @@ class CpdAcceptanceTest extends BaseSpec {
 
         then:
         def e = thrown GradleException
-        e.cause.message =~ /CPD found duplicate code\. See the report at file:\/\/.*\/cpdCheck.csv/
+        e.cause.cause.message =~ /CPD found duplicate code\. See the report at file:\/\/.*\/cpdCheck.csv/
 
         def report = project.file('build/reports/cpd/cpdCheck.csv')
         report.exists()
@@ -453,7 +453,7 @@ class CpdAcceptanceTest extends BaseSpec {
 
         then:
         def e = thrown GradleException
-        e.cause.message =~ /CPD found duplicate code\. See the report at file:\/\/.*\/cpdCheck.csv/
+        e.cause.cause.message =~ /CPD found duplicate code\. See the report at file:\/\/.*\/cpdCheck.csv/
 
         def report = project.file('build/reports/cpd/cpdCheck.csv')
         report.exists()
@@ -493,7 +493,7 @@ class CpdAcceptanceTest extends BaseSpec {
 
         then:
         def e = thrown GradleException
-        e.cause.message =~ /Lexical error in file .*Error.java at/
+        e.cause.cause.message =~ /Lexical error in file .*Error.java at/
 
         def report = project.file('build/reports/cpd/cpdCheck.csv')
         !report.exists()

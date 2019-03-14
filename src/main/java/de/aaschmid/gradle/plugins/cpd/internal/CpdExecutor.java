@@ -1,30 +1,24 @@
 package de.aaschmid.gradle.plugins.cpd.internal;
 
-import de.aaschmid.gradle.plugins.cpd.Cpd;
 import net.sourceforge.pmd.cpd.AnyLanguage;
 import net.sourceforge.pmd.cpd.CPD;
 import net.sourceforge.pmd.cpd.CPDConfiguration;
 import net.sourceforge.pmd.cpd.Language;
 import net.sourceforge.pmd.cpd.LanguageFactory;
 import net.sourceforge.pmd.cpd.Match;
-import net.sourceforge.pmd.cpd.ReportException;
 import net.sourceforge.pmd.cpd.Tokenizer;
 import org.gradle.api.GradleException;
 import org.gradle.api.InvalidUserDataException;
-import org.gradle.api.file.FileTree;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
-import org.gradle.internal.reflect.GroovyMethods;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public class CpdExecutor {
 
@@ -35,23 +29,23 @@ public class CpdExecutor {
     private final int minimumTokenCount;
     private final boolean skipDuplicateFiles;
     private final boolean skipLexicalErrors;
-    private final FileTree source;
+    private final Collection<File> source;
 
-    public CpdExecutor(Cpd task) {
-        if (task == null) {
-            throw new NullPointerException("task must not be null");
+    public CpdExecutor(CpdAction action) {
+        if (action == null) {
+            throw new NullPointerException("action must not be null");
         }
 
-        if (task.getMinimumTokenCount() <= 0) {
+        if (action.getMinimumTokenCount() <= 0) {
             throw new InvalidUserDataException("'minimumTokenCount' must be greater than zero.");
         }
 
-        this.encoding = task.getEncoding();
-        this.language = createLanguage(task);
-        this.minimumTokenCount = task.getMinimumTokenCount();
-        this.skipLexicalErrors = task.getSkipLexicalErrors();
-        this.skipDuplicateFiles = task.getSkipDuplicateFiles();
-        this.source = task.getSource();
+        this.encoding = action.getEncoding();
+        this.language = createLanguage(action);
+        this.minimumTokenCount = action.getMinimumTokenCount();
+        this.skipLexicalErrors = action.getSkipLexicalErrors();
+        this.skipDuplicateFiles = action.getSkipDuplicateFiles();
+        this.source = action.getSourceFiles();
     }
 
     public List<Match> run() {
@@ -105,23 +99,25 @@ public class CpdExecutor {
         }
     }
 
-    private Language createLanguage(Cpd task) {
-        Properties p = new Properties();
-        if (task.getIgnoreLiterals()) {
-            p.setProperty(Tokenizer.IGNORE_LITERALS, "true");
+    private Language createLanguage(CpdAction action) {
+        Properties languageProperties = new Properties();
+
+        if (action.getIgnoreLiterals()) {
+            languageProperties.setProperty(Tokenizer.IGNORE_LITERALS, "true");
         }
-        if (task.getIgnoreIdentifiers()) {
-            p.setProperty(Tokenizer.IGNORE_IDENTIFIERS, "true");
+        if (action.getIgnoreIdentifiers()) {
+            languageProperties.setProperty(Tokenizer.IGNORE_IDENTIFIERS, "true");
         }
-        if (task.getIgnoreAnnotations()) {
-            p.setProperty(Tokenizer.IGNORE_ANNOTATIONS, "true");
+        if (action.getIgnoreAnnotations()) {
+            languageProperties.setProperty(Tokenizer.IGNORE_ANNOTATIONS, "true");
         }
-        p.setProperty(Tokenizer.OPTION_SKIP_BLOCKS, Boolean.toString(task.getSkipBlocks()));
-        p.setProperty(Tokenizer.OPTION_SKIP_BLOCKS_PATTERN, task.getSkipBlocksPattern());
-        Language result = LanguageFactory.createLanguage(task.getLanguage(), p);
+        languageProperties.setProperty(Tokenizer.OPTION_SKIP_BLOCKS, Boolean.toString(action.getSkipBlocks()));
+        languageProperties.setProperty(Tokenizer.OPTION_SKIP_BLOCKS_PATTERN, action.getSkipBlocksPattern());
+
+        Language result = LanguageFactory.createLanguage(action.getLanguage(), languageProperties);
         logger.info("Using CPD language class '{}' for checking duplicates.", result);
         if (result instanceof AnyLanguage) {
-            logger.warn("Could not detect CPD language for '{}', using 'any' as fallback language.", task.getLanguage());
+            logger.warn("Could not detect CPD language for '{}', using 'any' as fallback language.", action.getLanguage());
         }
         return result;
     }

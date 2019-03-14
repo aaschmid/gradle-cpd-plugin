@@ -28,22 +28,22 @@ public class CpdReporter {
     private final String encoding;
     private final SingleFileReport report;
 
-    public CpdReporter(Cpd task) {
-        if (task == null) {
-            throw new NullPointerException("task must not be null");
+    public CpdReporter(CpdAction action) {
+        if (action == null) {
+            throw new NullPointerException("action must not be null");
         }
 
-        if (task.getEncoding() == null) {
-            throw new InvalidUserDataException(String.format("Task '%s' requires encoding but was: %s.",
-                    task.getName(), task.getEncoding()));
+        if (action.getEncoding() == null) {
+            throw new InvalidUserDataException(String.format("'%s' requires encoding but was: %s.",
+                    action.getClass().getSimpleName(), action.getEncoding()));
         }
 
-        CpdReports reports = task.getReports();
+        CpdReports reports = (CpdReports) action.getReports();
         if (reports.getEnabled().size() != 1) {
-            throw new InvalidUserDataException(String.format("Task '%s' requires exactly one report to be enabled but was: %s.",
-                    task.getName(), reports.getEnabled().getAsMap().keySet()));
+            throw new InvalidUserDataException(String.format("'%s' requires exactly one report to be enabled but was: %s.",
+                    action.getClass().getSimpleName(), reports.getEnabled().getAsMap().keySet()));
         }
-        this.encoding = task.getEncoding();
+        this.encoding = action.getEncoding();
         this.report = reports.getEnabled().iterator().next();
 
         try {

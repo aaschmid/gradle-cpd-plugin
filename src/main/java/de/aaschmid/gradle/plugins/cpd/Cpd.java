@@ -1,19 +1,14 @@
 package de.aaschmid.gradle.plugins.cpd;
 
-import de.aaschmid.gradle.plugins.cpd.internal.CpdExecutor;
-import de.aaschmid.gradle.plugins.cpd.internal.CpdReporter;
+import de.aaschmid.gradle.plugins.cpd.internal.CpdAction;
 import de.aaschmid.gradle.plugins.cpd.internal.CpdReportsImpl;
 import groovy.lang.Closure;
-import net.sourceforge.pmd.cpd.LanguageFactory;
-import net.sourceforge.pmd.cpd.Match;
 import org.gradle.api.Action;
-import org.gradle.api.GradleException;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.reporting.Reporting;
-import org.gradle.api.reporting.SingleFileReport;
 import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFiles;
@@ -26,18 +21,12 @@ import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.VerificationTask;
 import org.gradle.internal.reflect.Instantiator;
 import org.gradle.util.DeprecationLogger;
+import org.gradle.workers.WorkerConfiguration;
+import org.gradle.workers.WorkerExecutor;
 
 import javax.inject.Inject;
-import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.UndeclaredThrowableException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.HashSet;
 
 
 /**
@@ -82,6 +71,7 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
 
     private static final Logger logger = Logging.getLogger(Cpd.class);
 
+    private final WorkerExecutor workerExecutor;
     private final CpdReportsImpl reports;
 
     private String encoding;
@@ -97,71 +87,33 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
     private boolean skipBlocks;
     private String skipBlocksPattern;
 
+
     @Inject
-    public Cpd(Instantiator instantiator) {
+    public Cpd(Instantiator instantiator, WorkerExecutor workerExecutor) {
+        this.workerExecutor = workerExecutor;
         this.reports = DeprecationLogger.whileDisabled(() -> instantiator.newInstance(CpdReportsImpl.class, this));
     }
 
     @TaskAction
     void run() {
-        // TODO very ugly class loading hack but as using org.gradle.process.internal.WorkerProcess does not work due to classpath problems using my own classes, this is the only why for now :-(
-        addPmdClasspathToClassLoader();
-
-        // use getter to access properties that they are resolved correctly using conventionMapping
-        CpdReporter reporter = new CpdReporter(this);
-        CpdExecutor executor = new CpdExecutor(this);
-
-        List<Match> matches = executor.run();
-        reporter.generate(matches);
-        logResult(matches);
-    }
-
-    private void addPmdClasspathToClassLoader() {
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        try {
-            Method addUrlMethod = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-            addUrlMethod.setAccessible(true);
-            for (File file : getPmdClasspath().getFiles()) {
-                addUrlMethod.invoke(cl, file.toURI().toURL());
-            }
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | MalformedURLException e) {
-            throw new GradleException("Could not add pmd classpath urls to context classloader.", e);
-        }
-    }
-
-
-    private void logResult(List<Match> matches) {
-        if (matches.isEmpty()) {
-            if (logger.isInfoEnabled()) {
-                logger.info("No duplicates over {} tokens found.", getMinimumTokenCount());
-            }
-
-        } else {
-            String message = "CPD found duplicate code.";
-            SingleFileReport report = reports.getFirstEnabled();
-            if (report != null) {
-                String reportUrl = asClickableFileUrl(report.getDestination());
-                message += " See the report at " + reportUrl;
-            }
-            if (getIgnoreFailures()) {
-                if (logger.isWarnEnabled()) {
-                    logger.warn(message);
-                }
-            } else {
-                throw new GradleException(message);
-            }
-        }
-    }
-
-    private String asClickableFileUrl(File path) {
-        // File.toURI().toString() leads to an URL like this on Mac: file:/reports/index.html
-        // This URL is not recognized by the Mac console (too few leading slashes). We solve
-        // this be creating an URI with an empty authority.
-        try {
-            return new URI("file", "", path.toURI().getPath(), null, null).toString();
-        } catch (URISyntaxException e) {
-            throw new UndeclaredThrowableException(e);
-        }
+        workerExecutor.submit(CpdAction.class, (WorkerConfiguration config) -> {
+            config.classpath(getPmdClasspath());
+            config.setParams(
+                    getEncoding(),
+                    getMinimumTokenCount(),
+                    getLanguage(),
+                    getSkipLexicalErrors(),
+                    getSkipDuplicateFiles(),
+                    new HashSet<>(getSource().getFiles()),
+                    new ArrayList(getReports().getEnabled()),
+                    getIgnoreFailures(),
+                    getIgnoreLiterals(),
+                    getIgnoreIdentifiers(),
+                    getIgnoreAnnotations(),
+                    getSkipBlocks(),
+                    getSkipBlocksPattern()
+            );
+        });
     }
 
     @Override
@@ -360,9 +312,8 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
      * <p>
      * Example: {@code skipBlocks = false}
      *
-     * @see #skipBlocksPattern
-     *
      * @return whether blocks should be skipped by a given pattern
+     * @see #skipBlocksPattern
      */
     @Input
     public boolean getSkipBlocks() {
@@ -380,9 +331,8 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
      * <p>
      * Example: {@code skipBlocksPattern = '#include <|>'}
      *
-     * @see #skipBlocks
-     *
      * @return the pattern used to skip blocks
+     * @see #skipBlocks
      */
     @Input
     public String getSkipBlocksPattern() {
