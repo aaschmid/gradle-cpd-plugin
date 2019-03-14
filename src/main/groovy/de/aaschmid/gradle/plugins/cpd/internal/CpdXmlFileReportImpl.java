@@ -9,7 +9,7 @@ import org.gradle.api.reporting.internal.TaskGeneratedSingleFileReport;
 
 public class CpdXmlFileReportImpl extends TaskGeneratedSingleFileReport implements CpdXmlFileReport {
 
-    private static final Logger logger = Logging.getLogger(CpdReporter.class);
+    private static final Logger logger = Logging.getLogger(CpdXmlFileReportImpl.class);
 
     private final Cpd task;
 
