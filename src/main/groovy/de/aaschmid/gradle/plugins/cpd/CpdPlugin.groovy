@@ -90,12 +90,12 @@ class CpdPlugin implements Plugin<Project> {
             }
         }
         project.plugins.withType(LifecycleBasePlugin){
-            project.tasks.findByName('check').dependsOn(task)
+            project.tasks.findByName(LifecycleBasePlugin.CHECK_TASK_NAME).dependsOn(taskProvider)
         }
         project.gradle.taskGraph.whenReady{ TaskExecutionGraph graph ->
             if (!graph.hasTask("cpdCheck")) {
                 if (logger.isWarnEnabled()) {
-                    def lastCheckTask = graph.allTasks.reverse().find{ t -> t.name.endsWith('check') }
+                    def lastCheckTask = graph.allTasks.reverse().find{ t -> t.name.endsWith(LifecycleBasePlugin.CHECK_TASK_NAME) }
                     if (lastCheckTask) { // it is possible to just execute a task before check, e.g. "compileJava"
                         logger.warn("WARNING: Due to the absence of ${LifecycleBasePlugin.simpleName} on ${project}" +
                                 " the ${task} could not be added to task graph and therefore will not be executed" +
