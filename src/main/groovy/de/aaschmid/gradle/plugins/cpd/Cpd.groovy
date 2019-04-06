@@ -62,7 +62,7 @@ class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> 
 
     private static final Logger logger = Logging.getLogger(Cpd.class);
 
-    private WorkerExecutor workerExecutor;
+    private final WorkerExecutor workerExecutor;
 
     /**
      * The character set encoding (e.g., UTF-8) to use when reading the source code files but also when producing the
