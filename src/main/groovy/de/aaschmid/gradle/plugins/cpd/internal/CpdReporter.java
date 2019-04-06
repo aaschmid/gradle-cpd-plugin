@@ -1,23 +1,25 @@
-package de.aaschmid.gradle.plugins.cpd.internal
+package de.aaschmid.gradle.plugins.cpd.internal;
 
-import de.aaschmid.gradle.plugins.cpd.Cpd
-import de.aaschmid.gradle.plugins.cpd.CpdCsvFileReport
-import de.aaschmid.gradle.plugins.cpd.CpdTextFileReport
-import de.aaschmid.gradle.plugins.cpd.CpdXmlFileReport
-import net.sourceforge.pmd.cpd.CSVRenderer
-import net.sourceforge.pmd.cpd.FileReporter
-import net.sourceforge.pmd.cpd.Match
-import net.sourceforge.pmd.cpd.Renderer
-import net.sourceforge.pmd.cpd.ReportException
-import net.sourceforge.pmd.cpd.SimpleRenderer
-import net.sourceforge.pmd.cpd.XMLRenderer
-import org.gradle.api.GradleException
-import org.gradle.api.InvalidUserDataException
-import org.gradle.api.logging.Logger
-import org.gradle.api.logging.Logging
-import org.gradle.api.reporting.SingleFileReport
+import de.aaschmid.gradle.plugins.cpd.Cpd;
+import de.aaschmid.gradle.plugins.cpd.CpdCsvFileReport;
+import de.aaschmid.gradle.plugins.cpd.CpdReports;
+import de.aaschmid.gradle.plugins.cpd.CpdTextFileReport;
+import de.aaschmid.gradle.plugins.cpd.CpdXmlFileReport;
+import net.sourceforge.pmd.cpd.CSVRenderer;
+import net.sourceforge.pmd.cpd.FileReporter;
+import net.sourceforge.pmd.cpd.Match;
+import net.sourceforge.pmd.cpd.Renderer;
+import net.sourceforge.pmd.cpd.ReportException;
+import net.sourceforge.pmd.cpd.SimpleRenderer;
+import net.sourceforge.pmd.cpd.XMLRenderer;
+import org.gradle.api.GradleException;
+import org.gradle.api.InvalidUserDataException;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
+import org.gradle.api.reporting.SingleFileReport;
 
-import java.lang.reflect.Field
+import java.lang.reflect.Field;
+import java.util.List;
 
 public class CpdReporter {
 
@@ -32,25 +34,23 @@ public class CpdReporter {
         }
 
         if (task.getEncoding() == null) {
-            throw new InvalidUserDataException(
-                    "Task '${task.name}' requires encoding but was: ${task.getEncoding()}.");
+            throw new InvalidUserDataException(String.format("Task '%s' requires encoding but was: %s.",
+                    task.getName(), task.getEncoding()));
         }
 
-        CpdReportsImpl reports = task.reports;
-        if (reports.getEnabled().isEmpty() || reports.getEnabled().size() > 1) {
-            throw new InvalidUserDataException(
-                    "Task '${task.name}' requires exactly one report to be enabled but was: ${reports.enabled*.name}.");
+        CpdReports reports = task.getReports();
+        if (reports.getEnabled().size() != 1) {
+            throw new InvalidUserDataException(String.format("Task '%s' requires exactly one report to be enabled but was: %s.",
+                    task.getName(), reports.getEnabled().getAsMap().keySet()));
         }
-        try {
-            if (reports.getFirstEnabled().getDestination() == null) {
-                throw new InvalidUserDataException("'${reports.firstEnabled}' requires valid destination but was 'null'.");
-            }
-        } catch (IllegalArgumentException e) {
-            throw new InvalidUserDataException("'${reports.firstEnabled}' requires valid destination but was 'null'.");
-        }
-
         this.encoding = task.getEncoding();
-        this.report = (SingleFileReport) task.getReports().getFirstEnabled();
+        this.report = reports.getEnabled().iterator().next();
+
+        try {
+            this.report.getDestination();
+        } catch (IllegalArgumentException e) {
+            throw new InvalidUserDataException(String.format("'%s' requires valid destination but was 'null'.", this.report));
+        }
     }
 
     public void generate(List<Match> matches) {
@@ -70,7 +70,7 @@ public class CpdReporter {
     }
 
     /**
-     * @param the configured {@link SingleFileReport} used {@code cpdCheck.reports{ ... }}
+     * @param report the configured {@link SingleFileReport} used {@code cpdCheck.reports{ ... }}
      * @return a full configured {@link Renderer} to generate a CPD single file report.
      */
     public Renderer createRendererFor(SingleFileReport report) {
