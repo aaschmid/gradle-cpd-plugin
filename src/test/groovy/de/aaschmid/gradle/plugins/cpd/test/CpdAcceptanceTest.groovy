@@ -1,6 +1,8 @@
 package de.aaschmid.gradle.plugins.cpd.test
 
 import de.aaschmid.gradle.plugins.cpd.CpdPlugin
+import de.aaschmid.gradle.plugins.cpd.internal.CpdAction
+import de.aaschmid.gradle.plugins.cpd.internal.CpdXmlFileReportImpl
 import org.apache.commons.io.output.TeeOutputStream
 import org.gradle.api.GradleException
 import org.gradle.api.InvalidUserDataException
@@ -127,26 +129,7 @@ class CpdAcceptanceTest extends BaseSpec {
 
         def e = thrown(TaskExecutionException)
         e.cause instanceof InvalidUserDataException
-        e.cause.message == '''Task 'cpdCheck' requires exactly one report to be enabled but was: [].'''
-    }
-
-    def "executing 'Cpd' task on non-duplicate 'java' source will produce empty 'cpdCheck.xml'"() {
-        given:
-        project.cpd{
-            encoding = 'ISO-8859-1'
-            minimumTokenCount = 10
-        }
-        project.cpdCheck.source = testFile('de/aaschmid/foo')
-
-        when:
-        project.tasks.getByName('cpdCheck').execute()
-
-        then:
-        def report = project.file('build/reports/cpd/cpdCheck.xml')
-        report.exists()
-        // TODO do better?
-        report.text =~ /encoding="ISO-8859-1"/
-        report.text =~ /<pmd-cpd\/>/
+        e.cause.message == '''All reports for task 'cpdCheck' are disabled.'''
     }
 
     def "executing 'Cpd' task on duplicate 'java' source should throw 'GradleException' and produce 'cpdCheck.csv' with one warning"() {

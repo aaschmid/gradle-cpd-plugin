@@ -60,6 +60,8 @@ public class CpdAction implements Runnable {
             }
         }
 
+        cpd.go();
+
         Iterator<Match> matchesIterator = cpd.getMatches();
 
         List<Match> matches = new LinkedList<Match>();
