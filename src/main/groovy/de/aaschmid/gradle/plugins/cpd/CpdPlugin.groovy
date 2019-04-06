@@ -12,6 +12,7 @@ import org.gradle.api.plugins.ReportingBasePlugin
 import org.gradle.api.reporting.ReportingExtension
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.language.base.plugins.LifecycleBasePlugin
 
 /**
  * A plugin for the finding duplicate code using <a href="http://pmd.sourceforge.net/cpd-usage.html">CPD</a> source
@@ -27,7 +28,7 @@ import org.gradle.api.tasks.TaskProvider
  * A {@link Cpd} task named {@code cpd} is created and configured with default options. It can be further configured
  * to analyze the source code you want, e.g. {@code source = project.files('src')}.
  * <p>
- * The created {@link Cpd} task is added to the {@code check} lifecycle task of {@link JavaBasePlugin} if it is also
+ * The created {@link Cpd} task is added to the {@code check} lifecycle task of {@link LifecycleBasePlugin} if it is also
  * applied, e.g. using {@link org.gradle.api.plugins.JavaPlugin}.
  * <p>
  * Sample:
@@ -88,22 +89,21 @@ class CpdPlugin implements Plugin<Project> {
                 }
             }
         }
-
-        project.plugins.withType(JavaBasePlugin){
-            project.tasks.findByName('check').dependsOn(taskProvider)
+        project.plugins.withType(LifecycleBasePlugin){
+            project.tasks.findByName('check').dependsOn(task)
         }
         project.gradle.taskGraph.whenReady{ TaskExecutionGraph graph ->
             if (!graph.hasTask("cpdCheck")) {
                 if (logger.isWarnEnabled()) {
                     def lastCheckTask = graph.allTasks.reverse().find{ t -> t.name.endsWith('check') }
                     if (lastCheckTask) { // it is possible to just execute a task before check, e.g. "compileJava"
-                        logger.warn("WARNING: Due to the absence of ${JavaBasePlugin.simpleName} on ${project}" +
+                        logger.warn("WARNING: Due to the absence of ${LifecycleBasePlugin.simpleName} on ${project}" +
                                 " the ${task} could not be added to task graph and therefore will not be executed" +
                                 ". SUGGESTION: add a dependency to ${task} manually to a subprojects 'check' task, e.g. to ${lastCheckTask.project} using\n\n" +
                                 "    ${lastCheckTask.name}.dependsOn('${task.path}')\n\n" +
                                 "or to ${project} using\n\n" +
                                 "    project('${lastCheckTask.project.path}') {\n" +
-                                "        plugins.withType(JavaBasePlugin) { // <- just required if 'java' plugin is applied within subproject\n" +
+                                "        plugins.withType(LifecycleBasePlugin) { // <- just required if 'java' plugin is applied within subproject\n" +
                                 "            ${lastCheckTask.name}.dependsOn(${task.name})\n" +
                                 "        }\n" +
                                 "    }\n")

@@ -23,7 +23,7 @@ Gradle CPD plugin
 What is it
 ----------
 
-A [Gradle](http://gradle.org) plugin to find duplicate code using [PMD](https://pmd.github.io/)s copy/paste detection (= [CPD][]).
+A [Gradle](http://gradle.org) plugin to find duplicate code using [PMD][]s copy/paste detection (= [CPD][]).
 
 
 Requirements
@@ -32,6 +32,19 @@ Requirements
 Currently this plugin requires [PMD](https://pmd.github.io/) greater or equal to version 5.2.2 such that ```toolVersion >= '5.2.2'```.
 
 Explaination: v1.0 supports `OPTION_SKIP_BLOCKS` with was introduced in `net.sourceforge.pmd.cpd.Tokenizer` with v5.2.2.
+
+### Supported versions
+
+| G. CPD plugin  | Gradle      | PMD         | Java¹  |
+|:-------------- |:----------- |:----------- |:------ |
+| [v0.1][]       | 1.10 - 4.x  | 5.0.0 - 5.x | 6 - 8  |
+| [v0.2][]       | 2.0 - 4.x   | 5.0.0 - 5.x | 6 - 8  |
+| [v0.4][]       | 2.3 - 4.x   | 5.2.0 - 5.x | 6 - 8  |
+| [v1.0][]       | 2.14 - 5.0  | 5.2.0 - 5.x | 6 - 8  |
+| [v1.1][]       | 2.14 - 5.0  | 5.2.2 - 6.x | 6 - 9  |
+| [v1.2][]       | >= 3.5.1    | >= 5.2.2    | 8 - 11 |
+
+¹: Java version may additionally depend on [PMD][]s version which is properly reflected here.
 
 Usage
 -----
@@ -164,10 +177,13 @@ You are very welcome to contribute by providing a patch/pull request.
 
 Please note that running the test cases my take quite long becuase the acceptance test cases (see ```de.aaschmid.gradle.plugins.cpd.test.CpdAcceptanceTest``` will download [CPD][] and its dependencies for every version. I recommend to get these dependencies in your ```localMaven()``` repository as the test cases look there for it first.
 
+[PMD]: https://pmd.github.io/
 [CPD]: https://pmd.github.io/latest/pmd_userdocs_cpd.html
 
 [v0.1]: /../../releases/tag/v0.1
+[v0.2]: /../../releases/tag/v0.2
 [v0.4]: /../../releases/tag/v0.4
 [v0.5]: /../../releases/tag/v0.5
 [v1.0]: /../../releases/tag/v1.0
+[v1.1]: /../../releases/tag/v1.1
 [v1.2]: /../../releases/tag/v1.2
