@@ -11,8 +11,8 @@ import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.plugins.ReportingBasePlugin
 import org.gradle.api.reporting.ReportingExtension
 import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.language.base.plugins.LifecycleBasePlugin
-
 
 /**
  * A plugin for the finding duplicate code using <a href="http://pmd.sourceforge.net/cpd-usage.html">CPD</a> source
@@ -74,16 +74,18 @@ class CpdPlugin implements Plugin<Project> {
         createConfiguration(project, extension)
         setupTaskDefaults(project, extension)
 
-        Cpd task = project.tasks.create(name: 'cpdCheck', type: Cpd, description: 'Run CPD analysis for all sources')
-        project.getAllprojects().each{ p ->
-            p.plugins.withType(JavaBasePlugin){
-                p.sourceSets.all{ SourceSet sourceSet ->
-                    // task.source(sourceSet.allJava) => does not work if project contains java AND groovy sources
-                    task.source({
-                        sourceSet.allJava.srcDirTrees.each{ srcDirTree ->
-                            task.source(srcDirTree)
-                        }
-                    })
+        TaskProvider<Cpd> taskProvider = project.tasks.register('cpdCheck', Cpd) { Cpd task ->
+            task.description = 'Run CPD analysis for all sources'
+            project.getAllprojects().each { p ->
+                p.plugins.withType(JavaBasePlugin) {
+                    p.sourceSets.all { SourceSet sourceSet ->
+                        // task.source(sourceSet.allJava) => does not work if project contains java AND groovy sources
+                        task.source({
+                            sourceSet.allJava.srcDirTrees.each { srcDirTree ->
+                                task.source(srcDirTree)
+                            }
+                        })
+                    }
                 }
             }
         }
@@ -91,7 +93,7 @@ class CpdPlugin implements Plugin<Project> {
             project.tasks.findByName('check').dependsOn(task)
         }
         project.gradle.taskGraph.whenReady{ TaskExecutionGraph graph ->
-            if (!graph.hasTask(task)) {
+            if (!graph.hasTask("cpdCheck")) {
                 if (logger.isWarnEnabled()) {
                     def lastCheckTask = graph.allTasks.reverse().find{ t -> t.name.endsWith('check') }
                     if (lastCheckTask) { // it is possible to just execute a task before check, e.g. "compileJava"
@@ -127,7 +129,7 @@ class CpdPlugin implements Plugin<Project> {
 
     /** Set up task defaults for every created {@link Cpd} task. */
     private void setupTaskDefaults(Project project, CpdExtension extension) {
-        project.tasks.withType(Cpd){ Cpd task ->
+        project.tasks.withType(Cpd).configureEach { Cpd task ->
             task.conventionMapping.with{
                 encoding = { extension.encoding }
                 ignoreAnnotations = { extension.ignoreAnnotations }

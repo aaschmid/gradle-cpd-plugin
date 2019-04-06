@@ -11,6 +11,7 @@ script:
 
 jdk:
   - oraclejdk8
+  - openjdk11
 
 after_success:
     - ./gradlew jacocoTestReport coveralls
