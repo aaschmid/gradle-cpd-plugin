@@ -6,12 +6,12 @@ import de.aaschmid.gradle.plugins.cpd.internal.CpdReportsImpl
 import net.sourceforge.pmd.cpd.Match
 import org.gradle.api.Action
 import org.gradle.api.GradleException
-import org.gradle.api.Incubating
 import org.gradle.api.file.FileCollection
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.reporting.Reporting
 import org.gradle.api.reporting.SingleFileReport
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Nested
@@ -21,7 +21,6 @@ import org.gradle.api.tasks.VerificationTask
 import org.gradle.internal.reflect.Instantiator
 
 import javax.inject.Inject
-import java.lang.reflect.UndeclaredThrowableException
 
 
 /**
@@ -61,7 +60,7 @@ import java.lang.reflect.UndeclaredThrowableException
  *
  * @see CpdPlugin
  */
-@Incubating
+@CacheableTask
 class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> {
 
     private static final Logger logger = Logging.getLogger(Cpd.class);
