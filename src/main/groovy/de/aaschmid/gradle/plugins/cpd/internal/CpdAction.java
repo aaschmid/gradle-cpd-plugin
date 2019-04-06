@@ -29,7 +29,17 @@ public class CpdAction implements Runnable {
     private final List<SingleFileReport> reports;
     private final boolean ignoreFailures;
 
-    public CpdAction(String encoding, int minimumTokenCount, String language, Properties languageProperties, boolean skipLexicalErrors, boolean skipDuplicateFiles, Collection<File> files, List<SingleFileReport> reports, boolean ignoreFailures) {
+    public CpdAction(
+            String encoding,
+            int minimumTokenCount,
+            String language,
+            Properties languageProperties,
+            boolean skipLexicalErrors,
+            boolean skipDuplicateFiles,
+            Collection<File> files,
+            List<SingleFileReport> reports,
+            boolean ignoreFailures
+    ) {
         this.encoding = encoding;
         this.minimumTokenCount = minimumTokenCount;
         this.ignoreFailures = ignoreFailures;
