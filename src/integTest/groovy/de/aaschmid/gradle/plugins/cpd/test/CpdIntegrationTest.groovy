@@ -35,7 +35,7 @@ class CpdIntegrationTest extends Specification {
         then:
         result.output.contains("BUILD SUCCESSFUL")
         result.task(':cpdCheck').outcome == NO_SOURCE
-        !result.output.contains('WARNING: Due to the absence of LifecycleBasePlugin on root project')
+        !result.output.contains('WARNING: Due to the absence of \'LifecycleBasePlugin\' on root project')
     }
 
     @Issue('https://github.com/aaschmid/gradle-cpd-plugin/issues/8')
@@ -54,11 +54,11 @@ class CpdIntegrationTest extends Specification {
         then:
         result.output.contains("BUILD SUCCESSFUL")
         result.task(':cpdCheck') == null
-        !result.output.contains('WARNING: Due to the absence of LifecycleBasePlugin on root project')
+        !result.output.contains('WARNING: Due to the absence of \'LifecycleBasePlugin\' on root project')
     }
 
     @Issue('https://github.com/aaschmid/gradle-cpd-plugin/issues/3')
-    def "execution of task 'build' should show WARNING if rootProject does not apply at least 'JavaBasePlugin'"() {
+    def "execution of task 'build' should show WARNING if rootProject does not apply at least 'LifecycleBasePlugin'"() {
         given:
         testProjectDir.newFile("settings.gradle") << """\
             include 'sub'
@@ -82,25 +82,11 @@ class CpdIntegrationTest extends Specification {
         result.task(':cpdCheck') == null
 
         def rootProjectName = testProjectDir.root.name
-        result.output.contains("""\
-WARNING: Due to the absence of LifecycleBasePlugin on root project '${rootProjectName}' the task ':cpdCheck' could not be\
- added to task graph and therefore will not be executed. SUGGESTION: add a dependency to task ':cpdCheck' manually to a\
- subprojects 'check' task, e.g. to project ':sub' using
-
-    check.dependsOn(':cpdCheck')
-
-or to root project '${rootProjectName}' using
-
-    project(':sub') {
-        plugins.withType(LifecycleBasePlugin) { // <- just required if 'java' plugin is applied within subproject
-            check.dependsOn(cpdCheck)
-        }
-    }
-""")
+        result.output.contains("WARNING: Due to the absence of 'LifecycleBasePlugin' on root project '${rootProjectName}'")
     }
 
     @Issue('https://github.com/aaschmid/gradle-cpd-plugin/issues/14')
-    def "execution of task 'build' should not show WARNING if a subproject applies 'JavaBasePlugin' and puts a dependency to 'cpdCheck' task"() {
+    def "execution of task 'build' should not show WARNING if a subproject applies 'LifecycleBasePlugin' and puts a dependency to 'cpdCheck' task"() {
         given:
         testProjectDir.newFile("settings.gradle") << """\
             include 'sub'
@@ -124,7 +110,7 @@ or to root project '${rootProjectName}' using
         then:
         result.output.contains("BUILD SUCCESSFUL")
         result.task(':cpdCheck').outcome == NO_SOURCE
-        !result.output.contains('WARNING: Due to the absence of LifecycleBasePlugin on root project')
+        !result.output.contains('WARNING: Due to the absence of \'LifecycleBasePlugin\' on root project')
     }
 
     @Issue('https://github.com/aaschmid/gradle-cpd-plugin/issues/10')
