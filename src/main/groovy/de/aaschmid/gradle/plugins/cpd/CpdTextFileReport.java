@@ -1,6 +1,8 @@
 package de.aaschmid.gradle.plugins.cpd;
 
 import org.gradle.api.reporting.SingleFileReport;
+import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.Optional;
 
 /**
  * The single file simple text report for code/paste (= duplication) detection.
@@ -18,6 +20,8 @@ public interface CpdTextFileReport extends SingleFileReport {
      * @return if the common leading whitespace of a source code snippet should be trimmed (= {@code true}) or not (=
      *         {@code false}); defaults to {@link #DEFAULT_TRIM_LEADING_COMMON_SOURCE_WHITESPACE}.
      */
+    @Input
+    @Optional
     boolean getTrimLeadingCommonSourceWhitespaces();
 
     /**
@@ -30,6 +34,8 @@ public interface CpdTextFileReport extends SingleFileReport {
     /**
      * @return the line separator {@link String} used to generate text report; defaults to {@link #DEFAULT_LINE_SEPARATOR}.
      */
+    @Input
+    @Optional
     String getLineSeparator();
 
     /**

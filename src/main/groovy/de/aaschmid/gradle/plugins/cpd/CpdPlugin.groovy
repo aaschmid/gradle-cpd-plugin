@@ -11,8 +11,8 @@ import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.plugins.ReportingBasePlugin
 import org.gradle.api.reporting.ReportingExtension
 import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.language.base.plugins.LifecycleBasePlugin
-
 
 /**
  * A plugin for the finding duplicate code using <a href="http://pmd.sourceforge.net/cpd-usage.html">CPD</a> source
@@ -60,6 +60,7 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin
 class CpdPlugin implements Plugin<Project> {
 
     private static final Logger logger = Logging.getLogger(Cpd.class);
+    private static final String TASK_NAME_CPD_CHECK = 'cpdCheck'
 
     protected Project project
     protected CpdExtension extension
@@ -74,37 +75,44 @@ class CpdPlugin implements Plugin<Project> {
         createConfiguration(project, extension)
         setupTaskDefaults(project, extension)
 
-        Cpd task = project.tasks.create(name: 'cpdCheck', type: Cpd, description: 'Run CPD analysis for all sources')
-        project.getAllprojects().each{ p ->
-            p.plugins.withType(JavaBasePlugin){
-                p.sourceSets.all{ SourceSet sourceSet ->
-                    // task.source(sourceSet.allJava) => does not work if project contains java AND groovy sources
-                    task.source({
-                        sourceSet.allJava.srcDirTrees.each{ srcDirTree ->
-                            task.source(srcDirTree)
-                        }
-                    })
+        TaskProvider<Cpd> taskProvider = project.tasks.register(TASK_NAME_CPD_CHECK, Cpd) { Cpd task ->
+            task.description = 'Run CPD analysis for all sources'
+            project.getAllprojects().each { p ->
+                p.plugins.withType(JavaBasePlugin) {
+                    p.sourceSets.all { SourceSet sourceSet ->
+                        task.source({
+                            sourceSet.allJava.srcDirTrees.each { srcDirTree ->
+                                task.source(srcDirTree)
+                            }
+                        })
+                    }
                 }
             }
         }
         project.plugins.withType(LifecycleBasePlugin){
-            project.tasks.findByName('check').dependsOn(task)
+            project.tasks.findByName(LifecycleBasePlugin.CHECK_TASK_NAME).dependsOn(taskProvider)
         }
         project.gradle.taskGraph.whenReady{ TaskExecutionGraph graph ->
-            if (!graph.hasTask(task)) {
+            if (!graph.hasTask(":${TASK_NAME_CPD_CHECK}")) {
                 if (logger.isWarnEnabled()) {
-                    def lastCheckTask = graph.allTasks.reverse().find{ t -> t.name.endsWith('check') }
-                    if (lastCheckTask) { // it is possible to just execute a task before check, e.g. "compileJava"
-                        logger.warn("WARNING: Due to the absence of ${LifecycleBasePlugin.simpleName} on ${project}" +
-                                " the ${task} could not be added to task graph and therefore will not be executed" +
-                                ". SUGGESTION: add a dependency to ${task} manually to a subprojects 'check' task, e.g. to ${lastCheckTask.project} using\n\n" +
-                                "    ${lastCheckTask.name}.dependsOn('${task.path}')\n\n" +
-                                "or to ${project} using\n\n" +
-                                "    project('${lastCheckTask.project.path}') {\n" +
-                                "        plugins.withType(LifecycleBasePlugin) { // <- just required if 'java' plugin is applied within subproject\n" +
-                                "            ${lastCheckTask.name}.dependsOn(${task.name})\n" +
-                                "        }\n" +
-                                "    }\n")
+                    def lastCheckTask = graph.allTasks.reverse().find{ t -> t.name.endsWith(LifecycleBasePlugin.CHECK_TASK_NAME) }
+                    if (lastCheckTask) { // it is possible to just execute a task before 'check', e.g. "compileJava"
+                        logger.warn("""\
+                                WARNING: Due to the absence of '${LifecycleBasePlugin.simpleName}' on ${project}
+                                the ${taskProvider} could not be added to task graph and therefore will not be executed.
+                                SUGGESTION: add a dependency to ${taskProvider.name} manually to a subprojects '${LifecycleBasePlugin.CHECK_TASK_NAME}'
+                                task, e.g. to ${lastCheckTask.project} using
+
+                                    ${lastCheckTask.name}.dependsOn('${taskProvider.name}')
+
+                                or to ${project} using
+
+                                    project('${lastCheckTask.project.path}') {
+                                        plugins.withType(LifecycleBasePlugin) { // <- just required if 'java' plugin is applied within subproject
+                                            ${lastCheckTask.name}.dependsOn(${taskProvider.name})
+                                        }
+                                    }
+                            """.stripIndent())
                     }
                 }
             }
@@ -127,7 +135,7 @@ class CpdPlugin implements Plugin<Project> {
 
     /** Set up task defaults for every created {@link Cpd} task. */
     private void setupTaskDefaults(Project project, CpdExtension extension) {
-        project.tasks.withType(Cpd){ Cpd task ->
+        project.tasks.withType(Cpd).configureEach { Cpd task ->
             task.conventionMapping.with{
                 encoding = { extension.encoding }
                 ignoreAnnotations = { extension.ignoreAnnotations }

@@ -2,6 +2,7 @@ package de.aaschmid.gradle.plugins.cpd;
 
 import org.gradle.api.reporting.ReportContainer;
 import org.gradle.api.reporting.SingleFileReport;
+import org.gradle.api.tasks.Nested;
 
 /**
  * The reporting configuration for the {@link Cpd} task.
@@ -33,15 +34,18 @@ interface CpdReports extends ReportContainer<SingleFileReport> {
     /**
      * @return The CPD (single file) 'CSV' report
      */
+    @Nested
     CpdCsvFileReport getCsv();
 
     /**
      * @return The CPD (single file) 'text' report
      */
+    @Nested
     CpdTextFileReport getText();
 
     /**
      * @return The CPD (single file) 'XML' report
      */
+    @Nested
     CpdXmlFileReport getXml();
 }
