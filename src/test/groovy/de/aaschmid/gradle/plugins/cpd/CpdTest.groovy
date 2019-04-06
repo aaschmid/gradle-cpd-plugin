@@ -24,7 +24,7 @@ class CpdTest extends BaseSpec {
                 testFile('de/aaschmid/clazz/impl/Clazz1.java'),
                 testFile('de/aaschmid/clazz/impl/Clazz2.java'),
             ) as Set
-        task.inputs.properties.size() == 22
+        task.inputs.properties.size() == 44
     }
 
     def "'Cpd' task is aware of includes and excludes"() {
@@ -56,6 +56,10 @@ class CpdTest extends BaseSpec {
         given:
         project.cpdCheck{
             reports{
+                csv{
+                    enabled = false
+                    destination = project.file("${project.buildDir}/cpd.csv")
+                }
                 text{
                     enabled = true
                     destination = project.file("${project.buildDir}/cpdCheck.text")
@@ -67,7 +71,11 @@ class CpdTest extends BaseSpec {
         def task = project.tasks.findByName('cpdCheck')
 
         expect:
-        task.outputs.files.files == project.files("${project.buildDir}/cpdCheck.text", "${project.buildDir}/reports/cpd/cpdCheck.xml") as Set
+        task.outputs.files.files == project.files(
+                "${project.buildDir}/cpd.csv",
+                "${project.buildDir}/cpdCheck.text",
+                "${project.buildDir}/reports/cpd/cpdCheck.xml",
+            ) as Set
     }
 
     def "'Cpd' task ignoreFailures is 'false' by default"() {

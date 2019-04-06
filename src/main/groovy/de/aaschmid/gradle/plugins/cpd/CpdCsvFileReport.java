@@ -1,6 +1,8 @@
 package de.aaschmid.gradle.plugins.cpd;
 
 import org.gradle.api.reporting.SingleFileReport;
+import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.Optional;
 
 /**
  * The single file CSV report for code/paste (= duplication) detection.
@@ -15,6 +17,8 @@ public interface CpdCsvFileReport extends SingleFileReport {
     /**
      * @return the separator {@link Character} used to generate CSV report; defaults to {@link #DEFAULT_SEPARATOR}.
      */
+    @Input
+    @Optional
     Character getSeparator();
 
     /**
