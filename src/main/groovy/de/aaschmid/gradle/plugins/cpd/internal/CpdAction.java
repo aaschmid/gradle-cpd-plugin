@@ -82,6 +82,15 @@ public class CpdAction implements Runnable {
             }
         }
 
+        List<Match> matches = execute(cpd);
+
+        for (Report report : reports) {
+            writeReport(matches, report);
+        }
+        logResult(matches);
+    }
+
+    private List<Match> execute(CPD cpd) {
         cpd.go();
 
         Iterator<Match> matchesIterator = cpd.getMatches();
@@ -91,31 +100,28 @@ public class CpdAction implements Runnable {
         while (matchesIterator.hasNext()) {
             matches.add(matchesIterator.next());
         }
+        return matches;
+    }
 
+    private void writeReport(List<Match> matches, Report report) {
+        Renderer renderer = createRenderer(report);
 
-        for (Report report : reports) {
-            Renderer renderer = createRenderer(report);
+        String render = renderer.render(matches.iterator());
 
-            String render = renderer.render(matches.iterator());
-
-            try {
-                ResourceGroovyMethods.setText(report.getDestination(), render, encoding);
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
+        try {
+            ResourceGroovyMethods.setText(report.getDestination(), render, encoding);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
-        logResult(matches);
     }
 
     private Renderer createRenderer(Report report) {
         if (report instanceof CpdCsvFileReport) {
             Character separator = ((CpdCsvFileReport) report).getSeparator();
             return new CSVRenderer(separator);
-        }
-        else if (report instanceof CpdTextFileReport) {
+        } else if (report instanceof CpdTextFileReport) {
             return new SimpleRenderer();
-        }
-        else if (report instanceof CpdXmlFileReport) {
+        } else if (report instanceof CpdXmlFileReport) {
             return new XMLRenderer(encoding);
         }
 
@@ -128,8 +134,7 @@ public class CpdAction implements Runnable {
                 log.info("No duplicates over {} tokens found.", minimumTokenCount);
             }
 
-        }
-        else {
+        } else {
             String message = "CPD found duplicate code.";
             SingleFileReport report = reports.get(0);
             if (report != null) {
@@ -140,8 +145,7 @@ public class CpdAction implements Runnable {
                 if (log.isWarnEnabled()) {
                     log.warn(message);
                 }
-            }
-            else {
+            } else {
                 throw new GradleException(message);
             }
         }
