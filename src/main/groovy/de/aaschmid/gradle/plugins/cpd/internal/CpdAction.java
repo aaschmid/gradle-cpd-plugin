@@ -3,7 +3,15 @@ package de.aaschmid.gradle.plugins.cpd.internal;
 import de.aaschmid.gradle.plugins.cpd.CpdCsvFileReport;
 import de.aaschmid.gradle.plugins.cpd.CpdTextFileReport;
 import de.aaschmid.gradle.plugins.cpd.CpdXmlFileReport;
-import net.sourceforge.pmd.cpd.*;
+import net.sourceforge.pmd.cpd.CPD;
+import net.sourceforge.pmd.cpd.CPDConfiguration;
+import net.sourceforge.pmd.cpd.CSVRenderer;
+import net.sourceforge.pmd.cpd.Language;
+import net.sourceforge.pmd.cpd.LanguageFactory;
+import net.sourceforge.pmd.cpd.Match;
+import net.sourceforge.pmd.cpd.Renderer;
+import net.sourceforge.pmd.cpd.SimpleRenderer;
+import net.sourceforge.pmd.cpd.XMLRenderer;
 import org.codehaus.groovy.runtime.ResourceGroovyMethods;
 import org.gradle.api.GradleException;
 import org.gradle.api.UncheckedIOException;
@@ -14,7 +22,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
 
 public class CpdAction implements Runnable {
 
