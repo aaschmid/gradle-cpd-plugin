@@ -1,10 +1,12 @@
 package de.aaschmid.gradle.plugins.cpd
 
-import de.aaschmid.gradle.plugins.cpd.internal.CpdExecutor
-import de.aaschmid.gradle.plugins.cpd.internal.CpdReporter
+
 import de.aaschmid.gradle.plugins.cpd.internal.CpdReportsImpl
-import net.sourceforge.pmd.cpd.Match
+import de.aaschmid.gradle.plugins.cpd.internal.CpdAction
+import net.sourceforge.pmd.cpd.Tokenizer
 import org.gradle.api.Action
+import org.gradle.api.Incubating
+import org.gradle.api.InvalidUserDataException
 import org.gradle.api.GradleException
 import org.gradle.api.file.FileCollection
 import org.gradle.api.logging.Logger
@@ -19,9 +21,10 @@ import org.gradle.api.tasks.SourceTask
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.VerificationTask
 import org.gradle.internal.reflect.Instantiator
+import org.gradle.workers.WorkerConfiguration
+import org.gradle.workers.WorkerExecutor
 
 import javax.inject.Inject
-
 
 /**
  * Runs static code/paste (= duplication) detection on supplied source code files and generates a report of duplications
@@ -64,6 +67,8 @@ import javax.inject.Inject
 class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> {
 
     private static final Logger logger = Logging.getLogger(Cpd.class);
+
+    private final WorkerExecutor workerExecutor;
 
     /**
      * The character set encoding (e.g., UTF-8) to use when reading the source code files but also when producing the
@@ -172,57 +177,47 @@ class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> 
     private final CpdReportsImpl reports
 
     @Inject
-    Cpd(Instantiator instantiator) {
+    Cpd(Instantiator instantiator, WorkerExecutor workerExecutor) {
         this.reports = instantiator.newInstance(CpdReportsImpl, this)
+        this.workerExecutor = workerExecutor
     }
 
     @TaskAction
     void run() {
-        // TODO very ugly class loading hack but as using org.gradle.process.internal.WorkerProcess does not work due to classpath problems using my own classes, this is the only why for now :-(
-        def contextClassLoader = Thread.currentThread().contextClassLoader
-        getPmdClasspath().files.each{ file -> contextClassLoader.addURL(file.toURI().toURL()) }
 
-        // use getter to access properties that they are resolved correctly using conventionMapping
-        CpdReporter reporter = new CpdReporter(this)
-        CpdExecutor executor = new CpdExecutor(this)
+        Properties languageProperties = new Properties();
 
-        List<Match> matches = executor.run()
-        reporter.generate(matches)
-        logResult(matches)
-    }
-
-    private void logResult(List<Match> matches) {
-        if (matches.isEmpty()) {
-            if (logger.isInfoEnabled()) {
-                logger.info('No duplicates over {} tokens found.', getMinimumTokenCount())
-            }
-
-        } else {
-            String message = "CPD found duplicate code.";
-            SingleFileReport report = reports.getFirstEnabled();
-            if (report != null) {
-                String reportUrl = asClickableFileUrl(report.getDestination());
-                message += " See the report at ${reportUrl}";
-            }
-            if (getIgnoreFailures()) {
-                if (logger.isWarnEnabled()) {
-                    logger.warn(message);
-                }
-            } else {
-                throw new GradleException(message);
-            }
+        if (isIgnoreLiterals()) {
+            languageProperties.setProperty(Tokenizer.IGNORE_LITERALS, "true");
         }
-    }
-
-    private String asClickableFileUrl(File path) {
-        // File.toURI().toString() leads to an URL like this on Mac: file:/reports/index.html
-        // This URL is not recognized by the Mac console (too few leading slashes). We solve
-        // this be creating an URI with an empty authority.
-        try {
-            return new URI("file", "", path.toURI().getPath(), null, null).toString();
-        } catch (URISyntaxException e) {
-            throw UndeclaredThrowableException(e);
+        if (isIgnoreIdentifiers()) {
+            languageProperties.setProperty(Tokenizer.IGNORE_IDENTIFIERS, "true");
         }
+        if (isIgnoreAnnotations()) {
+            languageProperties.setProperty(Tokenizer.IGNORE_ANNOTATIONS, "true");
+        }
+        languageProperties.setProperty(Tokenizer.OPTION_SKIP_BLOCKS, Boolean.toString(isSkipBlocks()));
+        languageProperties.setProperty(Tokenizer.OPTION_SKIP_BLOCKS_PATTERN, getSkipBlocksPattern());
+
+        if (getReports().getEnabled().isEmpty()) {
+            throw new InvalidUserDataException("All reports for task '$name' are disabled.")
+        }
+
+        workerExecutor.submit(CpdAction) { WorkerConfiguration config ->
+            config.classpath(getPmdClasspath())
+            config.setParams(
+                    getEncoding(),
+                    getMinimumTokenCount(),
+                    getLanguage(),
+                    languageProperties,
+                    isSkipLexicalErrors(),
+                    isSkipDuplicateFiles(),
+                    new HashSet<>(getSource().getFiles()),
+                    new ArrayList(getReports().getEnabled()),
+                    isIgnoreFailures()
+            )
+        }
+
     }
 
         /**
