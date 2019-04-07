@@ -10,8 +10,8 @@ script:
   - ./gradlew build
 
 jdk:
+  - openjdk8
   - oraclejdk8
-  - openjdk11
 
 after_success:
     - ./gradlew jacocoTestReport coveralls

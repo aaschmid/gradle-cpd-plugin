@@ -7,11 +7,19 @@ import net.sourceforge.pmd.cpd.Tokenizer
 import org.gradle.api.Action
 import org.gradle.api.Incubating
 import org.gradle.api.InvalidUserDataException
+import org.gradle.api.GradleException
 import org.gradle.api.file.FileCollection
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.reporting.Reporting
-import org.gradle.api.tasks.*
+import org.gradle.api.reporting.SingleFileReport
+import org.gradle.api.tasks.CacheableTask
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Nested
+import org.gradle.api.tasks.SourceTask
+import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.VerificationTask
 import org.gradle.internal.reflect.Instantiator
 import org.gradle.workers.WorkerConfiguration
 import org.gradle.workers.WorkerExecutor
@@ -55,7 +63,7 @@ import javax.inject.Inject
  *
  * @see CpdPlugin
  */
-@Incubating
+@CacheableTask
 class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> {
 
     private static final Logger logger = Logging.getLogger(Cpd.class);
