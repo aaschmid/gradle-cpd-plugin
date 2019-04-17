@@ -23,6 +23,7 @@ import org.gradle.api.tasks.SourceTask
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.VerificationTask
 import org.gradle.internal.reflect.Instantiator
+import org.gradle.util.DeprecationLogger
 
 import javax.inject.Inject
 
@@ -178,7 +179,16 @@ class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> 
 
     @Inject
     Cpd(Instantiator instantiator) {
-        this.reports = instantiator.newInstance(CpdReportsImpl, this)
+        // Workaround for Groovy which is not supporting lambdas in version < 3
+        def thiz = this
+        def factory = new org.gradle.internal.Factory<CpdReportsImpl>() {
+
+            @Override
+            CpdReportsImpl create() {
+                return instantiator.newInstance(CpdReportsImpl, thiz)
+            }
+        }
+        this.reports = DeprecationLogger.whileDisabled(factory)
     }
 
     @TaskAction
