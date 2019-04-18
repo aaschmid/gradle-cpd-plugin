@@ -20,7 +20,7 @@ ext {
     isBuildOnJenkins = System.getenv('BUILD_TAG')?.startsWith('jenkins-') ?: false
 }
 
-sourceCompatibility = '1.6'
+sourceCompatibility = '1.8'
 
 repositories {
     mavenCentral()
