@@ -8,7 +8,7 @@ import spock.lang.Specification
 
 abstract class BaseSpec extends Specification {
 
-    public Project project
+    protected Project project
 
     def setup() {
         project = ProjectBuilder.builder().build()
@@ -38,18 +38,4 @@ abstract class BaseSpec extends Specification {
         testFile(relativePath).eachFileRecurse(FileType.FILES){ file -> result << file }
         return result;
     }
-
-//    // -- helper methods -----------------------------------------------------------------------------------------------
-//
-//    def getcpdCheck() {
-//        return project.tasks.getByName('cpdCheck')
-//    }
-//
-//    def cpdCheck(Closure closure) {
-//        return getcpdCheck()
-//    }
-//
-//    def cpd(Closure closure) {
-//        return project.extensions.getByName('cpd')
-//    }
 }
