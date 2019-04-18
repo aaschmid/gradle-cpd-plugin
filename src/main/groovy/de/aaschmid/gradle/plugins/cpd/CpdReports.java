@@ -29,7 +29,7 @@ import org.gradle.api.tasks.Nested;
  *
  * @see Cpd
  */
-interface CpdReports extends ReportContainer<SingleFileReport> {
+public interface CpdReports extends ReportContainer<SingleFileReport> {
 
     /**
      * @return The CPD (single file) 'CSV' report
