@@ -220,17 +220,11 @@ class CpdAcceptanceTest extends BaseSpec {
     def "applying 'Cpd' task to only parent project if only sub project has 'groovy' plugin"() {
         given:
         project = ProjectBuilder.builder().build()
+        def subProject = ProjectBuilder.builder().withParent(project).build()
+
         project.repositories{
             mavenLocal()
             mavenCentral()
-        }
-        def subProject = ProjectBuilder.builder().withParent(project).build()
-
-        project.plugins.apply(CpdPlugin)
-
-        project.cpdCheck{
-            ignoreFailures = true
-            minimumTokenCount = 2
         }
 
         subProject.plugins.apply(GroovyPlugin)
@@ -239,6 +233,13 @@ class CpdAcceptanceTest extends BaseSpec {
                 java.srcDir testFile('de/aaschmid/foo')
                 groovy.srcDir testFile('de/aaschmid/clazz')
             }
+        }
+
+        // add CpdPlugin at last because ...getSourceSets().all() does not work in test here
+        project.plugins.apply(CpdPlugin)
+        project.cpdCheck{
+            ignoreFailures = true
+            minimumTokenCount = 2
         }
 
         when:

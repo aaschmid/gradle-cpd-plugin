@@ -82,7 +82,17 @@ class CpdIntegrationTest extends Specification {
         result.task(':cpdCheck') == null
 
         def rootProjectName = testProjectDir.root.name
-        result.output.contains("WARNING: Due to the absence of 'LifecycleBasePlugin' on root project '${rootProjectName}'")
+        result.output.contains("WARNING: Due to the absence of 'LifecycleBasePlugin' on root project '${rootProjectName}' " +
+                "the task ':cpdCheck' could not be added to task graph. Therefore CPD will not be executed. To prevent " +
+                "this, manually add a task dependency of ':cpdCheck' to a 'check' task of a subproject.")
+        result.output.contains("1) Directly to project ':sub':")
+        result.output.contains("    check.dependsOn(':cpdCheck')")
+        result.output.contains("2) Indirectly, e.g. via root project '${rootProjectName}':")
+        result.output.contains("    project(':sub') {")
+        result.output.contains("        plugins.withType(LifecycleBasePlugin) { // <- just required if 'java' plugin is applied within subproject")
+        result.output.contains("            check.dependsOn(cpdCheck)")
+        result.output.contains("        }")
+        result.output.contains("    }")
     }
 
     @Issue('https://github.com/aaschmid/gradle-cpd-plugin/issues/14')

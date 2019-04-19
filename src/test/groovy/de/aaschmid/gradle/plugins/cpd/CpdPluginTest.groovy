@@ -31,7 +31,6 @@ class CpdPluginTest extends BaseSpec {
         !ext.ignoreLiterals
         ext.language == 'java'
         ext.minimumTokenCount == 50
-        ext.reportsDir == project.file('build/reports/cpd')
         !ext.skipDuplicateFiles
         !ext.skipLexicalErrors
         ext.skipBlocks
@@ -210,7 +209,7 @@ class CpdPluginTest extends BaseSpec {
         project.cpd{
             encoding = 'UTF-8'
             ignoreAnnotations = true
-            ignoreFailures = false
+            ignoreFailures = true
             language = 'ruby'
             minimumTokenCount = 25
             reportsDir = project.file('cpd-reports')
@@ -228,7 +227,7 @@ class CpdPluginTest extends BaseSpec {
 
         task.encoding == 'UTF-8'
         task.ignoreAnnotations
-        !task.ignoreFailures
+        task.ignoreFailures
         !task.ignoreIdentifiers
         !task.ignoreLiterals
         task.language == 'ruby'

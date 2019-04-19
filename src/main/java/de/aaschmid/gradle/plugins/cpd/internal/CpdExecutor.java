@@ -1,18 +1,29 @@
-package de.aaschmid.gradle.plugins.cpd.internal
+package de.aaschmid.gradle.plugins.cpd.internal;
 
-import de.aaschmid.gradle.plugins.cpd.Cpd
-import net.sourceforge.pmd.cpd.CPD
-import net.sourceforge.pmd.cpd.CPDConfiguration
-import net.sourceforge.pmd.cpd.Language
-import net.sourceforge.pmd.cpd.LanguageFactory
-import net.sourceforge.pmd.cpd.Match
-import net.sourceforge.pmd.cpd.ReportException
-import net.sourceforge.pmd.cpd.Tokenizer
-import org.gradle.api.GradleException
-import org.gradle.api.InvalidUserDataException
-import org.gradle.api.file.FileTree
-import org.gradle.api.logging.Logger
-import org.gradle.api.logging.Logging
+import de.aaschmid.gradle.plugins.cpd.Cpd;
+import net.sourceforge.pmd.cpd.CPD;
+import net.sourceforge.pmd.cpd.CPDConfiguration;
+import net.sourceforge.pmd.cpd.Language;
+import net.sourceforge.pmd.cpd.LanguageFactory;
+import net.sourceforge.pmd.cpd.Match;
+import net.sourceforge.pmd.cpd.ReportException;
+import net.sourceforge.pmd.cpd.Tokenizer;
+import org.gradle.api.GradleException;
+import org.gradle.api.InvalidUserDataException;
+import org.gradle.api.file.FileTree;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
+import org.gradle.internal.reflect.GroovyMethods;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class CpdExecutor {
 
@@ -48,14 +59,14 @@ public class CpdExecutor {
                 logger.info("Starting CPD, minimumTokenCount is {}", minimumTokenCount);
             }
 
-            def cpdConfig = new CPDConfiguration();
+            CPDConfiguration cpdConfig = new CPDConfiguration();
             cpdConfig.setMinimumTileSize(minimumTokenCount);
             cpdConfig.setLanguage(language);
             cpdConfig.setEncoding(encoding);
             cpdConfig.setSkipLexicalErrors(skipLexicalErrors);
             cpdConfig.setSkipDuplicates(skipDuplicateFiles);
 
-            def cpd = new CPD(cpdConfig);
+            CPD cpd = new CPD(cpdConfig);
 
             if (logger.isInfoEnabled()) {
                 logger.info("Tokenizing files");
@@ -77,22 +88,20 @@ public class CpdExecutor {
             if (logger.isInfoEnabled()) {
                 logger.info("Done analyzing code; took {} milliseconds", timeTaken);
             }
-            return cpd.getMatches().toList();
+            List<Match> result = new ArrayList<>();
+            for (Iterator<Match> it = cpd.getMatches(); it.hasNext(); ) {
+                result.add(it.next());
+            }
+            return result;
 
         } catch (IOException e) {
             if (logger.isErrorEnabled()) {
                 logger.error(e.getMessage(), e);
             }
             throw new GradleException("IOException during task execution", e);
-        } catch (ReportException e) {
-            if (logger.isErrorEnabled()) {
-                logger.error(e.toString(), e);
-            }
-            throw new GradleException("ReportException during task execution", e);
         } catch (Throwable t) {
             throw new GradleException(t.getMessage(), t);
         }
-        return [];
     }
 
     private Language createLanguage(Cpd task) {
