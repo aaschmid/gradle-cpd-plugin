@@ -120,7 +120,35 @@ class CpdIntegrationTest extends Specification {
         then:
         result.output.contains("BUILD SUCCESSFUL")
         result.task(':cpdCheck').outcome == NO_SOURCE
-        !result.output.contains('WARNING: Due to the absence of \'LifecycleBasePlugin\' on root project')
+        !result.output.contains('WARNING')
+    }
+
+    @Issue('https://github.com/aaschmid/gradle-cpd-plugin/issues/37')
+    def "execution of task 'build' should not show WARNING if subproject applies 'CPD' plugin and 'LifecycleBasePlugin'"() {
+        given:
+        testProjectDir.newFile("settings.gradle") << """\
+            include 'sub'
+            """.stripIndent()
+
+        buildFile << """\
+            plugins {
+                id 'de.aaschmid.cpd' apply false
+            }
+
+            project(':sub') {
+                apply plugin: 'cpd'
+                apply plugin: 'java'
+            }
+            """.stripIndent()
+
+        when:
+        def result = run('build')
+
+        then:
+        result.output.contains("BUILD SUCCESSFUL")
+        result.task(':cpdCheck') == null
+        result.task(':sub:cpdCheck').outcome == NO_SOURCE
+        !result.output.contains('WARNING')
     }
 
     @Issue('https://github.com/aaschmid/gradle-cpd-plugin/issues/10')
