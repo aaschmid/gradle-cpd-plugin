@@ -5,7 +5,6 @@ import de.aaschmid.gradle.plugins.cpd.internal.CpdReporter;
 import de.aaschmid.gradle.plugins.cpd.internal.CpdReportsImpl;
 import groovy.lang.Closure;
 import net.sourceforge.pmd.cpd.Match;
-import org.codehaus.groovy.reflection.ReflectionUtils;
 import org.gradle.api.Action;
 import org.gradle.api.GradleException;
 import org.gradle.api.file.FileCollection;
