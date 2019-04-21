@@ -4,6 +4,7 @@ import de.aaschmid.gradle.plugins.cpd.internal.CpdExecutor;
 import de.aaschmid.gradle.plugins.cpd.internal.CpdReporter;
 import de.aaschmid.gradle.plugins.cpd.internal.CpdReportsImpl;
 import groovy.lang.Closure;
+import net.sourceforge.pmd.cpd.LanguageFactory;
 import net.sourceforge.pmd.cpd.Match;
 import org.gradle.api.Action;
 import org.gradle.api.GradleException;

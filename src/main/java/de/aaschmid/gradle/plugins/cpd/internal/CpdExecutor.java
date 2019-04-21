@@ -1,6 +1,7 @@
 package de.aaschmid.gradle.plugins.cpd.internal;
 
 import de.aaschmid.gradle.plugins.cpd.Cpd;
+import net.sourceforge.pmd.cpd.AnyLanguage;
 import net.sourceforge.pmd.cpd.CPD;
 import net.sourceforge.pmd.cpd.CPDConfiguration;
 import net.sourceforge.pmd.cpd.Language;
@@ -117,6 +118,11 @@ public class CpdExecutor {
         }
         p.setProperty(Tokenizer.OPTION_SKIP_BLOCKS, Boolean.toString(task.getSkipBlocks()));
         p.setProperty(Tokenizer.OPTION_SKIP_BLOCKS_PATTERN, task.getSkipBlocksPattern());
-        return LanguageFactory.createLanguage(task.getLanguage(), p);
+        Language result = LanguageFactory.createLanguage(task.getLanguage(), p);
+        logger.info("Using CPD language class '{}' for checking duplicates.", result);
+        if (result instanceof AnyLanguage) {
+            logger.warn("Could not detect CPD language for '{}', using 'any' as fallback language.", task.getLanguage());
+        }
+        return result;
     }
 }
