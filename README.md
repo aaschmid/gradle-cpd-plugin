@@ -111,7 +111,7 @@ This example shows a project where only  ```main``` sources should be checked fo
 // optional - settings for every CPD task
 cpd {
     language = 'cpp'
-    toolVersion = '5.2.3' // defaults to '5.4.2'; just available for v5.2.0 and higher (see explanation above)
+    toolVersion = '5.2.3' // defaults to '6.13.0'; just available for v5.2.0 and higher (see explanation above)
 }
 
 // optional - default report is xml and default sources are 'main' and 'test'
@@ -128,7 +128,7 @@ cpdCheck {
 
 ### Kotlin support
 
-Unfortunately, [CPD][] does not support [Kotlin](https://kotlinlang.org/) such that you have to ignore files manuelly if you mixed it up with your Java files:
+[CPD][] supports [Kotlin](https://kotlinlang.org/) since [v6.10.0](https://search.maven.org/search?q=g:net.sourceforge.pmd%20AND%20a:pmd-kotlin&core=gav). For previous versions you have to ignore files manuelly if you mixed it up with your Java files:
 ```groovy
 tasks.withType(Cpd) {
     exclude "*.kt"

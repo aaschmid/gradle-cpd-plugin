@@ -2,8 +2,11 @@ package de.aaschmid.gradle.plugins.cpd.internal
 
 import de.aaschmid.gradle.plugins.cpd.test.BaseSpec
 import net.sourceforge.pmd.cpd.CSVRenderer
+import net.sourceforge.pmd.cpd.Mark
 import net.sourceforge.pmd.cpd.Match
 import net.sourceforge.pmd.cpd.SimpleRenderer
+import net.sourceforge.pmd.cpd.SourceCode
+import net.sourceforge.pmd.cpd.SourceCode.StringCodeLoader
 import net.sourceforge.pmd.cpd.TokenEntry
 import net.sourceforge.pmd.cpd.XMLRenderer
 import org.gradle.api.InvalidUserDataException
@@ -216,9 +219,11 @@ class CpdReporterTest extends BaseSpec {
             xml.enabled = false
         }
 
-        def tokenEntry1 = new TokenEntry('1', 'Clazz1.java', 5)
-        def tokenEntry2 = new TokenEntry('2', 'Clazz2.java', 7)
-        def match = new Match(5, tokenEntry1, tokenEntry2)
+        def mark1 = new Mark(new TokenEntry('1', 'Clazz1.java', 1))
+        def mark2 = new Mark(new TokenEntry('2', 'Clazz2.java', 1))
+        mark1.lineCount = mark2.lineCount = 1
+        mark1.sourceCode = mark2.sourceCode = new SourceCode(new StringCodeLoader("def str = 'I am a duplicate'"))
+        def match = new Match(5, mark1, mark2)
 
         def underTest = new CpdReporter(project.cpdCheck)
 
