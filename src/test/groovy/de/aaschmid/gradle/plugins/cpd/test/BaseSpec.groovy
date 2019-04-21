@@ -22,7 +22,11 @@ abstract class BaseSpec extends Specification {
      * @see File
      */
     File testFile(String relativePath) {
-        def resourceName = "/test-data/java/${relativePath}"
+        return testFile("java", relativePath)
+    }
+
+    File testFile(String lang, String relativePath) {
+        def resourceName = "/test-data/${lang}/${relativePath}"
         def resource = this.class.getResource(resourceName)
         assert resource: "${resourceName} not found on classpath"
 

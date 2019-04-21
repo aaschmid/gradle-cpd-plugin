@@ -9,6 +9,7 @@ import org.gradle.api.tasks.TaskExecutionException
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Rule
 import org.junit.rules.ExternalResource
+import spock.lang.Issue
 
 class CpdAcceptanceTest extends BaseSpec {
 
@@ -169,6 +170,48 @@ class CpdAcceptanceTest extends BaseSpec {
         // TODO do better?
         report.text =~ /encoding="ISO-8859-1"/
         report.text =~ /<pmd-cpd\/>/
+    }
+
+    @Issue("https://github.com/aaschmid/gradle-cpd-plugin/issues/38")
+    def "executing 'Cpd' task on duplicate 'java' comments in source should not produce 'cpdCheck.txt'"() {
+        given:
+        project.cpdCheck{
+            reports{
+                xml.enabled = false
+                text.enabled = true
+            }
+            source testFile('de/aaschmid/test'), testFile('de/aaschmid/duplicate')
+        }
+
+        when:
+        project.tasks.getByName('cpdCheck').execute()
+
+        then:
+        def report = project.file('build/reports/cpd/cpdCheck.text')
+        report.exists()
+        report.text.empty
+    }
+
+    @Issue("https://github.com/aaschmid/gradle-cpd-plugin/issues/38")
+    def "executing 'Cpd' task on duplicate 'kotlin' comments in source should not produce 'cpdCheck.txt'"() {
+        given:
+        project.cpdCheck{
+            language = 'kotlin'
+            minimumTokenCount = 10
+            reports{
+                xml.enabled = false
+                text.enabled = true
+            }
+            source = testFile('kotlin', 'de/aaschmid/test')
+        }
+
+        when:
+        project.tasks.getByName('cpdCheck').execute()
+
+        then:
+        def report = project.file('build/reports/cpd/cpdCheck.text')
+        report.exists()
+        report.text.empty
     }
 
     def "executing 'Cpd' task on duplicate 'java' source should throw 'GradleException' and produce 'cpdCheck.csv' with one warning"() {
@@ -414,7 +457,7 @@ class CpdAcceptanceTest extends BaseSpec {
 
         def report = project.file('build/reports/cpd/cpdCheck.csv')
         report.exists()
-        report.text =~ /6,15,2,5,.*(duplicate|test)\/Test\.java,5,.*(duplicate|test)\/Test\.java/
+        report.text =~ /6,15,2,20,.*(duplicate|test)\/Test\.java,20,.*(duplicate|test)\/Test\.java/
     }
 
     def "executing 'Cpd' task on duplicate files should not throw 'GradleException' if skipDuplicateFiles"() {

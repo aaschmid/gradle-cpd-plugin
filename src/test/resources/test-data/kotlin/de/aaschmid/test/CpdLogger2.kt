@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.aaschmid.test;
+package de.aaschmid.test
 
-import static org.junit.Assert.assertTrue;
+/**
+ * Testing helper class.
+ */
+@Suppress("SpreadOperator")
+internal object CpdTester {
 
-public class Test {
-
-    public testCpd() {
-        assertTrue(true);
+    fun isTestingEnabled(): Boolean {
+        return true
     }
 }
