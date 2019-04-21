@@ -95,7 +95,8 @@ public class CpdPlugin implements Plugin<Project> {
             project.getTasks().findByName(LifecycleBasePlugin.CHECK_TASK_NAME).dependsOn(taskProvider));
 
         project.getGradle().getTaskGraph().whenReady(graph -> {
-            if (!graph.hasTask(":" + TASK_NAME_CPD_CHECK)) {
+            String projectPath = (project.getRootProject() == project) ? project.getPath() : project.getPath() + ":";
+            if (!graph.hasTask(projectPath + TASK_NAME_CPD_CHECK)) {
                 if (logger.isWarnEnabled()) {
                     Optional<Task> lastCheckTask = graph.getAllTasks().stream().sorted(reverseOrder()).filter(t ->
                             t.getName().endsWith(LifecycleBasePlugin.CHECK_TASK_NAME)).findFirst();
