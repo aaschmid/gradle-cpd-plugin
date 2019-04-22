@@ -160,17 +160,11 @@ public class CpdPlugin implements Plugin<Project> {
     private void createConfiguration(Project project, CpdExtension extension) {
         Configuration configuration = project.getConfigurations().create("cpd");
         configuration.setDescription("The CPD libraries to be used for this project.");
-
-        configuration.defaultDependencies(d ->
-            d.add(project.getDependencies().create("net.sourceforge.pmd:pmd-dist:" + extension.getToolVersion())));
-
         configuration.setTransitive(true);
         configuration.setVisible(false);
 
-        // don't need these dependencies, they're provided by the runtime
-        configuration.exclude(mapOf(new DefaultExcludeRule("ant", "ant")));
-        configuration.exclude(mapOf(new DefaultExcludeRule("org.apache.ant", "ant")));
-        configuration.exclude(mapOf(new DefaultExcludeRule("org.apache.ant", "ant-launcher")));
+        configuration.defaultDependencies(d ->
+                d.add(project.getDependencies().create("net.sourceforge.pmd:pmd-dist:" + extension.getToolVersion())));
     }
 
     private Map<String, String> mapOf(DefaultExcludeRule excludeRule) {
