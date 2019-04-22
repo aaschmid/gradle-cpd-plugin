@@ -3,13 +3,9 @@ package de.aaschmid.gradle.plugins.cpd.internal;
 import de.aaschmid.gradle.plugins.cpd.Cpd;
 import de.aaschmid.gradle.plugins.cpd.CpdXmlFileReport;
 import org.gradle.api.Task;
-import org.gradle.api.logging.Logger;
-import org.gradle.api.logging.Logging;
 import org.gradle.api.reporting.internal.TaskGeneratedSingleFileReport;
 
 public class CpdXmlFileReportImpl extends TaskGeneratedSingleFileReport implements CpdXmlFileReport {
-
-    private static final Logger logger = Logging.getLogger(CpdXmlFileReportImpl.class);
 
     private final Cpd task;
 

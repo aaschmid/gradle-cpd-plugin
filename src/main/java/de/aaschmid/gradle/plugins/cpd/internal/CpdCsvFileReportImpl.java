@@ -9,8 +9,6 @@ import org.gradle.api.reporting.internal.TaskGeneratedSingleFileReport;
 
 public class CpdCsvFileReportImpl extends TaskGeneratedSingleFileReport implements CpdCsvFileReport {
 
-    private static final Logger logger = Logging.getLogger(CpdCsvFileReportImpl.class);
-
     private char separator = CpdCsvFileReport.DEFAULT_SEPARATOR;
 
     public CpdCsvFileReportImpl(String name, Task task) {
