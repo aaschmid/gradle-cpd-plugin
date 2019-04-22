@@ -102,6 +102,8 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
 
     @TaskAction
     void run() {
+        checkTaskState();
+
         workerExecutor.submit(CpdAction.class, (WorkerConfiguration config) -> {
             config.classpath(getPmdClasspath());
             config.setParams(
@@ -120,6 +122,18 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
                     createCpdReportConfigurations()
             );
         });
+    }
+
+    private void checkTaskState() {
+        if (getEncoding() == null) {
+            throw new InvalidUserDataException(String.format("Task '%s' requires 'encoding' but was: %s.", getName(), getEncoding()));
+        }
+        if (getMinimumTokenCount() <= 0) {
+            throw new InvalidUserDataException(String.format("Task '%s' requires 'minimumTokenCount' to be greater than zero.", getName()));
+        }
+        if (reports.getEnabled().isEmpty()) {
+            throw new InvalidUserDataException(String.format("Task '%s' requires at least one enabled report.", getName()));
+        }
     }
 
     private List<CpdReportConfiguration> createCpdReportConfigurations() {
