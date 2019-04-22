@@ -6,11 +6,10 @@ import org.gradle.testkit.runner.internal.PluginUnderTestMetadataReading
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Issue
-import spock.lang.Specification
 
 import static org.gradle.testkit.runner.TaskOutcome.*
 
-class CpdIntegrationTest extends Specification {
+class CpdIntegrationTest extends BaseSpec {
 
     @Rule
     final TemporaryFolder testProjectDir = new TemporaryFolder()
@@ -183,6 +182,38 @@ class CpdIntegrationTest extends Specification {
         then:
         result.output.contains("BUILD SUCCESSFUL")
         result.task(':cpdCheck').outcome == SKIPPED
+    }
+
+    def "executing 'Cpd' task on duplicate 'java' source should not throw 'GradleException' if 'ignoreFailures' and produce 'cpdCheck.csv' with one warning"() {
+        given:
+        buildFile << """\
+            plugins {
+                id 'de.aaschmid.cpd'
+            }
+            repositories {
+                mavenLocal()
+            }
+            cpdCheck{
+                ignoreFailures = true
+                minimumTokenCount = 15
+                reports{
+                    csv.enabled = true
+                    xml.enabled = false
+                }
+                source = file('${testFile('java', 'de/aaschmid/clazz').path}')
+            }
+        """.stripIndent()
+
+        when:
+        def result = run('cpdCheck')
+
+        then:
+        result.output.contains("BUILD SUCCESSFUL")
+        result.task(':cpdCheck').outcome == SUCCESS
+
+        def report = testProjectDir.getRoot().toPath().resolve('build/reports/cpd/cpdCheck.csv').toFile()
+        report.exists()
+        report.text =~ /4,15,2,[79],.*Clazz[12]\.java,[79],.*Clazz[12]\.java/
     }
 
     private BuildResult run(String... arguments) {
