@@ -44,6 +44,7 @@ Explaination: v1.0 supports `OPTION_SKIP_BLOCKS` with was introduced in `net.sou
 | [v1.1][]       | 2.14 - 5.0  | 5.2.2 - 6.x | 6 - 9  |
 | [v1.2][]       | >= 3.5.1    | >= 5.2.2    | 8 - 11 |
 | [v1.3][]       | >= 4.10.3   | >= 5.2.2    | 8 - 11 |
+| [v1.4][]       | >= 4.10.3   | >= 6.10.0   | 8 - 11 |
 
 ¹: Java version may additionally depend on [PMD][]s version which is properly reflected here.
 
