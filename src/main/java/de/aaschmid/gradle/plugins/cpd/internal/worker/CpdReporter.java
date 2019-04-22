@@ -17,17 +17,17 @@ import org.gradle.api.logging.Logging;
 import java.lang.reflect.Field;
 import java.util.List;
 
-public class CpdReporter {
+class CpdReporter {
 
     private static final Logger logger = Logging.getLogger(CpdReporter.class);
 
     private final List<CpdReportConfiguration> reports;
 
-    public CpdReporter(List<CpdReportConfiguration> reports) {
+    CpdReporter(List<CpdReportConfiguration> reports) {
         this.reports = reports;
     }
 
-    public void generate(List<Match> matches) {
+    void generate(List<Match> matches) {
         if (logger.isInfoEnabled()) {
             logger.info("Generating reports");
         }

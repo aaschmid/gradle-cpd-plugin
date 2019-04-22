@@ -1,13 +1,15 @@
 package de.aaschmid.gradle.plugins.cpd;
 
-import de.aaschmid.gradle.plugins.cpd.internal.CpdAction;
-import de.aaschmid.gradle.plugins.cpd.internal.CpdReportsImpl;
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdAction;
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdExecutionConfiguration;
 import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration;
 import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdCsvReport;
 import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdTextReport;
 import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdXmlReport;
+import de.aaschmid.gradle.plugins.cpd.internal.CpdReportsImpl;
 import groovy.lang.Closure;
 import org.gradle.api.Action;
+import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.logging.Logger;
@@ -31,7 +33,6 @@ import org.gradle.workers.WorkerExecutor;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 
@@ -101,26 +102,13 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
     }
 
     @TaskAction
-    void run() {
+    public void run() {
         checkTaskState();
 
         workerExecutor.submit(CpdAction.class, (WorkerConfiguration config) -> {
-            config.classpath(getPmdClasspath());
-            config.setParams(
-                    getEncoding(),
-                    getMinimumTokenCount(),
-                    getLanguage(),
-                    getSkipLexicalErrors(),
-                    getSkipDuplicateFiles(),
-                    new HashSet<>(getSource().getFiles()),
-                    getIgnoreFailures(),
-                    getIgnoreLiterals(),
-                    getIgnoreIdentifiers(),
-                    getIgnoreAnnotations(),
-                    getSkipBlocks(),
-                    getSkipBlocksPattern(),
-                    createCpdReportConfigurations()
-            );
+            config.setClasspath(getPmdClasspath());
+            config.setDisplayName("CPD worker");
+            config.setParams(createCpdExecutionConfiguration(), createCpdReportConfigurations());
         });
     }
 
@@ -134,6 +122,23 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
         if (reports.getEnabled().isEmpty()) {
             throw new InvalidUserDataException(String.format("Task '%s' requires at least one enabled report.", getName()));
         }
+    }
+
+    private CpdExecutionConfiguration createCpdExecutionConfiguration() {
+        return new CpdExecutionConfiguration(
+                getEncoding(),
+                getIgnoreAnnotations(),
+                getIgnoreFailures(),
+                getIgnoreIdentifiers(),
+                getIgnoreLiterals(),
+                getLanguage(),
+                getMinimumTokenCount(),
+                getSkipBlocks(),
+                getSkipBlocksPattern(),
+                getSkipDuplicateFiles(),
+                getSkipLexicalErrors(),
+                getSource().getFiles()
+        );
     }
 
     private List<CpdReportConfiguration> createCpdReportConfigurations() {
@@ -371,8 +376,9 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
      * <p>
      * Example: {@code skipBlocks = false}
      *
-     * @return whether blocks should be skipped by a given pattern
      * @see #skipBlocksPattern
+     *
+     * @return whether blocks should be skipped by a given pattern
      */
     @Input
     public boolean getSkipBlocks() {
@@ -390,8 +396,9 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
      * <p>
      * Example: {@code skipBlocksPattern = '#include <|>'}
      *
-     * @return the pattern used to skip blocks
      * @see #skipBlocks
+     *
+     * @return the pattern used to skip blocks
      */
     @Input
     public String getSkipBlocksPattern() {

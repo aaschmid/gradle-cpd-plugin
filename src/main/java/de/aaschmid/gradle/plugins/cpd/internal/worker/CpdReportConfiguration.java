@@ -8,16 +8,16 @@ public class CpdReportConfiguration implements Serializable {
     private final String encoding;
     private final File destination;
 
-    public CpdReportConfiguration(String encoding, File destination) {
+    CpdReportConfiguration(String encoding, File destination) {
         this.encoding = encoding;
         this.destination = destination;
     }
 
-    public String getEncoding() {
+    String getEncoding() {
         return encoding;
     }
 
-    public File getDestination() {
+    File getDestination() {
         return destination;
     }
 

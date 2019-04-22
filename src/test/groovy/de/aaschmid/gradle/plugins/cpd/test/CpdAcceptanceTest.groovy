@@ -128,29 +128,42 @@ class CpdAcceptanceTest extends BaseSpec {
 
         def e = thrown(TaskExecutionException)
         e.cause instanceof InvalidUserDataException
-        e.cause.message == '''All reports for task 'cpdCheck' are disabled.'''
+        e.cause.message == "Task 'cpdCheck' requires at least one enabled report."
     }
 
-    def "executing 'Cpd' task throws wrapped 'InvalidUserDataException' if more than one report is enabled"() {
+    def "executing 'Cpd' task with multiple enabled reports should create and fill all reports"() {
         given:
         project.cpdCheck{
+            language = 'kotlin'
+            minimumTokenCount = 5
             reports{
                 csv.enabled = false
                 text.enabled = true
                 xml.enabled = true
             }
-            source = testFile('.')
+            source = testFile('kotlin', '.')
         }
+
 
         when:
         project.tasks.getByName('cpdCheck').execute()
 
         then:
-        !project.file('build/reports/cpdCheck.csv').exists()
+        def e = thrown GradleException
 
-        def e = thrown(TaskExecutionException)
-        e.cause instanceof InvalidUserDataException
-        e.cause.message == '''Task 'cpdCheck' requires exactly one report to be enabled but was: [text, xml].'''
+        def csv = project.file('build/reports/cpd/cpdCheck.csv')
+        def txt = project.file('build/reports/cpd/cpdCheck.text')
+        def xml = project.file('build/reports/cpd/cpdCheck.xml')
+
+        !csv.exists()
+
+        txt.exists()
+        txt.text.contains("Found a 4 line (9 tokens) duplication in the following files:")
+        txt.text.contains("Found a 2 line (8 tokens) duplication in the following files:")
+
+        xml.exists()
+        xml.text.contains('<duplication lines="4" tokens="9">')
+        xml.text.contains('<duplication lines="2" tokens="8">')
     }
 
     def "executing 'Cpd' task on non-duplicate 'java' source will produce empty 'cpdCheck.xml'"() {
