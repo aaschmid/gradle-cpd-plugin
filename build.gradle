@@ -132,7 +132,7 @@ task integTest(type: Test) {
 check.dependsOn integTest
 
 gradlePlugin {
-    testSourceSets sourceSets.integTest
+    testSourceSets sourceSets.test, sourceSets.integTest
 }
 
 idea {
