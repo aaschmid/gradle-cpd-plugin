@@ -1,5 +1,7 @@
 package de.aaschmid.gradle.plugins.cpd.internal;
 
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration;
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReporter;
 import net.sourceforge.pmd.cpd.Match;
 import org.gradle.api.GradleException;
 import org.gradle.api.reporting.SingleFileReport;
@@ -20,7 +22,6 @@ public class CpdAction implements Runnable {
     private final boolean skipLexicalErrors;
     private final boolean skipDuplicateFiles;
     private final Collection<File> sourceFiles;
-    private final List<SingleFileReport>  reports;
     private final boolean ignoreLiterals;
     private final boolean ignoreIdentifiers;
     private final boolean ignoreAnnotations;
@@ -28,7 +29,9 @@ public class CpdAction implements Runnable {
     private final String skipBlocksPattern;
     private final boolean ignoreFailures;
 
-    public CpdAction(String encoding, int minimumTokenCount, String language, boolean skipLexicalErrors, boolean skipDuplicateFiles, Collection<File> sourceFiles, List<SingleFileReport> reports, boolean ignoreFailures, boolean ignoreLiterals, boolean ignoreIdentifiers, boolean ignoreAnnotations, boolean skipBlocks, String skipBlocksPattern) {
+    private List<CpdReportConfiguration> reportConfigs;
+
+    public CpdAction(String encoding, int minimumTokenCount, String language, boolean skipLexicalErrors, boolean skipDuplicateFiles, Collection<File> sourceFiles, boolean ignoreFailures, boolean ignoreLiterals, boolean ignoreIdentifiers, boolean ignoreAnnotations, boolean skipBlocks, String skipBlocksPattern, List<CpdReportConfiguration> reportConfigs) {
         this.encoding = encoding;
         this.minimumTokenCount = minimumTokenCount;
         this.ignoreFailures = ignoreFailures;
@@ -36,18 +39,18 @@ public class CpdAction implements Runnable {
         this.skipLexicalErrors = skipLexicalErrors;
         this.skipDuplicateFiles = skipDuplicateFiles;
         this.sourceFiles = sourceFiles;
-        this.reports = reports;
         this.ignoreLiterals = ignoreLiterals;
         this.ignoreIdentifiers = ignoreIdentifiers;
         this.ignoreAnnotations = ignoreAnnotations;
         this.skipBlocks = skipBlocks;
         this.skipBlocksPattern = skipBlocksPattern;
+        this.reportConfigs = reportConfigs;
     }
 
     @Override
     public void run() {
         CpdExecutor executor = new CpdExecutor(this);
-        CpdReporter reporter = new CpdReporter(this);
+        CpdReporter reporter = new CpdReporter(reportConfigs);
 
         List<Match> matches = executor.run();
         reporter.generate(matches);
@@ -63,7 +66,7 @@ public class CpdAction implements Runnable {
         }
         else {
             String message = "CPD found duplicate code.";
-            SingleFileReport report = reports.get(0);
+            CpdReportConfiguration report = reportConfigs.get(0);
             if (report != null) {
                 String reportUrl = report.getDestination().toString();
                 message += " See the report at " + reportUrl;
@@ -101,10 +104,6 @@ public class CpdAction implements Runnable {
 
     public Collection<File> getSourceFiles() {
         return sourceFiles;
-    }
-
-    public List<SingleFileReport>  getReports() {
-        return reports;
     }
 
     public boolean getIgnoreLiterals() {

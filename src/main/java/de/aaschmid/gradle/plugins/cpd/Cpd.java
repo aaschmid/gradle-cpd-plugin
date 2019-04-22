@@ -2,12 +2,17 @@ package de.aaschmid.gradle.plugins.cpd;
 
 import de.aaschmid.gradle.plugins.cpd.internal.CpdAction;
 import de.aaschmid.gradle.plugins.cpd.internal.CpdReportsImpl;
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration;
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdCsvReport;
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdTextReport;
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdXmlReport;
 import groovy.lang.Closure;
 import org.gradle.api.Action;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
+import org.gradle.api.reporting.Report;
 import org.gradle.api.reporting.Reporting;
 import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Input;
@@ -27,6 +32,7 @@ import org.gradle.workers.WorkerExecutor;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 
 /**
@@ -105,15 +111,54 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
                     getSkipLexicalErrors(),
                     getSkipDuplicateFiles(),
                     new HashSet<>(getSource().getFiles()),
-                    new ArrayList(getReports().getEnabled()),
                     getIgnoreFailures(),
                     getIgnoreLiterals(),
                     getIgnoreIdentifiers(),
                     getIgnoreAnnotations(),
                     getSkipBlocks(),
-                    getSkipBlocksPattern()
+                    getSkipBlocksPattern(),
+                    createCpdReportConfigurations()
             );
         });
+    }
+
+    private List<CpdReportConfiguration> createCpdReportConfigurations() {
+        List<CpdReportConfiguration> result = new ArrayList<>();
+        for (Report report : getReports()) {
+            if (!report.isEnabled()) {
+                continue;
+            }
+
+            if (report instanceof CpdCsvFileReport) {
+                Character separator = ((CpdCsvFileReport) report).getSeparator();
+                result.add(new CpdCsvReport(getEncoding(), report.getDestination(), separator));
+
+            } else if (report instanceof CpdTextFileReport) {
+                String lineSeparator = ((CpdTextFileReport) report).getLineSeparator();
+                boolean trimLeadingCommonSourceWhitespaces = ((CpdTextFileReport) report).getTrimLeadingCommonSourceWhitespaces();
+                result.add(new CpdTextReport(getEncoding(), report.getDestination(), lineSeparator, trimLeadingCommonSourceWhitespaces));
+
+            } else if (report instanceof CpdXmlFileReport) {
+                String encoding = getXmlRendererEncoding((CpdXmlFileReport) report);
+                result.add(new CpdXmlReport(encoding, report.getDestination()));
+
+            } else {
+                throw new IllegalArgumentException(String.format("Report of type '%s' not available.", report.getClass().getSimpleName()));
+            }
+        }
+        return result;
+    }
+
+    // VisibleForTesting
+    String getXmlRendererEncoding(CpdXmlFileReport report) {
+        String encoding = report.getEncoding();
+        if (encoding == null) {
+            encoding = getEncoding();
+        }
+        if (encoding == null) {
+            encoding = System.getProperty("file.encoding");
+        }
+        return encoding;
     }
 
     @Override
