@@ -4,16 +4,16 @@ import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.Cpd
 import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdTextReport;
 import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdXmlReport;
 import net.sourceforge.pmd.cpd.CSVRenderer;
-import net.sourceforge.pmd.cpd.FileReporter;
 import net.sourceforge.pmd.cpd.Match;
-import net.sourceforge.pmd.cpd.Renderer;
-import net.sourceforge.pmd.cpd.ReportException;
 import net.sourceforge.pmd.cpd.SimpleRenderer;
 import net.sourceforge.pmd.cpd.XMLRenderer;
+import net.sourceforge.pmd.cpd.renderer.CPDRenderer;
 import org.gradle.api.GradleException;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.List;
 
@@ -33,24 +33,19 @@ class CpdReporter {
         }
         for (CpdReportConfiguration report : reports) {
 
-            Renderer renderer = createRendererFor(report);
-            String renderedMatches;
+            CPDRenderer renderer = createRendererFor(report);
+            try (FileWriter fileWriter = new FileWriter(report.getDestination())){
 
-            ClassLoader previousContextClassLoader = Thread.currentThread().getContextClassLoader();
-            try {
-                // Workaround for Gradle Worker API uses special classloaders which Xerces dynamic implementation loading does not like
-                Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+                ClassLoader previousContextClassLoader = Thread.currentThread().getContextClassLoader();
+                try {
+                    // Workaround for Gradle Worker API uses special classloaders which Xerces dynamic implementation loading does not like
+                    Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
 
-                renderedMatches = renderer.render(matches.iterator());
-            } finally {
-                Thread.currentThread().setContextClassLoader(previousContextClassLoader);
-            }
-
-            FileReporter reporter = new FileReporter(report.getDestination(), report.getEncoding());
-            try {
-                reporter.report(renderedMatches);
-
-            } catch (ReportException e) {
+                    renderer.render(matches.iterator(), fileWriter);
+                } finally {
+                    Thread.currentThread().setContextClassLoader(previousContextClassLoader);
+                }
+            } catch (IOException e) {
                 throw new GradleException(e.getMessage(), e);
             }
         }
@@ -58,9 +53,9 @@ class CpdReporter {
 
     /**
      * @param report the configured reports used
-     * @return a full configured {@link Renderer} to generate a CPD single file reports.
+     * @return a full configured {@link CPDRenderer} to generate a CPD single file reports.
      */
-    private Renderer createRendererFor(CpdReportConfiguration report) { // TODO CpdRenderer exists since 6.1.0 <- update minimal version!!
+    private CPDRenderer createRendererFor(CpdReportConfiguration report) {
         if (report instanceof CpdCsvReport) {
             char separator = ((CpdCsvReport) report).getSeparator();
 
@@ -76,7 +71,7 @@ class CpdReporter {
             if (logger.isDebugEnabled()) {
                 logger.debug("Creating renderer to generate simple text file separated by '{}' and trimmed '{}'.", lineSeparator, trimLeadingCommonSourceWhitespaces);
             }
-            Renderer result = new SimpleRenderer(lineSeparator);
+            SimpleRenderer result = new SimpleRenderer(lineSeparator);
             setTrimLeadingWhitespacesByReflection(result, trimLeadingCommonSourceWhitespaces);
             return result;
 
@@ -96,7 +91,7 @@ class CpdReporter {
      * <i>Information:</i> Use reflection because neither proper constructor for setting both fields nor setter are
      * available.
      */
-    private void setTrimLeadingWhitespacesByReflection(Renderer result, boolean trimLeadingCommonSourceWhitespaces) {
+    private void setTrimLeadingWhitespacesByReflection(CPDRenderer result, boolean trimLeadingCommonSourceWhitespaces) {
         String fieldName = "trimLeadingWhitespace";
         if (logger.isDebugEnabled()) {
             logger.debug("Try setting '{}' field to '{}' for '{}' by reflection.", fieldName, trimLeadingCommonSourceWhitespaces, result);
