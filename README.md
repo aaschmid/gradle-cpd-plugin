@@ -44,9 +44,9 @@ Explaination: v2.0 removes deprecated rendering API (= `net.sourceforge.pmd.cpd.
 | [v0.4][]       | 2.3 - 4.x   | 5.2.0 - 5.x | 6 - 8  |
 | [v1.0][]       | 2.14 - 5.0  | 5.2.0 - 5.x | 6 - 8  |
 | [v1.1][]       | 2.14 - 5.0  | 5.2.2 - 6.x | 6 - 9  |
-| [v1.2][]       | >= 3.5.1    | >= 5.2.2    | 8 - 11 |
-| [v1.3][]       | >= 4.10.3   | >= 5.2.2    | 8 - 11 |
-| [v2.0][]       | >= 4.10.3   | >= 6.1.0    | 8 - 11 |
+| [v1.2][]       | >= 3.5.1    | >= 5.2.2    | >= 8   |
+| [v1.3][]       | >= 4.10.3   | >= 5.2.2    | >= 8   |
+| [v2.0][]       | >= 4.10.3   | >= 6.1.0    | >= 8   |
 
 ¹: Java version may additionally depend on [PMD][]s version which is properly reflected here.
 
