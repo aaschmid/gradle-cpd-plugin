@@ -133,6 +133,17 @@ check.dependsOn integTest
 
 gradlePlugin {
     testSourceSets sourceSets.integTest
+
+    plugins {
+        cpd {
+            id = "de.aaschmid.cpd"
+            implementationClass = "de.aaschmid.gradle.plugins.cpd.CpdPlugin"
+        }
+        legacyCpd {
+            id = "cpd"
+            implementationClass = "de.aaschmid.gradle.plugins.cpd.CpdPlugin"
+        }
+    }
 }
 
 idea {
@@ -246,7 +257,7 @@ pluginBundle {
     tags = [ 'duplicates', 'cpd', 'copy-paste-detection' ]
 
     plugins {
-        cpdPlugin {
+        cpd {
             id = 'de.aaschmid.cpd'
             displayName = 'Gradle CPD plugin'
         }
