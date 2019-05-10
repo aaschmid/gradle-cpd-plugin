@@ -1,5 +1,6 @@
 package de.aaschmid.gradle.plugins.cpd.internal.worker;
 
+import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.pmd.cpd.Match;
 import org.gradle.api.GradleException;
 import org.slf4j.Logger;
@@ -12,9 +13,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
+@Slf4j
 public class CpdAction implements Runnable {
-
-    private static final Logger log = LoggerFactory.getLogger(CpdAction.class);
 
     private final CpdExecutionConfiguration executionConfig;
     private List<CpdReportConfiguration> reportConfigs;

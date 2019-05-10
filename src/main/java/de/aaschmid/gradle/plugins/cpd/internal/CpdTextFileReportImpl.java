@@ -1,11 +1,15 @@
 package de.aaschmid.gradle.plugins.cpd.internal;
 
 import de.aaschmid.gradle.plugins.cpd.CpdTextFileReport;
+import lombok.Getter;
+import lombok.Setter;
 import org.gradle.api.Task;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.reporting.internal.TaskGeneratedSingleFileReport;
 
+@Getter
+@Setter
 public class CpdTextFileReportImpl extends TaskGeneratedSingleFileReport implements CpdTextFileReport {
 
     private String lineSeparator = CpdTextFileReport.DEFAULT_LINE_SEPARATOR;
@@ -15,23 +19,4 @@ public class CpdTextFileReportImpl extends TaskGeneratedSingleFileReport impleme
         super(name, task);
     }
 
-    @Override
-    public boolean getTrimLeadingCommonSourceWhitespaces() {
-        return trimLeadingCommonSourceWhitespaces;
-    }
-
-    @Override
-    public void setTrimLeadingCommonSourceWhitespaces(boolean trimLeadingCommonSourceWhitespaces) {
-        this.trimLeadingCommonSourceWhitespaces = trimLeadingCommonSourceWhitespaces;
-    }
-
-    @Override
-    public String getLineSeparator() {
-        return lineSeparator;
-    }
-
-    @Override
-    public void setLineSeparator(String lineSeparator) {
-        this.lineSeparator = lineSeparator;
-    }
 }

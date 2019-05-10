@@ -22,7 +22,7 @@ public interface CpdTextFileReport extends SingleFileReport {
      * {@code false}); defaults to {@link #DEFAULT_TRIM_LEADING_COMMON_SOURCE_WHITESPACE}.
      */
     @Input
-    boolean getTrimLeadingCommonSourceWhitespaces();
+    boolean isTrimLeadingCommonSourceWhitespaces();
 
     /**
      * @param trimLeadingCommonSourceWhitespaces set to {@code true} if the leading common whitespaces of a single

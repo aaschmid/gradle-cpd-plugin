@@ -8,17 +8,18 @@ import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.Cpd
 import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdXmlReport;
 import de.aaschmid.gradle.plugins.cpd.internal.CpdReportsImpl;
 import groovy.lang.Closure;
+import lombok.Getter;
+import lombok.Setter;
 import org.gradle.api.Action;
 import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.FileTree;
-import org.gradle.api.logging.Logger;
-import org.gradle.api.logging.Logging;
 import org.gradle.api.reporting.Report;
 import org.gradle.api.reporting.Reporting;
 import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFiles;
+import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
@@ -74,26 +75,15 @@ import java.util.List;
  * @see CpdPlugin
  */
 @CacheableTask
+@Getter
+@Setter
 public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> {
 
-    private static final Logger logger = Logging.getLogger(Cpd.class);
-
+    @Internal
     private final WorkerExecutor workerExecutor;
+
+    @Nested
     private final CpdReportsImpl reports;
-
-    private String encoding;
-    private boolean ignoreAnnotations;
-    private boolean ignoreFailures;
-    private boolean ignoreIdentifiers;
-    private boolean ignoreLiterals;
-    private String language;
-    private int minimumTokenCount;
-    private FileCollection pmdClasspath;
-    private boolean skipDuplicateFiles;
-    private boolean skipLexicalErrors;
-    private boolean skipBlocks;
-    private String skipBlocksPattern;
-
 
     @Inject
     public Cpd(Instantiator instantiator, WorkerExecutor workerExecutor) {
@@ -127,16 +117,16 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
     private CpdExecutionConfiguration createCpdExecutionConfiguration() {
         return new CpdExecutionConfiguration(
                 getEncoding(),
-                getIgnoreAnnotations(),
+                isIgnoreAnnotations(),
                 getIgnoreFailures(),
-                getIgnoreIdentifiers(),
-                getIgnoreLiterals(),
+                isIgnoreIdentifiers(),
+                isIgnoreLiterals(),
                 getLanguage(),
                 getMinimumTokenCount(),
-                getSkipBlocks(),
+                isSkipBlocks(),
                 getSkipBlocksPattern(),
-                getSkipDuplicateFiles(),
-                getSkipLexicalErrors(),
+                isSkipDuplicateFiles(),
+                isSkipLexicalErrors(),
                 getSource().getFiles()
         );
     }
@@ -154,7 +144,7 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
 
             } else if (report instanceof CpdTextFileReport) {
                 String lineSeparator = ((CpdTextFileReport) report).getLineSeparator();
-                boolean trimLeadingCommonSourceWhitespaces = ((CpdTextFileReport) report).getTrimLeadingCommonSourceWhitespaces();
+                boolean trimLeadingCommonSourceWhitespaces = ((CpdTextFileReport) report).isTrimLeadingCommonSourceWhitespaces();
                 result.add(new CpdTextReport(getEncoding(), report.getDestination(), lineSeparator, trimLeadingCommonSourceWhitespaces));
 
             } else if (report instanceof CpdXmlFileReport) {
@@ -193,12 +183,6 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
         return (CpdReports) reports.configure(closure);
     }
 
-    @Override
-    @Nested
-    public CpdReports getReports() {
-        return reports;
-    }
-
     //@Override to be compatible with earlier versions too
     public CpdReports reports(Action<? super CpdReports> action) {
         action.execute(this.reports);
@@ -215,13 +199,7 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
      * @return the charset encoding
      */
     @Input
-    public String getEncoding() {
-        return encoding;
-    }
-
-    public void setEncoding(String encoding) {
-        this.encoding = encoding;
-    }
+    private String encoding;
 
     /**
      * Ignore annotations because more and more modern frameworks use annotations on classes and methods which can be very
@@ -232,13 +210,7 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
      * @return if annotations should be ignored
      */
     @Input
-    public boolean getIgnoreAnnotations() {
-        return ignoreAnnotations;
-    }
-
-    public void setIgnoreAnnotations(boolean ignoreAnnotations) {
-        this.ignoreAnnotations = ignoreAnnotations;
-    }
+    private boolean ignoreAnnotations;
 
     /**
      * Whether or not to allow the build to continue if there are warnings.
@@ -246,15 +218,12 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
      * Example: {@code ignoreFailures = true}
      * {@inheritDoc}
      */
-    @Override
     @Input
-    public boolean getIgnoreFailures() {
-        return ignoreFailures;
-    }
+    private boolean ignoreFailures;
 
     @Override
-    public void setIgnoreFailures(boolean ignoreFailures) {
-        this.ignoreFailures = ignoreFailures;
+    public boolean getIgnoreFailures() {
+        return ignoreFailures;
     }
 
     /**
@@ -266,13 +235,7 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
      * @return whether identifiers should be ignored
      */
     @Input
-    public boolean getIgnoreIdentifiers() {
-        return ignoreIdentifiers;
-    }
-
-    public void setIgnoreIdentifiers(boolean ignoreIdentifiers) {
-        this.ignoreIdentifiers = ignoreIdentifiers;
-    }
+    private boolean ignoreIdentifiers;
 
     /**
      * Option if CPD should ignore literal value differences when evaluating a duplicate block. This means e.g. that
@@ -283,13 +246,7 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
      * @return whether literals should be ignored
      */
     @Input
-    public boolean getIgnoreLiterals() {
-        return ignoreLiterals;
-    }
-
-    public void setIgnoreLiterals(boolean ignoreLiterals) {
-        this.ignoreLiterals = ignoreLiterals;
-    }
+    private boolean ignoreLiterals;
 
     /**
      * Flag to select the appropriate language.
@@ -299,13 +256,7 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
      * @return used language
      */
     @Input
-    public String getLanguage() {
-        return language;
-    }
-
-    public void setLanguage(String language) {
-        this.language = language;
-    }
+    private String language;
 
     /**
      * A positive integer indicating the minimum token count to trigger a CPD match; defaults to
@@ -316,13 +267,7 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
      * @return the minimum token cound
      */
     @Input
-    public int getMinimumTokenCount() {
-        return minimumTokenCount;
-    }
-
-    public void setMinimumTokenCount(int minimumTokenCount) {
-        this.minimumTokenCount = minimumTokenCount;
-    }
+    private int minimumTokenCount;
 
     /**
      * The classpath containing the PMD library which contains the CPD library to be used.
@@ -331,13 +276,7 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
      */
     @InputFiles
     @PathSensitive(PathSensitivity.NAME_ONLY)
-    public FileCollection getPmdClasspath() {
-        return pmdClasspath;
-    }
-
-    public void setPmdClasspath(FileCollection pmdClasspath) {
-        this.pmdClasspath = pmdClasspath;
-    }
+    private FileCollection pmdClasspath;
 
     /**
      * Ignore multiple copies of files of the same name and length in comparison.
@@ -347,13 +286,7 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
      * @return whether duplicate files should be skipped
      */
     @Input
-    public boolean getSkipDuplicateFiles() {
-        return skipDuplicateFiles;
-    }
-
-    public void setSkipDuplicateFiles(boolean skipDuplicateFiles) {
-        this.skipDuplicateFiles = skipDuplicateFiles;
-    }
+    private boolean skipDuplicateFiles;
 
     /**
      * Skip files which cannot be tokenized due to invalid characters instead of aborting CPD.
@@ -363,13 +296,7 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
      * @return whether lexical errors should be skipped
      */
     @Input
-    public boolean getSkipLexicalErrors() {
-        return skipLexicalErrors;
-    }
-
-    public void setSkipLexicalErrors(boolean skipLexicalErrors) {
-        this.skipLexicalErrors = skipLexicalErrors;
-    }
+    private boolean skipLexicalErrors;
 
     /**
      * Enables or disables skipping of blocks configured by {@link #skipBlocksPattern}.
@@ -381,13 +308,7 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
      * @return whether blocks should be skipped by a given pattern
      */
     @Input
-    public boolean getSkipBlocks() {
-        return skipBlocks;
-    }
-
-    public void setSkipBlocks(boolean skipBlocks) {
-        this.skipBlocks = skipBlocks;
-    }
+    private boolean skipBlocks;
 
     /**
      * Configures the pattern, to find the blocks to skip if enabled using {@link #skipBlocks}. It is a {@link String}
@@ -401,11 +322,5 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
      * @return the pattern used to skip blocks
      */
     @Input
-    public String getSkipBlocksPattern() {
-        return skipBlocksPattern;
-    }
-
-    public void setSkipBlocksPattern(String skipBlocksPattern) {
-        this.skipBlocksPattern = skipBlocksPattern;
-    }
+    private String skipBlocksPattern;
 }

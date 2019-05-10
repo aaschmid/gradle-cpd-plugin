@@ -69,7 +69,6 @@ import static java.util.Collections.reverseOrder;
 @Incubating
 public class CpdPlugin implements Plugin<Project> {
 
-    private static final Logger logger = Logging.getLogger(CpdPlugin.class);
     private static final String TASK_NAME_CPD_CHECK = "cpdCheck";
 
     @Override
@@ -97,7 +96,7 @@ public class CpdPlugin implements Plugin<Project> {
         project.getGradle().getTaskGraph().whenReady(graph -> {
             String projectPath = (project.getRootProject() == project) ? project.getPath() : project.getPath() + ":";
             if (!graph.hasTask(projectPath + TASK_NAME_CPD_CHECK)) {
-                if (logger.isWarnEnabled()) {
+                if (project.getLogger().isWarnEnabled()) {
                     Optional<Task> lastCheckTask = graph.getAllTasks().stream().sorted(reverseOrder()).filter(t ->
                             t.getName().endsWith(LifecycleBasePlugin.CHECK_TASK_NAME)).findFirst();
                     if (lastCheckTask.isPresent()) { // it is possible to just execute a task before 'check', e.g. "compileJava"
@@ -116,7 +115,7 @@ public class CpdPlugin implements Plugin<Project> {
                                 "            " + task.getName() + ".dependsOn(" + TASK_NAME_CPD_CHECK + ")\n" +
                                 "        }\n" +
                                 "    }\n";
-                        logger.warn(message);
+                        project.getLogger().warn(message);
                     }
                 }
             }

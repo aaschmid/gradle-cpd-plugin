@@ -1,5 +1,7 @@
 package de.aaschmid.gradle.plugins.cpd;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.gradle.api.plugins.quality.CodeQualityExtension;
 
 
@@ -21,18 +23,9 @@ import org.gradle.api.plugins.quality.CodeQualityExtension;
  *
  * @see CpdPlugin
  */
+@Getter
+@Setter
 public class CpdExtension extends CodeQualityExtension {
-
-    private String encoding = System.getProperty("file.encoding");
-    private boolean ignoreAnnotations = false;
-    private boolean ignoreIdentifiers = false;
-    private boolean ignoreLiterals = false;
-    private String language = "java";
-    private int minimumTokenCount = 50;
-    private boolean skipDuplicateFiles = false;
-    private boolean skipLexicalErrors = false;
-    private boolean skipBlocks = true;
-    private String skipBlocksPattern = "#if 0|#endif";
 
     /**
      * The character set encoding (e.g., UTF-8) to use when reading the source code files but also when producing the
@@ -42,13 +35,7 @@ public class CpdExtension extends CodeQualityExtension {
      *
      * @return the charset encoding
      */
-    public String getEncoding() {
-        return encoding;
-    }
-
-    public void setEncoding(String encoding) {
-        this.encoding = encoding;
-    }
+    private String encoding = System.getProperty("file.encoding");
 
     /**
      * Ignore annotations because more and more modern frameworks use annotations on classes and methods which can be
@@ -60,13 +47,7 @@ public class CpdExtension extends CodeQualityExtension {
      *
      * @return whether annotation should be ignored
      */
-    public boolean isIgnoreAnnotations() {
-        return ignoreAnnotations;
-    }
-
-    public void setIgnoreAnnotations(boolean ignoreAnnotations) {
-        this.ignoreAnnotations = ignoreAnnotations;
-    }
+    private boolean ignoreAnnotations = false;
 
     /**
      * Option if CPD should ignore identifiers differences, i.e. variable names, methods names, and so forth, when
@@ -78,13 +59,7 @@ public class CpdExtension extends CodeQualityExtension {
      *
      * @return whether identifiers should be ignored
      */
-    public boolean isIgnoreIdentifiers() {
-        return ignoreIdentifiers;
-    }
-
-    public void setIgnoreIdentifiers(boolean ignoreIdentifiers) {
-        this.ignoreIdentifiers = ignoreIdentifiers;
-    }
+    private boolean ignoreIdentifiers = false;
 
     /**
      * Option if CPD should ignore literal value differences when evaluating a duplicate block; defaults to {@code
@@ -96,13 +71,7 @@ public class CpdExtension extends CodeQualityExtension {
      *
      * @return whether literals should be ignored
      */
-    public boolean isIgnoreLiterals() {
-        return ignoreLiterals;
-    }
-
-    public void setIgnoreLiterals(boolean ignoreLiterals) {
-        this.ignoreLiterals = ignoreLiterals;
-    }
+    private boolean ignoreLiterals = false;
 
     /**
      * Flag to select the appropriate language; defaults to {@code 'java'}.
@@ -111,13 +80,7 @@ public class CpdExtension extends CodeQualityExtension {
      *
      * @return the used language
      */
-    public String getLanguage() {
-        return language;
-    }
-
-    public void setLanguage(String language) {
-        this.language = language;
-    }
+    private String language = "java";
 
     /**
      * A positive integer indicating the minimum token count to trigger a CPD match; defaults to {@code 50}.
@@ -126,13 +89,7 @@ public class CpdExtension extends CodeQualityExtension {
      *
      * @return the minimum token count
      */
-    public int getMinimumTokenCount() {
-        return minimumTokenCount;
-    }
-
-    public void setMinimumTokenCount(int minimumTokenCount) {
-        this.minimumTokenCount = minimumTokenCount;
-    }
+    private int minimumTokenCount = 50;
 
     /**
      * Ignore multiple copies of files of the same name and length in comparison; defaults to {@code false}.
@@ -141,13 +98,7 @@ public class CpdExtension extends CodeQualityExtension {
      *
      * @return whether duplicate files should be skipped
      */
-    public boolean isSkipDuplicateFiles() {
-        return skipDuplicateFiles;
-    }
-
-    public void setSkipDuplicateFiles(boolean skipDuplicateFiles) {
-        this.skipDuplicateFiles = skipDuplicateFiles;
-    }
+    private boolean skipDuplicateFiles = false;
 
     /**
      * Skip files which cannot be tokenized due to invalid characters instead of aborting CPD; defaults to {@code
@@ -157,13 +108,7 @@ public class CpdExtension extends CodeQualityExtension {
      *
      * @return whether lexical errors should be skipped
      */
-    public boolean isSkipLexicalErrors() {
-        return skipLexicalErrors;
-    }
-
-    public void setSkipLexicalErrors(boolean skipLexicalErrors) {
-        this.skipLexicalErrors = skipLexicalErrors;
-    }
+    private boolean skipLexicalErrors = false;
 
     /**
      * Enables or disables skipping of blocks configured by {@link #skipBlocksPattern} like a pre-processor; defaults to
@@ -175,13 +120,7 @@ public class CpdExtension extends CodeQualityExtension {
      *
      * @return whether blocks should be skipped by a given pattern
      */
-    public boolean isSkipBlocks() {
-        return skipBlocks;
-    }
-
-    public void setSkipBlocks(boolean skipBlocks) {
-        this.skipBlocks = skipBlocks;
-    }
+    private boolean skipBlocks = true;
 
     /**
      * CConfigures the pattern, to find the blocks to skip if enabled using {@link #skipBlocks}. It is a {@link String}
@@ -195,11 +134,5 @@ public class CpdExtension extends CodeQualityExtension {
      *
      * @return the pattern used to skip blocks
      */
-    public String getSkipBlocksPattern() {
-        return skipBlocksPattern;
-    }
-
-    public void setSkipBlocksPattern(String skipBlocksPattern) {
-        this.skipBlocksPattern = skipBlocksPattern;
-    }
+    private String skipBlocksPattern = "#if 0|#endif";
 }

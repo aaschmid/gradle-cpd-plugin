@@ -3,6 +3,9 @@ package de.aaschmid.gradle.plugins.cpd.internal.worker;
 import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdCsvReport;
 import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdTextReport;
 import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdXmlReport;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.pmd.cpd.CSVRenderer;
 import net.sourceforge.pmd.cpd.Match;
 import net.sourceforge.pmd.cpd.SimpleRenderer;
@@ -17,19 +20,15 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.List;
 
+@Slf4j
+@RequiredArgsConstructor
 class CpdReporter {
-
-    private static final Logger logger = Logging.getLogger(CpdReporter.class);
 
     private final List<CpdReportConfiguration> reports;
 
-    CpdReporter(List<CpdReportConfiguration> reports) {
-        this.reports = reports;
-    }
-
     void generate(List<Match> matches) {
-        if (logger.isInfoEnabled()) {
-            logger.info("Generating reports");
+        if (log.isInfoEnabled()) {
+            log.info("Generating reports");
         }
         for (CpdReportConfiguration report : reports) {
 
@@ -59,17 +58,17 @@ class CpdReporter {
         if (report instanceof CpdCsvReport) {
             char separator = ((CpdCsvReport) report).getSeparator();
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("Creating renderer to generate CSV file separated by '{}'.", separator);
+            if (log.isDebugEnabled()) {
+                log.debug("Creating renderer to generate CSV file separated by '{}'.", separator);
             }
             return new CSVRenderer(separator);
 
         } else if (report instanceof CpdTextReport) {
             String lineSeparator = ((CpdTextReport) report).getLineSeparator();
-            boolean trimLeadingCommonSourceWhitespaces = ((CpdTextReport) report).getTrimLeadingCommonSourceWhitespaces();
+            boolean trimLeadingCommonSourceWhitespaces = ((CpdTextReport) report).isTrimLeadingCommonSourceWhitespaces();
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("Creating renderer to generate simple text file separated by '{}' and trimmed '{}'.", lineSeparator, trimLeadingCommonSourceWhitespaces);
+            if (log.isDebugEnabled()) {
+                log.debug("Creating renderer to generate simple text file separated by '{}' and trimmed '{}'.", lineSeparator, trimLeadingCommonSourceWhitespaces);
             }
             SimpleRenderer result = new SimpleRenderer(lineSeparator);
             setTrimLeadingWhitespacesByReflection(result, trimLeadingCommonSourceWhitespaces);
@@ -77,8 +76,8 @@ class CpdReporter {
 
         } else if (report instanceof CpdXmlReport) {
             String encoding = report.getEncoding();
-            if (logger.isDebugEnabled()) {
-                logger.debug("Creating XML renderer to generate with encoding '{}'.", encoding);
+            if (log.isDebugEnabled()) {
+                log.debug("Creating XML renderer to generate with encoding '{}'.", encoding);
             }
             return new XMLRenderer(encoding);
         }
@@ -93,8 +92,8 @@ class CpdReporter {
      */
     private void setTrimLeadingWhitespacesByReflection(CPDRenderer result, boolean trimLeadingCommonSourceWhitespaces) {
         String fieldName = "trimLeadingWhitespace";
-        if (logger.isDebugEnabled()) {
-            logger.debug("Try setting '{}' field to '{}' for '{}' by reflection.", fieldName, trimLeadingCommonSourceWhitespaces, result);
+        if (log.isDebugEnabled()) {
+            log.debug("Try setting '{}' field to '{}' for '{}' by reflection.", fieldName, trimLeadingCommonSourceWhitespaces, result);
         }
         try {
             Field field = SimpleRenderer.class.getDeclaredField(fieldName);
@@ -102,8 +101,8 @@ class CpdReporter {
             field.set(result, trimLeadingCommonSourceWhitespaces);
 
         } catch (Exception e) {
-            if (logger.isWarnEnabled()) { // TODO test if it is really logged?
-                logger.warn(String.format("Could not set field '%s' on created SimpleRenderer by reflection due to:", fieldName), e);
+            if (log.isWarnEnabled()) { // TODO test if it is really logged?
+                log.warn(String.format("Could not set field '%s' on created SimpleRenderer by reflection due to:", fieldName), e);
             }
         }
     }

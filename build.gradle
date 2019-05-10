@@ -10,6 +10,7 @@ plugins {
     id 'signing'
     id 'com.gradle.plugin-publish' version '0.10.1'
     id 'com.jfrog.bintray' version '1.8.4'
+    id 'io.freefair.lombok' version '2.9.5'
 }
 
 description = 'Gradle plugin to find duplicate code using PMDs copy/paste detection (= CPD)'

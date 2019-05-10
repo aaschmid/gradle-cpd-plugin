@@ -1,5 +1,6 @@
 package de.aaschmid.gradle.plugins.cpd.internal.worker;
 
+import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.pmd.cpd.AnyLanguage;
 import net.sourceforge.pmd.cpd.CPD;
 import net.sourceforge.pmd.cpd.CPDConfiguration;
@@ -22,9 +23,8 @@ import static java.util.Spliterators.spliteratorUnknownSize;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
+@Slf4j
 class CpdExecutor {
-
-    private static final Logger logger = Logging.getLogger(CpdExecutor.class);
 
     private final CPDConfiguration cpdConfig;
     private final Collection<File> sourceFiles;
@@ -64,9 +64,9 @@ class CpdExecutor {
             Thread.currentThread().setContextClassLoader(CpdExecutor.class.getClassLoader());
 
             Language result = LanguageFactory.createLanguage(language, languageProperties);
-            logger.info("Using CPD language class '{}' for checking duplicates.", result);
+            log.info("Using CPD language class '{}' for checking duplicates.", result);
             if (result instanceof AnyLanguage) {
-                logger.warn("Could not detect CPD language for '{}', using 'any' as fallback language.", language);
+                log.warn("Could not detect CPD language for '{}', using 'any' as fallback language.", language);
             }
             return result;
         } finally {
@@ -75,8 +75,8 @@ class CpdExecutor {
     }
 
     List<Match> run() {
-        if (logger.isInfoEnabled()) {
-            logger.info("Starting CPD, minimumTokenCount is {}", cpdConfig.getMinimumTileSize());
+        if (log.isInfoEnabled()) {
+            log.info("Starting CPD, minimumTokenCount is {}", cpdConfig.getMinimumTileSize());
         }
         try {
             CPD cpd = new CPD(cpdConfig);
@@ -92,24 +92,24 @@ class CpdExecutor {
 
     private void tokenizeSourceFiles(CPD cpd) throws IOException {
         for (File file : sourceFiles) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Tokenize {}", file.getAbsolutePath());
+            if (log.isDebugEnabled()) {
+                log.debug("Tokenize {}", file.getAbsolutePath());
             }
             cpd.add(file);
         }
     }
 
     private void analyzeSourceCode(CPD cpd) {
-        if (logger.isInfoEnabled()) {
-            logger.info("Starting to analyze code");
+        if (log.isInfoEnabled()) {
+            log.info("Starting to analyze code");
         }
         long start = System.currentTimeMillis();
         cpd.go();
         long stop = System.currentTimeMillis();
 
         long timeTaken = stop - start;
-        if (logger.isInfoEnabled()) {
-            logger.info("Successfully analyzed code - took {} milliseconds", timeTaken);
+        if (log.isInfoEnabled()) {
+            log.info("Successfully analyzed code - took {} milliseconds", timeTaken);
         }
     }
 }

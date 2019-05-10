@@ -1,26 +1,20 @@
 package de.aaschmid.gradle.plugins.cpd.internal.worker;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Value;
+
 import java.io.File;
 import java.io.Serializable;
 
+@RequiredArgsConstructor
+@Getter
 public class CpdReportConfiguration implements Serializable {
 
     private final String encoding;
     private final File destination;
 
-    CpdReportConfiguration(String encoding, File destination) {
-        this.encoding = encoding;
-        this.destination = destination;
-    }
-
-    String getEncoding() {
-        return encoding;
-    }
-
-    File getDestination() {
-        return destination;
-    }
-
+    @Getter
     public static class CpdCsvReport extends CpdReportConfiguration {
         private final Character separator;
 
@@ -28,12 +22,9 @@ public class CpdReportConfiguration implements Serializable {
             super(encoding, destination);
             this.separator = separator;
         }
-
-        Character getSeparator() {
-            return separator;
-        }
     }
 
+    @Getter
     public static class CpdTextReport extends CpdReportConfiguration {
         private final String lineSeparator;
         private final boolean trimLeadingCommonSourceWhitespaces;
@@ -42,14 +33,6 @@ public class CpdReportConfiguration implements Serializable {
             super(encoding, destination);
             this.lineSeparator = lineSeparator;
             this.trimLeadingCommonSourceWhitespaces = trimLeadingCommonSourceWhitespaces;
-        }
-
-        String getLineSeparator() {
-            return lineSeparator;
-        }
-
-        boolean getTrimLeadingCommonSourceWhitespaces() {
-            return trimLeadingCommonSourceWhitespaces;
         }
     }
 
