@@ -8,8 +8,6 @@ import org.gradle.api.reporting.internal.TaskGeneratedSingleFileReport;
 
 public class CpdTextFileReportImpl extends TaskGeneratedSingleFileReport implements CpdTextFileReport {
 
-    private static final Logger logger = Logging.getLogger(CpdReporter.class);
-
     private String lineSeparator = CpdTextFileReport.DEFAULT_LINE_SEPARATOR;
     private boolean trimLeadingCommonSourceWhitespaces = CpdTextFileReport.DEFAULT_TRIM_LEADING_COMMON_SOURCE_WHITESPACE;
 

@@ -54,7 +54,7 @@ class CpdPluginTest extends BaseSpec {
 
     def "applying 'CpdPlugin' creates and configures task 'cpdCheck' with correct default values"() {
         given:
-        Cpd task = project.tasks.findByName('cpdCheck')
+        Cpd task = project.tasks.getByName('cpdCheck')
 
         expect:
         task instanceof Cpd
@@ -124,8 +124,8 @@ class CpdPluginTest extends BaseSpec {
         given:
         project.plugins.apply(LifecycleBasePlugin)
 
-        def checkTask = project.tasks.findByName('check')
-        def cpdTask = project.tasks.findByName('cpdCheck')
+        def checkTask = project.tasks.getByName('check')
+        def cpdTask = project.tasks.getByName('cpdCheck')
 
         expect:
         checkTask.taskDependencies.getDependencies(checkTask).find{ Task task ->
@@ -144,7 +144,7 @@ class CpdPluginTest extends BaseSpec {
             test.java.srcDir testFile('de/aaschmid/test')
         }
 
-        def cpdTask = project.tasks.findByName('cpdCheck')
+        def cpdTask = project.tasks.getByName('cpdCheck')
 
         expect:
         cpdTask.source.files == [ *testFilesRecurseIn('de/aaschmid/clazz'), *testFilesRecurseIn('de/aaschmid/test') ] as Set
@@ -161,7 +161,7 @@ class CpdPluginTest extends BaseSpec {
             test.groovy.srcDir testFile('de/aaschmid/test')
         }
 
-        def cpdTask = project.tasks.findByName('cpdCheck')
+        def cpdTask = project.tasks.getByName('cpdCheck')
 
         expect:
         cpdTask.source.files == [ *testFilesRecurseIn('de/aaschmid/clazz'), *testFilesRecurseIn('de/aaschmid/test') ] as Set
@@ -177,7 +177,7 @@ class CpdPluginTest extends BaseSpec {
             }
         }
 
-        def cpdTask = project.tasks.findByName('cpdCheck')
+        def cpdTask = project.tasks.getByName('cpdCheck')
 
         expect:
         cpdTask.source.files == [ *testFilesRecurseIn('de/aaschmid/foo'), *testFilesRecurseIn('de/aaschmid/clazz') ] as Set
@@ -194,8 +194,8 @@ class CpdPluginTest extends BaseSpec {
             tmp.java.srcDir testFile('')
         }
 
-        def checkTask = project.tasks.findByName('check')
-        def cpdTask = project.tasks.findByName('cpdCheck')
+        def checkTask = project.tasks.getByName('check')
+        def cpdTask = project.tasks.getByName('cpdCheck')
 
         expect:
         checkTask.taskDependencies.getDependencies(checkTask).find{ Task task ->
@@ -218,7 +218,7 @@ class CpdPluginTest extends BaseSpec {
             skipBlocks = false
         }
 
-        def task = project.tasks.findByName('cpdCheck')
+        def task = project.tasks.getByName('cpdCheck')
 
         expect:
         task instanceof Cpd
@@ -280,7 +280,7 @@ class CpdPluginTest extends BaseSpec {
             source = project.file('src/')
         }
 
-        def task = project.tasks.findByName('cpdCheck')
+        def task = project.tasks.getByName('cpdCheck')
 
         expect:
         task instanceof Cpd

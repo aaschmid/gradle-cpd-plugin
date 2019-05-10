@@ -1,4 +1,4 @@
-package de.aaschmid.gradle.plugins.cpd.internal
+package de.aaschmid.gradle.plugins.cpd.internal.worker
 
 import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdCsvReport
 import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdTextReport
@@ -61,7 +61,7 @@ class CpdReporterTest extends Specification {
         mark1.sourceCode = mark2.sourceCode = new SourceCode(new StringCodeLoader("def str = 'I am a duplicate'"))
         def match = new Match(5, mark1, mark2)
 
-        def underTest = new de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReporter([ report])
+        def underTest = new CpdReporter([ report])
 
         when:
         underTest.generate([ match, match ])

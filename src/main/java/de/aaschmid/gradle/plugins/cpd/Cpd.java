@@ -1,19 +1,21 @@
 package de.aaschmid.gradle.plugins.cpd;
 
-import de.aaschmid.gradle.plugins.cpd.internal.CpdExecutor;
-import de.aaschmid.gradle.plugins.cpd.internal.CpdReporter;
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdAction;
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdExecutionConfiguration;
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration;
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdCsvReport;
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdTextReport;
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdXmlReport;
 import de.aaschmid.gradle.plugins.cpd.internal.CpdReportsImpl;
 import groovy.lang.Closure;
-import net.sourceforge.pmd.cpd.LanguageFactory;
-import net.sourceforge.pmd.cpd.Match;
 import org.gradle.api.Action;
-import org.gradle.api.GradleException;
+import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
+import org.gradle.api.reporting.Report;
 import org.gradle.api.reporting.Reporting;
-import org.gradle.api.reporting.SingleFileReport;
 import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFiles;
@@ -26,17 +28,11 @@ import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.VerificationTask;
 import org.gradle.internal.reflect.Instantiator;
 import org.gradle.util.DeprecationLogger;
+import org.gradle.workers.WorkerConfiguration;
+import org.gradle.workers.WorkerExecutor;
 
 import javax.inject.Inject;
-import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.UndeclaredThrowableException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -82,6 +78,7 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
 
     private static final Logger logger = Logging.getLogger(Cpd.class);
 
+    private final WorkerExecutor workerExecutor;
     private final CpdReportsImpl reports;
 
     private String encoding;
@@ -97,71 +94,90 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
     private boolean skipBlocks;
     private String skipBlocksPattern;
 
+
     @Inject
-    public Cpd(Instantiator instantiator) {
+    public Cpd(Instantiator instantiator, WorkerExecutor workerExecutor) {
+        this.workerExecutor = workerExecutor;
         this.reports = DeprecationLogger.whileDisabled(() -> instantiator.newInstance(CpdReportsImpl.class, this));
     }
 
     @TaskAction
-    void run() {
-        // TODO very ugly class loading hack but as using org.gradle.process.internal.WorkerProcess does not work due to classpath problems using my own classes, this is the only why for now :-(
-        addPmdClasspathToClassLoader();
+    public void run() {
+        checkTaskState();
 
-        // use getter to access properties that they are resolved correctly using conventionMapping
-        CpdReporter reporter = new CpdReporter(this);
-        CpdExecutor executor = new CpdExecutor(this);
-
-        List<Match> matches = executor.run();
-        reporter.generate(matches);
-        logResult(matches);
+        workerExecutor.submit(CpdAction.class, (WorkerConfiguration config) -> {
+            config.setClasspath(getPmdClasspath());
+            config.setDisplayName("CPD worker");
+            config.setParams(createCpdExecutionConfiguration(), createCpdReportConfigurations());
+        });
     }
 
-    private void addPmdClasspathToClassLoader() {
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        try {
-            Method addUrlMethod = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-            addUrlMethod.setAccessible(true);
-            for (File file : getPmdClasspath().getFiles()) {
-                addUrlMethod.invoke(cl, file.toURI().toURL());
-            }
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | MalformedURLException e) {
-            throw new GradleException("Could not add pmd classpath urls to context classloader.", e);
+    private void checkTaskState() {
+        if (getEncoding() == null) {
+            throw new InvalidUserDataException(String.format("Task '%s' requires 'encoding' but was: %s.", getName(), getEncoding()));
+        }
+        if (getMinimumTokenCount() <= 0) {
+            throw new InvalidUserDataException(String.format("Task '%s' requires 'minimumTokenCount' to be greater than zero.", getName()));
+        }
+        if (reports.getEnabled().isEmpty()) {
+            throw new InvalidUserDataException(String.format("Task '%s' requires at least one enabled report.", getName()));
         }
     }
 
+    private CpdExecutionConfiguration createCpdExecutionConfiguration() {
+        return new CpdExecutionConfiguration(
+                getEncoding(),
+                getIgnoreAnnotations(),
+                getIgnoreFailures(),
+                getIgnoreIdentifiers(),
+                getIgnoreLiterals(),
+                getLanguage(),
+                getMinimumTokenCount(),
+                getSkipBlocks(),
+                getSkipBlocksPattern(),
+                getSkipDuplicateFiles(),
+                getSkipLexicalErrors(),
+                getSource().getFiles()
+        );
+    }
 
-    private void logResult(List<Match> matches) {
-        if (matches.isEmpty()) {
-            if (logger.isInfoEnabled()) {
-                logger.info("No duplicates over {} tokens found.", getMinimumTokenCount());
+    private List<CpdReportConfiguration> createCpdReportConfigurations() {
+        List<CpdReportConfiguration> result = new ArrayList<>();
+        for (Report report : getReports()) {
+            if (!report.isEnabled()) {
+                continue;
             }
 
-        } else {
-            String message = "CPD found duplicate code.";
-            SingleFileReport report = reports.getFirstEnabled();
-            if (report != null) {
-                String reportUrl = asClickableFileUrl(report.getDestination());
-                message += " See the report at " + reportUrl;
-            }
-            if (getIgnoreFailures()) {
-                if (logger.isWarnEnabled()) {
-                    logger.warn(message);
-                }
+            if (report instanceof CpdCsvFileReport) {
+                Character separator = ((CpdCsvFileReport) report).getSeparator();
+                result.add(new CpdCsvReport(getEncoding(), report.getDestination(), separator));
+
+            } else if (report instanceof CpdTextFileReport) {
+                String lineSeparator = ((CpdTextFileReport) report).getLineSeparator();
+                boolean trimLeadingCommonSourceWhitespaces = ((CpdTextFileReport) report).getTrimLeadingCommonSourceWhitespaces();
+                result.add(new CpdTextReport(getEncoding(), report.getDestination(), lineSeparator, trimLeadingCommonSourceWhitespaces));
+
+            } else if (report instanceof CpdXmlFileReport) {
+                String encoding = getXmlRendererEncoding((CpdXmlFileReport) report);
+                result.add(new CpdXmlReport(encoding, report.getDestination()));
+
             } else {
-                throw new GradleException(message);
+                throw new IllegalArgumentException(String.format("Report of type '%s' not available.", report.getClass().getSimpleName()));
             }
         }
+        return result;
     }
 
-    private String asClickableFileUrl(File path) {
-        // File.toURI().toString() leads to an URL like this on Mac: file:/reports/index.html
-        // This URL is not recognized by the Mac console (too few leading slashes). We solve
-        // this be creating an URI with an empty authority.
-        try {
-            return new URI("file", "", path.toURI().getPath(), null, null).toString();
-        } catch (URISyntaxException e) {
-            throw new UndeclaredThrowableException(e);
+    // VisibleForTesting
+    String getXmlRendererEncoding(CpdXmlFileReport report) {
+        String encoding = report.getEncoding();
+        if (encoding == null) {
+            encoding = getEncoding();
         }
+        if (encoding == null) {
+            encoding = System.getProperty("file.encoding");
+        }
+        return encoding;
     }
 
     @Override

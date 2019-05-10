@@ -18,7 +18,6 @@ public interface CpdCsvFileReport extends SingleFileReport {
      * @return the separator {@link Character} used to generate CSV report; defaults to {@link #DEFAULT_SEPARATOR}.
      */
     @Input
-    @Optional
     Character getSeparator();
 
     /**

@@ -29,9 +29,11 @@ A [Gradle](http://gradle.org) plugin to find duplicate code using [PMD][]s copy/
 Requirements
 ------------
 
-Currently this plugin requires [PMD](https://pmd.github.io/) greater or equal to version 5.2.2 such that ```toolVersion >= '5.2.2'```.
+Currently this plugin requires [PMD](https://pmd.github.io/) greater or equal to version 6.1.0 such that ```toolVersion >= '6.1.0'```.
 
-Explaination: v1.0 supports `OPTION_SKIP_BLOCKS` with was introduced in `net.sourceforge.pmd.cpd.Tokenizer` with v5.2.2.
+Explaination: v2.0 removes deprecated rendering API (= `net.sourceforge.pmd.cpd.Renderer`) and replace it with new
+`net.sourceforge.pmd.cpd.renderer.CPDRenderer` which was introduced with v6.1.0, see
+[PMD release notes](https://pmd.github.io/2018/02/25/PMD-6.1.0/#api-changes).
 
 ### Supported versions
 
@@ -42,8 +44,9 @@ Explaination: v1.0 supports `OPTION_SKIP_BLOCKS` with was introduced in `net.sou
 | [v0.4][]       | 2.3 - 4.x   | 5.2.0 - 5.x | 6 - 8  |
 | [v1.0][]       | 2.14 - 5.0  | 5.2.0 - 5.x | 6 - 8  |
 | [v1.1][]       | 2.14 - 5.0  | 5.2.2 - 6.x | 6 - 9  |
-| [v1.2][]       | >= 3.5.1    | >= 5.2.2    | 8 - 11 |
-| [v1.3][]       | >= 4.10.3   | >= 5.2.2    | 8 - 11 |
+| [v1.2][]       | >= 3.5.1    | >= 5.2.2    | >= 8   |
+| [v1.3][]       | >= 4.10.3   | >= 5.2.2    | >= 8   |
+| [v2.0][]       | >= 4.10.3   | >= 6.1.0    | >= 8   |
 
 ¹: Java version may additionally depend on [PMD][]s version which is properly reflected here.
 
@@ -55,11 +58,13 @@ This plugin is available using either the new [Gradle plugins DSL](https://gradl
 
 ```groovy
 plugins {
-    id 'de.aaschmid.cpd' version '1.2'
+    id 'de.aaschmid.cpd' version '2.0'
 }
 ```
 
-or the old fashion [buildscript block](https://gradle.org/docs/current/userguide/plugins.html#sec:applying_plugins_buildscript) from [Maven Central](http://search.maven.org/#search|ga|1|gradle-cpd-plugin) or [jCenter](https://bintray.com/aaschmid/gradle-plugins/gradle-cpd-plugin/view).
+or the old fashion [buildscript block](https://gradle.org/docs/current/userguide/plugins.html#sec:applying_plugins_buildscript)
+from [Maven Central](http://search.maven.org/#search|ga|1|gradle-cpd-plugin) or
+[jCenter](https://bintray.com/aaschmid/gradle-plugins/gradle-cpd-plugin/view).
 ```groovy
 buildscript {
     repositories {
@@ -69,7 +74,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'de.aaschmid:gradle-cpd-plugin:1.2'
+        classpath 'de.aaschmid:gradle-cpd-plugin:2.0'
     }
 }
 apply plugin: 'cpd'
@@ -77,11 +82,13 @@ apply plugin: 'cpd'
 
 **Attention:** The plugins groupId was changed from ```de.aaschmid.gradle.plugins``` to ```de.aaschmid``` in [v1.0][].
 
-By default the copy-paste-detection looks at all source code of all projects which at least apply ```LifecycleBasePlugin```. If you use a different programming language and want to get it configurated out of the box, please open an issue :-)
+By default the copy-paste-detection looks at all source code of all projects which at least apply ```LifecycleBasePlugin```.
+If you use a different programming language and want to get it configurated out of the box, please open an issue :-)
 
 ### Single module project
 
-If you have a single module project you just need to make sure that the ```LifecycleBasePlugin``` is also applied to it (explicitly or implicitly through e.g. Java or Groovy plugin). Otherwise you can simply add a dependency to a task you like by
+If you have a single module project you just need to make sure that the ```LifecycleBasePlugin``` is also applied to it
+(explicitly or implicitly through e.g. Java or Groovy plugin). Otherwise you can simply add a dependency to a task you like by
 
 ```groovy
 analyze.dependsOn(cpdCheck)
@@ -89,7 +96,9 @@ analyze.dependsOn(cpdCheck)
 
 ### Multi module project
 
-If the root project of your multi-module project applies the ```LifecycleBasePlugin```, you are done. But most likely this is not how your project looks like. If so, you need to manually add a task graph dependency manually to either one or all of your subprojects such that the ```cpdCheck``` task is executed:
+If the root project of your multi-module project applies the ```LifecycleBasePlugin```, you are done. But most likely this
+is not how your project looks like. If so, you need to manually add a task graph dependency manually to either one or all
+of your subprojects such that the ```cpdCheck``` task is executed:
 
 ```groovy
 // one single subproject where 'LifecycleBasePlugin' is available
@@ -111,7 +120,7 @@ This example shows a project where only  ```main``` sources should be checked fo
 // optional - settings for every CPD task
 cpd {
     language = 'cpp'
-    toolVersion = '5.2.3' // defaults to '6.13.0'; just available for v5.2.0 and higher (see explanation above)
+    toolVersion = '6.1.0' // defaults to '6.13.0'; just available for v6.1.0 and higher (see explanation above)
 }
 
 // optional - default report is xml and default sources are 'main' and 'test'
@@ -128,7 +137,9 @@ cpdCheck {
 
 ### Kotlin support
 
-[CPD][] supports [Kotlin](https://kotlinlang.org/) since [v6.10.0](https://search.maven.org/search?q=g:net.sourceforge.pmd%20AND%20a:pmd-kotlin&core=gav). For previous versions you have to ignore files manuelly if you mixed it up with your Java files:
+[CPD][] supports [Kotlin](https://kotlinlang.org/) since
+[v6.10.0](https://search.maven.org/search?q=g:net.sourceforge.pmd%20AND%20a:pmd-kotlin&core=gav). For previous versions
+you have to ignore files manuelly if you mixed it up with your Java files:
 ```groovy
 tasks.withType(Cpd) {
     exclude "*.kt"
@@ -154,6 +165,9 @@ e.g. using ```cpdCheck { }```:
 | skipLexicalErrors  | ```false```          |                            | [v0.5][] |
 | skipBlocks         | ```true```           | ```'cpp'```                | [v0.4][] |
 | skipBlocksPattern  | ```'#if 0\|#endif'``` | ```'cpp'```                | [v0.4][] |
+
+If a specified `language` cannot be found, a fallback mechanism uses `net.sourceforge.pmd.cpd.AnyLanguage` instead. This
+fallback language does not run ANTLR and therefore also checks duplicates in comments.
 
 For more information about options and their descriptions, see [here](https://pmd.github.io/latest/pmd_userdocs_cpd.html#attribute-reference),
 and for the available programming languages have a look on [CPD documentation](https://pmd.github.io/latest/pmd_userdocs_cpd.html#supported-languages).
@@ -188,3 +202,5 @@ Please note that running the test cases my take quite long becuase the acceptanc
 [v1.0]: /../../releases/tag/v1.0
 [v1.1]: /../../releases/tag/v1.1
 [v1.2]: /../../releases/tag/v1.2
+[v1.3]: /../../releases/tag/v1.3
+[v2.0]: /../../releases/tag/v2.0
