@@ -1,6 +1,5 @@
 plugins {
     id 'groovy'
-    id 'idea'
     id 'jacoco'
     id 'com.github.kt3k.coveralls' version '2.6.3'
 
@@ -26,44 +25,24 @@ repositories {
     mavenCentral()
 }
 
-configurations {
-    provided
-}
-
 sourceSets {
-    main {
-        compileClasspath += configurations.provided
-        runtimeClasspath += configurations.provided
-    }
-    test {
-        compileClasspath += configurations.provided
-        runtimeClasspath += configurations.provided
-    }
     integTest {
-        compileClasspath += configurations.provided + main.output + test.output
-        runtimeClasspath += configurations.provided + main.output + test.output
+        compileClasspath += main.output + test.output
+        runtimeClasspath += main.output + test.output
     }
-}
-
-configurations {
-    integTestCompile.extendsFrom testCompile
-    integTestRuntime.extendsFrom testRuntime
 }
 
 dependencies {
-    provided gradleApi()
-    provided localGroovy()
 
-    provided 'javax.inject:javax.inject:1'
-    provided 'net.sourceforge.pmd:pmd-dist:6.13.0'
+    compileOnly 'net.sourceforge.pmd:pmd-dist:6.13.0'
+    testCompile 'net.sourceforge.pmd:pmd-dist:6.13.0'
 
     testCompile('org.spockframework:spock-core:1.3-groovy-2.4') {
         exclude module: 'groovy-all'
     }
-}
-
-javadoc {
-    classpath += configurations.provided
+    integTestCompile('org.spockframework:spock-core:1.3-groovy-2.4') {
+        exclude module: 'groovy-all'
+    }
 }
 
 jar {
@@ -144,15 +123,6 @@ gradlePlugin {
             id = "cpd"
             implementationClass = "de.aaschmid.gradle.plugins.cpd.CpdPlugin"
         }
-    }
-}
-
-idea {
-    module {
-        scopes.PROVIDED.plus += [ configurations.provided ]
-
-        scopes.TEST.plus.add(configurations.integTestCompile)
-        scopes.TEST.plus.add(configurations.integTestRuntime)
     }
 }
 
