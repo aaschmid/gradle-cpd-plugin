@@ -139,6 +139,7 @@ gradlePlugin {
             id = "de.aaschmid.cpd"
             implementationClass = "de.aaschmid.gradle.plugins.cpd.CpdPlugin"
         }
+        // Note: this has to be commented out for publishPlugins
         legacyCpd {
             id = "cpd"
             implementationClass = "de.aaschmid.gradle.plugins.cpd.CpdPlugin"
@@ -258,7 +259,6 @@ pluginBundle {
 
     plugins {
         cpd {
-            id = 'de.aaschmid.cpd'
             displayName = 'Gradle CPD plugin'
         }
     }
