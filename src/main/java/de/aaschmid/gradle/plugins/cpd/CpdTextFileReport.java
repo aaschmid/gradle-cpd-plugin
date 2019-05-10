@@ -22,7 +22,6 @@ public interface CpdTextFileReport extends SingleFileReport {
      * {@code false}); defaults to {@link #DEFAULT_TRIM_LEADING_COMMON_SOURCE_WHITESPACE}.
      */
     @Input
-    @Optional
     boolean getTrimLeadingCommonSourceWhitespaces();
 
     /**
@@ -37,7 +36,6 @@ public interface CpdTextFileReport extends SingleFileReport {
      * #DEFAULT_LINE_SEPARATOR}.
      */
     @Input
-    @Optional
     String getLineSeparator();
 
     /**
