@@ -1,26 +1,26 @@
 plugins {
-    id 'groovy'
-    id 'jacoco'
-    id 'com.github.kt3k.coveralls' version '2.6.3'
+    id "groovy"
+    id "jacoco"
+    id "com.github.kt3k.coveralls" version "2.6.3"
 
-    id 'java-gradle-plugin'
+    id "java-gradle-plugin"
     id "io.freefair.maven-jars" version "2.9.5"
 
-    id 'maven'
-    id 'signing'
-    id 'com.gradle.plugin-publish' version '0.10.1'
-    id 'com.jfrog.bintray' version '1.8.4'
+    id "maven"
+    id "signing"
+    id "com.gradle.plugin-publish" version "0.10.1"
+    id "com.jfrog.bintray" version "1.8.4"
 }
 
-description = 'Gradle plugin to find duplicate code using PMDs copy/paste detection (= CPD)'
-group = 'de.aaschmid'
-version = '3.0-SNAPSHOT'
+description = "Gradle plugin to find duplicate code using PMDs copy/paste detection (= CPD)"
+group = "de.aaschmid"
+version = "3.0-SNAPSHOT"
 
 ext {
-    isBuildOnJenkins = System.getenv('BUILD_TAG')?.startsWith('jenkins-') ?: false
+    isBuildOnJenkins = System.getenv("BUILD_TAG")?.startsWith("jenkins-") ?: false
 }
 
-sourceCompatibility = '1.8'
+sourceCompatibility = "1.8"
 
 repositories {
     mavenCentral()
@@ -34,29 +34,28 @@ sourceSets {
 }
 
 dependencies {
+    compileOnly "net.sourceforge.pmd:pmd-dist:6.10.0"
+    testCompile "net.sourceforge.pmd:pmd-dist:6.10.0"
 
-    compileOnly 'net.sourceforge.pmd:pmd-dist:6.10.0'
-    testCompile 'net.sourceforge.pmd:pmd-dist:6.10.0'
-
-    testCompile('org.spockframework:spock-core:1.3-groovy-2.4') {
-        exclude module: 'groovy-all'
+    testCompile("org.spockframework:spock-core:1.3-groovy-2.4") {
+        exclude module: "groovy-all"
     }
-    integTestCompile('org.spockframework:spock-core:1.3-groovy-2.4') {
-        exclude module: 'groovy-all'
+    integTestCompile("org.spockframework:spock-core:1.3-groovy-2.4") {
+        exclude module: "groovy-all"
     }
 }
 
 jar {
     manifest {
         attributes (
-            'Built-By': "Gradle ${gradle.gradleVersion}",
-            'Built-Date': new Date(),
-            'Specification-Title': 'gradle-cpd-plugin',
-            'Specification-Version': version,
-            'Specification-Vendor': 'Andreas Schmid, service@aaschmid.de',
-            'Implementation-Title': 'gradle-cpd-plugin',
-            'Implementation-Version': version,
-            'Implementation-Vendor': 'Andreas Schmid, service@aaschmid.de',
+            "Built-By": "Gradle ${gradle.gradleVersion}",
+            "Built-Date": new Date(),
+            "Specification-Title": "gradle-cpd-plugin",
+            "Specification-Version": version,
+            "Specification-Vendor": "Andreas Schmid, service@aaschmid.de",
+            "Implementation-Title": "gradle-cpd-plugin",
+            "Implementation-Version": version,
+            "Implementation-Vendor": "Andreas Schmid, service@aaschmid.de",
         )
     }
 }
@@ -70,7 +69,7 @@ test {
 }
 
 jacoco {
-    toolVersion = '0.8.3'
+    toolVersion = "0.8.3"
 }
 
 jacocoTestReport {
@@ -82,7 +81,7 @@ jacocoTestReport {
 
 task integTest(type: Test) {
     inputs.files jar
-    shouldRunAfter 'test'
+    shouldRunAfter "test"
 
     ignoreFailures = isBuildOnJenkins
 
@@ -115,16 +114,16 @@ gradlePlugin {
 signing {
     // requires gradle.properties, see http://www.gradle.org/docs/current/userguide/signing_plugin.html
     required {
-        gradle.taskGraph.hasTask('uploadArchives')
+        gradle.taskGraph.hasTask("uploadArchives")
     }
     sign configurations.archives
 }
 
-if (!hasProperty('sonatypeUsername')) {
-    ext.sonatypeUsername = ''
+if (!hasProperty("sonatypeUsername")) {
+    ext.sonatypeUsername = ""
 }
-if (!hasProperty('sonatypePassword')) {
-    ext.sonatypePassword = ''
+if (!hasProperty("sonatypePassword")) {
+    ext.sonatypePassword = ""
 }
 
 uploadArchives {
@@ -133,93 +132,93 @@ uploadArchives {
             beforeDeployment { deployment ->
                 signing.signPom(deployment)
             }
-            repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
                 // username and password from gradle.properties
                 authentication(userName: sonatypeUsername, password: sonatypePassword )
             }
-            snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
                 authentication(userName: sonatypeUsername, password: sonatypePassword )
             }
 
             pom {
                 project {
-                    name 'gradle-cpd-plugin'
-                    packaging 'jar'
+                    name "gradle-cpd-plugin"
+                    packaging "jar"
                     description project.description
-                    url 'https://github.com/aaschmid/gradle-cpd-plugin'
+                    url "https://github.com/aaschmid/gradle-cpd-plugin"
 
                     scm {
-                        url 'scm:git@github.com:aaschmid/gradle-cpd-plugin.git'
-                        connection 'scm:git@github.com:aaschmid/gradle-cpd-plugin.git'
-                        developerConnection 'scm:git@github.com:aaschmid/gradle-cpd-plugin.git'
+                        url "scm:git@github.com:aaschmid/gradle-cpd-plugin.git"
+                        connection "scm:git@github.com:aaschmid/gradle-cpd-plugin.git"
+                        developerConnection "scm:git@github.com:aaschmid/gradle-cpd-plugin.git"
                     }
 
                     licenses {
                         license {
-                            name 'The Apache Software License, Version 2.0'
-                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                            distribution 'repo'
+                            name "The Apache Software License, Version 2.0"
+                            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                            distribution "repo"
                         }
                     }
 
                     developers {
                         developer {
-                            id 'aaschmid'
-                            name 'Andreas Schmid'
+                            id "aaschmid"
+                            name "Andreas Schmid"
                         }
                     }
                 }
                 whenConfigured { pom ->
-                    pom.dependencies.removeAll(pom.dependencies.findAll{ dep -> dep.scope in [ 'compile', 'test' ] })
+                    pom.dependencies.removeAll(pom.dependencies.findAll{ dep -> dep.scope in [ "compile", "test" ] })
                 }
             }
         }
     }
 }
 
-if (!hasProperty('bintrayUsername')) {
-    ext.bintrayUsername = ''
+if (!hasProperty("bintrayUsername")) {
+    ext.bintrayUsername = ""
 }
-if (!hasProperty('bintrayApiKey')) {
-    ext.bintrayApiKey = ''
+if (!hasProperty("bintrayApiKey")) {
+    ext.bintrayApiKey = ""
 }
 bintray {
     user = bintrayUsername
     key = bintrayApiKey
     pkg {
-        repo = 'gradle-plugins'
-        name = 'gradle-cpd-plugin'
+        repo = "gradle-plugins"
+        name = "gradle-cpd-plugin"
         userOrg = bintrayUsername
-        licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/aaschmid/gradle-cpd-plugin.git'
+        licenses = ["Apache-2.0"]
+        vcsUrl = "https://github.com/aaschmid/gradle-cpd-plugin.git"
         version {
             name = project.version
             desc = "Gradle plugin to find duplicate code using PMDs copy/paste detection (= CPD) in version ${project.version}."
             released  = new Date()
             vcsTag = "https://github.com/aaschmid/gradle-cpd-plugin/releases/tag/v${project.version}"
-            attributes = ['gradle-plugin': 'de.aaschmid.cpd:de.aaschmid:gradle-cpd-plugin']
+            attributes = ["gradle-plugin": "de.aaschmid.cpd:de.aaschmid:gradle-cpd-plugin"]
         }
-        configurations = ['archives']
+        configurations = ["archives"]
     }
 }
 
 // Note: The plugin has to be uploaded to Bintray first
 pluginBundle {
-    website = 'https://github.com/aaschmid/gradle-cpd-plugin'
-    vcsUrl = 'https://github.com/aaschmid/gradle-cpd-plugin'
+    website = "https://github.com/aaschmid/gradle-cpd-plugin"
+    vcsUrl = "https://github.com/aaschmid/gradle-cpd-plugin"
 
-    description = 'A Gradle plugin to find duplicate code using PMDs copy/paste detection (= CPD).'
-    tags = [ 'duplicates', 'cpd', 'copy-paste-detection' ]
+    description = "A Gradle plugin to find duplicate code using PMDs copy/paste detection (= CPD)."
+    tags = [ "duplicates", "cpd", "copy-paste-detection" ]
 
     plugins {
         cpd {
-            displayName = 'Gradle CPD plugin'
+            displayName = "Gradle CPD plugin"
         }
     }
 
     mavenCoordinates {
         groupId = project.group
-        artifactId = 'gradle-cpd-plugin'
+        artifactId = "gradle-cpd-plugin"
         version = project.version
     }
 }
