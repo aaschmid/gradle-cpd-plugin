@@ -1,9 +1,8 @@
 package de.aaschmid.gradle.plugins.cpd.internal.worker
 
-import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdCsvReport
-import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdTextReport
-import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdXmlReport
-import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReporter
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportParameters.CpdCsvReport
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportParameters.CpdTextReport
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportParameters.CpdXmlReport
 import net.sourceforge.pmd.cpd.CSVRenderer
 import net.sourceforge.pmd.cpd.Mark
 import net.sourceforge.pmd.cpd.Match

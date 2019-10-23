@@ -1,8 +1,13 @@
 package de.aaschmid.gradle.plugins.cpd.internal.worker;
 
-import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdCsvReport;
-import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdTextReport;
-import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdXmlReport;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.List;
+
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportParameters.CpdCsvReport;
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportParameters.CpdTextReport;
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportParameters.CpdXmlReport;
 import net.sourceforge.pmd.cpd.CSVRenderer;
 import net.sourceforge.pmd.cpd.Match;
 import net.sourceforge.pmd.cpd.SimpleRenderer;
@@ -12,18 +17,13 @@ import org.gradle.api.GradleException;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.List;
-
 class CpdReporter {
 
     private static final Logger logger = Logging.getLogger(CpdReporter.class);
 
-    private final List<CpdReportConfiguration> reports;
+    private final List<CpdReportParameters> reports;
 
-    CpdReporter(List<CpdReportConfiguration> reports) {
+    CpdReporter(List<CpdReportParameters> reports) {
         this.reports = reports;
     }
 
@@ -31,10 +31,10 @@ class CpdReporter {
         if (logger.isInfoEnabled()) {
             logger.info("Generating reports");
         }
-        for (CpdReportConfiguration report : reports) {
+        for (CpdReportParameters report : reports) {
 
             CPDRenderer renderer = createRendererFor(report);
-            try (FileWriter fileWriter = new FileWriter(report.getDestination())){
+            try (FileWriter fileWriter = new FileWriter(report.getDestination())) {
 
                 ClassLoader previousContextClassLoader = Thread.currentThread().getContextClassLoader();
                 try {
@@ -55,7 +55,7 @@ class CpdReporter {
      * @param report the configured reports used
      * @return a full configured {@link CPDRenderer} to generate a CPD single file reports.
      */
-    private CPDRenderer createRendererFor(CpdReportConfiguration report) {
+    private CPDRenderer createRendererFor(CpdReportParameters report) {
         if (report instanceof CpdCsvReport) {
             char separator = ((CpdCsvReport) report).getSeparator();
 

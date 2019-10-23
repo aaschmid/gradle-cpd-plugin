@@ -1,12 +1,17 @@
 package de.aaschmid.gradle.plugins.cpd;
 
-import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdAction;
-import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdExecutionConfiguration;
-import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration;
-import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdCsvReport;
-import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdTextReport;
-import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdXmlReport;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import de.aaschmid.gradle.plugins.cpd.internal.CpdReportsImpl;
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdAction;
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdWorkParameters;
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportParameters;
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportParameters.CpdCsvReport;
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportParameters.CpdTextReport;
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportParameters.CpdXmlReport;
 import groovy.lang.Closure;
 import org.gradle.api.Action;
 import org.gradle.api.InvalidUserDataException;
@@ -28,12 +33,7 @@ import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.VerificationTask;
 import org.gradle.internal.reflect.Instantiator;
 import org.gradle.util.DeprecationLogger;
-import org.gradle.workers.WorkerConfiguration;
 import org.gradle.workers.WorkerExecutor;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**
@@ -105,11 +105,9 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
     public void run() {
         checkTaskState();
 
-        workerExecutor.submit(CpdAction.class, (WorkerConfiguration config) -> {
-            config.setClasspath(getPmdClasspath());
-            config.setDisplayName("CPD worker");
-            config.setParams(createCpdExecutionConfiguration(), createCpdReportConfigurations());
-        });
+        workerExecutor
+                .classLoaderIsolation(action -> action.getClasspath().setFrom(getPmdClasspath()))
+                .submit(CpdAction.class, getCpdWorkParameters());
     }
 
     private void checkTaskState() {
@@ -124,25 +122,26 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
         }
     }
 
-    private CpdExecutionConfiguration createCpdExecutionConfiguration() {
-        return new CpdExecutionConfiguration(
-                getEncoding(),
-                getIgnoreAnnotations(),
-                getIgnoreFailures(),
-                getIgnoreIdentifiers(),
-                getIgnoreLiterals(),
-                getLanguage(),
-                getMinimumTokenCount(),
-                getSkipBlocks(),
-                getSkipBlocksPattern(),
-                getSkipDuplicateFiles(),
-                getSkipLexicalErrors(),
-                getSource().getFiles()
-        );
+    private Action<CpdWorkParameters> getCpdWorkParameters() {
+        return parameters -> {
+            parameters.getEncoding().set(getEncoding());
+            parameters.getIgnoreAnnotations().set(getIgnoreAnnotations());
+            parameters.getIgnoreFailures().set(getIgnoreFailures());
+            parameters.getIgnoreIdentifiers().set(getIgnoreIdentifiers());
+            parameters.getIgnoreLiterals().set(getIgnoreLiterals());
+            parameters.getLanguage().set(getLanguage());
+            parameters.getMinimumTokenCount().set(getMinimumTokenCount());
+            parameters.getSkipBlocks().set(getSkipBlocks());
+            parameters.getSkipBlocksPattern().set(getSkipBlocksPattern());
+            parameters.getSkipDuplicateFiles().set(getSkipDuplicateFiles());
+            parameters.getSkipLexicalErrors().set(getSkipLexicalErrors());
+            parameters.getSourceFiles().setFrom(getSource().getFiles());
+            parameters.getReportParameters().set(createCpdReportConfigurations());
+        };
     }
 
-    private List<CpdReportConfiguration> createCpdReportConfigurations() {
-        List<CpdReportConfiguration> result = new ArrayList<>();
+    private List<CpdReportParameters> createCpdReportConfigurations() {
+        List<CpdReportParameters> result = new ArrayList<>();
         for (Report report : getReports()) {
             if (!report.isEnabled()) {
                 continue;

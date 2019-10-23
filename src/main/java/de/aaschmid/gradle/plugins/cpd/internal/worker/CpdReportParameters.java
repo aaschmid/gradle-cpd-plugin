@@ -3,12 +3,12 @@ package de.aaschmid.gradle.plugins.cpd.internal.worker;
 import java.io.File;
 import java.io.Serializable;
 
-public class CpdReportConfiguration implements Serializable {
+public class CpdReportParameters implements Serializable {
 
     private final String encoding;
     private final File destination;
 
-    CpdReportConfiguration(String encoding, File destination) {
+    CpdReportParameters(String encoding, File destination) {
         this.encoding = encoding;
         this.destination = destination;
     }
@@ -21,7 +21,7 @@ public class CpdReportConfiguration implements Serializable {
         return destination;
     }
 
-    public static class CpdCsvReport extends CpdReportConfiguration {
+    public static class CpdCsvReport extends CpdReportParameters {
         private final Character separator;
 
         public CpdCsvReport(String encoding, File destination, Character separator) {
@@ -34,7 +34,7 @@ public class CpdReportConfiguration implements Serializable {
         }
     }
 
-    public static class CpdTextReport extends CpdReportConfiguration {
+    public static class CpdTextReport extends CpdReportParameters {
         private final String lineSeparator;
         private final boolean trimLeadingCommonSourceWhitespaces;
 
@@ -53,7 +53,7 @@ public class CpdReportConfiguration implements Serializable {
         }
     }
 
-    public static class CpdXmlReport extends CpdReportConfiguration {
+    public static class CpdXmlReport extends CpdReportParameters {
         public CpdXmlReport(String encoding, File destination) {
             super(encoding, destination);
         }

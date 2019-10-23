@@ -85,7 +85,7 @@ public class CpdPlugin implements Plugin<Project> {
             project.getAllprojects().forEach(p ->
                 p.getPlugins().withType(JavaBasePlugin.class, plugin ->
                     p.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().all(sourceSet ->
-                        sourceSet.getAllJava().getSrcDirTrees().forEach(srcDirTree -> task.source(srcDirTree))
+                        sourceSet.getAllJava().getSrcDirs().forEach(task::source)
                     )
                 )
             );
@@ -165,12 +165,5 @@ public class CpdPlugin implements Plugin<Project> {
 
         configuration.defaultDependencies(d ->
                 d.add(project.getDependencies().create("net.sourceforge.pmd:pmd-dist:" + extension.getToolVersion())));
-    }
-
-    private Map<String, String> mapOf(DefaultExcludeRule excludeRule) {
-        Map<String, String> result = new HashMap<>();
-        result.put("group", excludeRule.getGroup());
-        result.put("module", excludeRule.getModule());
-        return result;
     }
 }
