@@ -1,19 +1,10 @@
 package de.aaschmid.gradle.plugins.cpd.test
 
-import de.aaschmid.gradle.plugins.cpd.CpdPlugin
+
 import groovy.io.FileType
-import org.gradle.api.Project
-import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.Specification
 
 abstract class BaseSpec extends Specification {
-
-    protected Project project
-
-    def setup() {
-        project = ProjectBuilder.builder().build()
-        project.plugins.apply(CpdPlugin)
-    }
 
     /**
      * Creates a {@link File} with location <code>classpath:/test-data/java/${relativePath}</code> as absolute path

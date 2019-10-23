@@ -3,9 +3,17 @@ package de.aaschmid.gradle.plugins.cpd
 import de.aaschmid.gradle.plugins.cpd.internal.CpdXmlFileReportImpl
 import de.aaschmid.gradle.plugins.cpd.test.BaseSpec
 import org.gradle.api.InvalidUserDataException
-import org.gradle.api.tasks.TaskExecutionException
+import org.gradle.api.Project
+import org.gradle.testfixtures.ProjectBuilder
 
 class CpdTest extends BaseSpec {
+
+    private Project project
+
+    def setup() {
+        project = ProjectBuilder.builder().build()
+        project.plugins.apply(CpdPlugin)
+    }
 
     def "'Cpd' task inputs are set correctly"() {
         given:

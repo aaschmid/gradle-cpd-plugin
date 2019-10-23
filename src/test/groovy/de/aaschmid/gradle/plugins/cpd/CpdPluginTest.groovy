@@ -14,6 +14,13 @@ import org.gradle.testfixtures.ProjectBuilder
 
 class CpdPluginTest extends BaseSpec {
 
+    Project project
+
+    def setup() {
+        project = ProjectBuilder.builder().build()
+        project.plugins.apply(CpdPlugin)
+    }
+
     def "applying 'CpdPlugin' applies required reporting-base plugin"() {
         expect:
         project.plugins.hasPlugin(ReportingBasePlugin)
@@ -21,7 +28,7 @@ class CpdPluginTest extends BaseSpec {
 
     def "applying 'CpdPlugin' creates and configures extension 'cpd'"() {
         given:
-        CpdExtension ext = project.extensions.findByName('cpd')
+        def ext = project.extensions.findByName('cpd')
 
         expect:
         ext.encoding == System.getProperty('file.encoding')
@@ -54,7 +61,7 @@ class CpdPluginTest extends BaseSpec {
 
     def "applying 'CpdPlugin' creates and configures task 'cpdCheck' with correct default values"() {
         given:
-        Cpd task = project.tasks.getByName('cpdCheck')
+        def task = project.tasks.getByName('cpdCheck')
 
         expect:
         task instanceof Cpd
@@ -202,6 +209,38 @@ class CpdPluginTest extends BaseSpec {
             task == cpdTask
         }
         cpdTask.source.files == testFilesRecurseIn('') as Set
+    }
+
+    def "'CpdPlugin' allows configuring tool dependencies explicitly via toolVersion property"() {
+        given:
+        project.repositories {
+            mavenLocal()
+            mavenCentral()
+        }
+        project.cpd{ toolVersion '5.2.1' }
+        project.cpdCheck{ source = testFile('.') }
+
+        when:
+        def result = project.configurations.cpd.resolve()
+
+        then:
+        result.any{ file -> file.name == 'pmd-core-5.2.1.jar' }
+    }
+
+    def "'CpdPlugin' allows configuring tool dependencies explicitly via configuration"() {
+        given:
+        project.repositories {
+            mavenLocal()
+            mavenCentral()
+        }
+        project.dependencies{ cpd 'net.sourceforge.pmd:pmd:5.0.2' }
+        project.cpdCheck{ source = testFile('.') }
+
+        when:
+        def result = project.configurations.cpd.resolve()
+
+        then:
+        result.any{ file -> file.name == 'pmd-5.0.2.jar' }
     }
 
     def "'Cpd' task can be customized via extension"() {
