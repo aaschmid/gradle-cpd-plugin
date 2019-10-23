@@ -1,8 +1,18 @@
 package de.aaschmid.gradle.plugins.cpd.test
 
-
 import groovy.io.FileType
 import spock.lang.Specification
+
+enum Lang {
+    JAVA("java"),
+    KOTLIN("kotlin");
+
+    private final String folder
+
+    Lang(String folder) {
+        this.folder = folder;
+    }
+}
 
 abstract class BaseSpec extends Specification {
 
@@ -13,11 +23,11 @@ abstract class BaseSpec extends Specification {
      * @see File
      */
     File testFile(String relativePath) {
-        return testFile("java", relativePath)
+        return testFile(Lang.JAVA, relativePath)
     }
 
-    File testFile(String lang, String relativePath) {
-        def resourceName = "/test-data/${lang}/${relativePath}"
+    File testFile(Lang lang, String relativePath) {
+        def resourceName = "/test-data/${lang.folder}/${relativePath}"
         def resource = this.class.getResource(resourceName)
         assert resource: "${resourceName} not found on classpath"
 
@@ -32,5 +42,9 @@ abstract class BaseSpec extends Specification {
         def result = [ ]
         testFile(relativePath).eachFileRecurse(FileType.FILES){ file -> result << file }
         return result;
+    }
+
+    String testPath(Lang lang, String...relativePaths) {
+        return "['${relativePaths.collect{testFile(lang, it).getAbsolutePath()}.join("', '")}']"
     }
 }

@@ -17,6 +17,16 @@ import static org.assertj.core.api.Assertions.fail;
 
 public class TestFileResolver {
 
+    public enum Lang {
+        JAVA("java"),
+        KOTLIN("kotlin");
+
+        private final String folder;
+
+        Lang(String folder) {
+            this.folder = folder;
+        }
+    }
 
     /**
      * Creates a {@link File} with location <code>classpath:/test-data/java/${relativePath}</code> as absolute path
@@ -24,12 +34,8 @@ public class TestFileResolver {
      * @see Class#getResource(java.lang.String)
      * @see File
      */
-    public static File testFile(String relativePath) {
-        return testFile("java", relativePath);
-    }
-
-    public static File testFile(String lang, String relativePath) {
-        String resourceName = String.format("/test-data/%s/%s", lang, relativePath);
+    public static File testFile(Lang lang, String relativePath) {
+        String resourceName = String.format("/test-data/%s/%s", lang.folder, relativePath);
         URL resource = TestFileResolver.class.getResource(resourceName);
         assertThat(resource).as("%s not found on classpath.", resourceName).isNotNull();
 
@@ -39,10 +45,10 @@ public class TestFileResolver {
         return file;
     }
 
-    public static List<File> testFilesRecurseIn(String relativePath) {
+    public static List<File> testFilesRecurseIn(Lang lang, String relativePath) {
         try {
             return Files
-                    .find(testFile(relativePath).toPath(), Integer.MAX_VALUE, (filePath, fileAttr) -> fileAttr.isRegularFile())
+                    .find(testFile(lang, relativePath).toPath(), Integer.MAX_VALUE, (filePath, fileAttr) -> fileAttr.isRegularFile())
                     .map(Path::toFile)
                     .collect(Collectors.toList());
         } catch (IOException e) {

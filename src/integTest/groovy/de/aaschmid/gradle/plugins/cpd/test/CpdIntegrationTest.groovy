@@ -1,28 +1,15 @@
 package de.aaschmid.gradle.plugins.cpd.test
 
-import org.gradle.testkit.runner.BuildResult
-import org.gradle.testkit.runner.GradleRunner
-import org.gradle.testkit.runner.UnexpectedBuildFailure
-import org.gradle.testkit.runner.internal.PluginUnderTestMetadataReading
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Issue
 
+import static de.aaschmid.gradle.plugins.cpd.test.Lang.*
 import static org.gradle.testkit.runner.TaskOutcome.*
 
-class CpdIntegrationTest extends BaseSpec {
-
-    @Rule
-    final TemporaryFolder testProjectDir = new TemporaryFolder()
-    File buildFile
-
-    def setup() {
-        buildFile = testProjectDir.newFile('build.gradle')
-    }
+class CpdIntegrationTest extends IntegrationBaseSpec {
 
     def "execution of task 'check' execute 'cpdCheck' and don't show WARNING"() {
         given:
-        buildFile << """\
+        buildFile << """
             plugins {
                 id 'java'
                 id 'de.aaschmid.cpd'
@@ -41,7 +28,7 @@ class CpdIntegrationTest extends BaseSpec {
     @Issue('https://github.com/aaschmid/gradle-cpd-plugin/issues/8')
     def "execution of task before 'check' should not lead to NullPointerException and don't show WARNING"() {
         given:
-        buildFile << """\
+        buildFile << """
             plugins {
                 id 'de.aaschmid.cpd'
                 id 'java'
@@ -60,11 +47,9 @@ class CpdIntegrationTest extends BaseSpec {
     @Issue('https://github.com/aaschmid/gradle-cpd-plugin/issues/3')
     def "execution of task 'build' should show WARNING if rootProject does not apply at least 'LifecycleBasePlugin'"() {
         given:
-        testProjectDir.newFile("settings.gradle") << """\
-            include 'sub'
-            """.stripIndent()
+        withSubProjects('sub')
 
-        buildFile << """\
+        buildFile << """
             plugins {
                 id 'de.aaschmid.cpd'
             }
@@ -98,11 +83,9 @@ class CpdIntegrationTest extends BaseSpec {
     @Issue('https://github.com/aaschmid/gradle-cpd-plugin/issues/14')
     def "execution of task 'build' should not show WARNING if a subproject applies 'LifecycleBasePlugin' and puts a dependency to 'cpdCheck' task"() {
         given:
-        testProjectDir.newFile("settings.gradle") << """\
-            include 'sub'
-            """.stripIndent()
+        withSubProjects('sub')
 
-        buildFile << """\
+        buildFile << """
             plugins {
                 id 'de.aaschmid.cpd'
             }
@@ -126,11 +109,9 @@ class CpdIntegrationTest extends BaseSpec {
     @Issue('https://github.com/aaschmid/gradle-cpd-plugin/issues/37')
     def "execution of task 'build' should not show WARNING if subproject applies 'CPD' plugin and 'LifecycleBasePlugin'"() {
         given:
-        testProjectDir.newFile("settings.gradle") << """\
-            include 'sub'
-            """.stripIndent()
+        withSubProjects('sub')
 
-        buildFile << """\
+        buildFile << """
             plugins {
                 id 'de.aaschmid.cpd' apply false
             }
@@ -154,7 +135,7 @@ class CpdIntegrationTest extends BaseSpec {
     @Issue('https://github.com/aaschmid/gradle-cpd-plugin/issues/10')
     def "CpdPlugin can be added using full qualified name"() {
         given:
-        buildFile << createBuildscriptWithClasspathOfGradleTestkitMechanism() << """
+        buildFile << createBuildScriptWithClasspathOfGradleTestKitMechanism() << """
             apply plugin: 'de.aaschmid.cpd'
             """.stripIndent()
 
@@ -169,11 +150,7 @@ class CpdIntegrationTest extends BaseSpec {
     @Issue('https://github.com/aaschmid/gradle-cpd-plugin/issues/16')
     def "CpdPlugin can be disabled"() {
         given:
-        buildFile << """\
-            plugins {
-                id 'de.aaschmid.cpd'
-            }
-
+        buildFileWithPluginAndRepos() << """
             cpdCheck.enabled = hasProperty('cpd_enabled')
             """.stripIndent()
 
@@ -185,23 +162,16 @@ class CpdIntegrationTest extends BaseSpec {
         result.task(':cpdCheck').outcome == SKIPPED
     }
 
-    def "executing 'Cpd' task on duplicate 'kotlin' source should not throw 'GradleException' if 'ignoreFailures' and produce 'cpdCheck.csv' with one warning"() {
+    def "executing 'Cpd' task on duplicate 'kotlin' source should not fail if 'ignoreFailures' and produce 'cpdCheck.csv' with one warning"() {
         given:
-        buildFile << """\
-            plugins {
-                id 'de.aaschmid.cpd'
-            }
-            repositories {
-                mavenLocal()
-                mavenCentral()
-            }
+        buildFileWithPluginAndRepos() << """
             cpdCheck{
                 ignoreFailures = true
                 language = 'kotlin'
                 minimumTokenCount = 5
-                source = file('${testFile('kotlin', 'de/aaschmid/test').path}')
+                source = ${testPath(KOTLIN, 'de/aaschmid/test')}
             }
-        """.stripIndent()
+            """.stripIndent()
 
         when:
         def result = run('cpdCheck')
@@ -210,7 +180,7 @@ class CpdIntegrationTest extends BaseSpec {
         result.output.contains("BUILD SUCCESSFUL")
         result.task(':cpdCheck').outcome == SUCCESS
 
-        def report = testProjectDir.getRoot().toPath().resolve('build/reports/cpd/cpdCheck.xml').toFile()
+        def report = file('build/reports/cpd/cpdCheck.xml')
         report.exists()
         report.text.contains('<duplication lines="4" tokens="9">')
         report.text.contains('<duplication lines="2" tokens="8">')
@@ -218,14 +188,7 @@ class CpdIntegrationTest extends BaseSpec {
 
     def "executing 'Cpd' task on duplicate 'java' source with minimal supported PMD version should produce 'cpdCheck.xml'"() {
         given:
-        buildFile << """\
-            plugins {
-                id 'de.aaschmid.cpd'
-            }
-            repositories {
-                mavenLocal()
-                mavenCentral()
-            }
+        buildFileWithPluginAndRepos() << """
             cpd{
                 toolVersion = '6.10.0'
             }
@@ -236,9 +199,9 @@ class CpdIntegrationTest extends BaseSpec {
                     csv.enabled = true
                     xml.enabled = false
                 }
-                source = file('${testFile('java', 'de/aaschmid/clazz').path}')
+                source = ${testPath(JAVA, 'de/aaschmid/clazz')}
             }
-        """.stripIndent()
+            """.stripIndent()
 
         when:
         def result = run('cpdCheck')
@@ -247,14 +210,14 @@ class CpdIntegrationTest extends BaseSpec {
         result.output.contains("BUILD SUCCESSFUL")
         result.task(':cpdCheck').outcome == SUCCESS
 
-        def report = testProjectDir.getRoot().toPath().resolve('build/reports/cpd/cpdCheck.csv').toFile()
+        def report = file('build/reports/cpd/cpdCheck.csv')
         report.exists()
         report.text =~ /4,15,2,[79],.*Clazz[12]\.java,[79],.*Clazz[12]\.java/
     }
 
     def "executing 'Cpd' task on duplicates should fallback to any language if language does not exist"() {
         given:
-        buildFile << createBuildscriptWithClasspathOfGradleTestkitMechanism() << """\
+        buildFile << createBuildScriptWithClasspathOfGradleTestKitMechanism() << """
             apply plugin: 'de.aaschmid.cpd'
             repositories {
                 mavenLocal()
@@ -265,65 +228,20 @@ class CpdIntegrationTest extends BaseSpec {
             }
             cpdCheck{
                 language = 'my-lang'
-                source = file('${testFile('kotlin', 'de/aaschmid/test').path}')
+                source = ${testPath(KOTLIN, 'de/aaschmid/test')}
             }
-        """.stripIndent()
+            """.stripIndent()
 
         when:
         def result = runWithoutPluginClasspath('cpdCheck')
 
         then:
-        def e = thrown UnexpectedBuildFailure
+        result.output.contains("BUILD FAILED")
+        result.output.contains("Could not detect CPD language for 'my-lang', using 'any' as fallback language.")
+        result.output =~ /CPD found duplicate code. See the report at file:\/.*\/cpdCheck.xml/
 
-        e.message.contains("BUILD FAILED")
-        e.message.contains("Could not detect CPD language for 'my-lang', using 'any' as fallback language.");
-        e.message =~ /CPD found duplicate code. See the report at file:\/.*\/cpdCheck.xml/
-
-        def report = testProjectDir.getRoot().toPath().resolve('build/reports/cpd/cpdCheck.xml').toFile()
+        def report = file('build/reports/cpd/cpdCheck.xml')
         report.exists()
         report.text.contains('<duplication lines="19" tokens="118">')
-    }
-
-    private BuildResult runWithoutPluginClasspath(String... arguments) {
-        GradleRunner.create()
-                .withProjectDir(testProjectDir.root)
-                .withArguments(arguments)
-                .withDebug(true)
-                .build()
-    }
-
-    private BuildResult run(String... arguments) {
-        GradleRunner.create()
-                .withProjectDir(testProjectDir.root)
-                .withArguments(arguments)
-                .withPluginClasspath()
-                .withDebug(true)
-                .build()
-    }
-
-    /**
-     * As the Gradle testkit does not support the old plugin mechanism, this method generates a {@code bundlescript}
-     * code block with the same dependencies as {@link GradleRunner#withPluginClasspath()} or
-     * {@link PluginUnderTestMetadataReading#readImplementationClasspath()}, respectively. Classpath is also filtered by
-     * provided PMD dependencies.
-     * <p>
-     * <b>Note:</b> While debugging the problem appears to be that the used {@link org.gradle.api.plugins.PluginManager}
-     * (=> {@link org.gradle.api.internal.plugins.DefaultPluginManager}) does not get the correct
-     * {@link org.gradle.api.internal.plugins.PluginRegistry} containing the correct
-     * {@link org.gradle.api.internal.initialization.ClassLoaderScope} with the injected classpath dependencies ... :-(
-     *
-     * @return a {@link String} containing all the dependencies which {@link GradleRunner#withPluginClasspath()} uses
-     */
-    def createBuildscriptWithClasspathOfGradleTestkitMechanism() {
-        """\
-            buildscript {
-                dependencies {
-                    classpath files(
-                        '${PluginUnderTestMetadataReading.readImplementationClasspath().
-                            findAll{!it.path.contains("net.sourceforge.pmd")}.join("',\n                        '")}'
-                    )
-                }
-            }
-            """.stripIndent()
     }
 }

@@ -27,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static de.aaschmid.gradle.plugins.cpd.test.PropertyUtils.listProperty;
 import static de.aaschmid.gradle.plugins.cpd.test.PropertyUtils.property;
+import static de.aaschmid.gradle.plugins.cpd.test.TestFileResolver.Lang.JAVA;
 import static de.aaschmid.gradle.plugins.cpd.test.TestFileResolver.testFile;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
@@ -67,7 +68,7 @@ class CpdActionTest {
     @Test
     void execute_shouldForwardCallCorrectly(Project project) {
         // Given:
-        Set<File> sourceFiles = singleton(testFile("de/aaschmid/clazz/Clazz.java"));
+        Set<File> sourceFiles = singleton(testFile(JAVA, "de/aaschmid/clazz/Clazz.java"));
         List<Report> reports = singletonList(new Report.Csv("UTF-8", new File("cpd.csv"), ';'));
 
         List<Match> matches = singletonList(mock(Match.class));
@@ -178,7 +179,7 @@ class CpdActionTest {
     }
 
     private void stubParametersWithDefaults(Project project) {
-        Set<File> sourceFiles = singleton(testFile("de/aaschmid/clazz/Clazz.java"));
+        Set<File> sourceFiles = singleton(testFile(JAVA, "de/aaschmid/clazz/Clazz.java"));
         Report.Text report = new Report.Text("UTF-8", new File("cpd.text"), "\n", false);
 
         when(parameters.getEncoding()).thenReturn(property("US-ASCII"));
