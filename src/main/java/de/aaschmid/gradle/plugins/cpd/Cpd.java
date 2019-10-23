@@ -8,19 +8,14 @@ import javax.inject.Inject;
 import de.aaschmid.gradle.plugins.cpd.internal.CpdReportsImpl;
 import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdAction;
 import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdWorkParameters;
-import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportParameters;
-import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportParameters.CpdCsvReport;
-import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportParameters.CpdTextReport;
-import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportParameters.CpdXmlReport;
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdWorkParameters.Report;
 import groovy.lang.Closure;
 import org.gradle.api.Action;
 import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.FileTree;
-import org.gradle.api.logging.Logger;
-import org.gradle.api.logging.Logging;
-import org.gradle.api.reporting.Report;
 import org.gradle.api.reporting.Reporting;
+import org.gradle.api.reporting.SingleFileReport;
 import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFiles;
@@ -75,8 +70,6 @@ import org.gradle.workers.WorkerExecutor;
  */
 @CacheableTask
 public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> {
-
-    private static final Logger logger = Logging.getLogger(Cpd.class);
 
     private final WorkerExecutor workerExecutor;
     private final CpdReportsImpl reports;
@@ -136,29 +129,29 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
             parameters.getSkipDuplicateFiles().set(getSkipDuplicateFiles());
             parameters.getSkipLexicalErrors().set(getSkipLexicalErrors());
             parameters.getSourceFiles().setFrom(getSource().getFiles());
-            parameters.getReportParameters().set(createCpdReportConfigurations());
+            parameters.getReportParameters().set(createReportParameters(getReports()));
         };
     }
 
-    private List<CpdReportParameters> createCpdReportConfigurations() {
-        List<CpdReportParameters> result = new ArrayList<>();
-        for (Report report : getReports()) {
+    private List<Report> createReportParameters(CpdReports reports) {
+        List<Report> result = new ArrayList<>();
+        for (SingleFileReport report : reports) {
             if (!report.isEnabled()) {
                 continue;
             }
 
             if (report instanceof CpdCsvFileReport) {
                 Character separator = ((CpdCsvFileReport) report).getSeparator();
-                result.add(new CpdCsvReport(getEncoding(), report.getDestination(), separator));
+                result.add(new Report.Csv(getEncoding(), report.getDestination(), separator));
 
             } else if (report instanceof CpdTextFileReport) {
                 String lineSeparator = ((CpdTextFileReport) report).getLineSeparator();
                 boolean trimLeadingCommonSourceWhitespaces = ((CpdTextFileReport) report).getTrimLeadingCommonSourceWhitespaces();
-                result.add(new CpdTextReport(getEncoding(), report.getDestination(), lineSeparator, trimLeadingCommonSourceWhitespaces));
+                result.add(new Report.Text(getEncoding(), report.getDestination(), lineSeparator, trimLeadingCommonSourceWhitespaces));
 
             } else if (report instanceof CpdXmlFileReport) {
                 String encoding = getXmlRendererEncoding((CpdXmlFileReport) report);
-                result.add(new CpdXmlReport(encoding, report.getDestination()));
+                result.add(new Report.Xml(encoding, report.getDestination()));
 
             } else {
                 throw new IllegalArgumentException(String.format("Report of type '%s' not available.", report.getClass().getSimpleName()));

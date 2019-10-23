@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.Spliterator;
 
 import net.sourceforge.pmd.cpd.CPD;
@@ -21,21 +22,13 @@ class CpdExecutor {
 
     private static final Logger logger = Logging.getLogger(CpdExecutor.class);
 
-    private final CPDConfiguration cpdConfig;
-    private final Collection<File> sourceFiles;
-
-    CpdExecutor(CPDConfiguration cpdConfig, Collection<File> sourceFiles) {
-        this.cpdConfig = cpdConfig;
-        this.sourceFiles = sourceFiles;
-    }
-
-    List<Match> run() {
+    List<Match> run(CPDConfiguration cpdConfig, Set<File> sourceFiles) {
         if (logger.isInfoEnabled()) {
             logger.info("Starting CPD, minimumTokenCount is {}", cpdConfig.getMinimumTileSize());
         }
         try {
             CPD cpd = new CPD(cpdConfig);
-            tokenizeSourceFiles(cpd);
+            tokenizeSourceFiles(cpd, sourceFiles);
             analyzeSourceCode(cpd);
             return stream(spliteratorUnknownSize(cpd.getMatches(), Spliterator.ORDERED), false).collect(toList());
         } catch (IOException e) {
@@ -45,7 +38,7 @@ class CpdExecutor {
         }
     }
 
-    private void tokenizeSourceFiles(CPD cpd) throws IOException {
+    private void tokenizeSourceFiles(CPD cpd, Set<File> sourceFiles) throws IOException {
         for (File file : sourceFiles) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Tokenize {}", file.getAbsolutePath());

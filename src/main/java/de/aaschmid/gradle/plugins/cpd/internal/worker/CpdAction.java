@@ -7,6 +7,9 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Properties;
 
+import javax.inject.Inject;
+
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdWorkParameters.Report;
 import net.sourceforge.pmd.cpd.AnyLanguage;
 import net.sourceforge.pmd.cpd.CPDConfiguration;
 import net.sourceforge.pmd.cpd.Language;
@@ -25,9 +28,10 @@ public abstract class CpdAction implements WorkAction<CpdWorkParameters> {
     private final CpdExecutor executor;
     private final CpdReporter reporter;
 
+    @Inject
     public CpdAction() {
-        executor = new CpdExecutor(createCpdConfiguration(getParameters()), getParameters().getSourceFiles().getFiles());
-        reporter = new CpdReporter(getParameters().getReportParameters().get());
+        executor = new CpdExecutor();
+        reporter = new CpdReporter();
     }
 
     // Visible for testing
@@ -38,11 +42,8 @@ public abstract class CpdAction implements WorkAction<CpdWorkParameters> {
 
     @Override
     public void execute() {
-        CpdExecutor executor = new CpdExecutor(createCpdConfiguration(getParameters()), getParameters().getSourceFiles().getFiles());
-        CpdReporter reporter = new CpdReporter(getParameters().getReportParameters().get());
-
-        List<Match> matches = executor.run();
-        reporter.generate(matches);
+        List<Match> matches = executor.run(createCpdConfiguration(getParameters()), getParameters().getSourceFiles().getFiles());
+        reporter.generate(getParameters().getReportParameters().get(), matches);
         logResult(matches);
     }
 
@@ -63,7 +64,7 @@ public abstract class CpdAction implements WorkAction<CpdWorkParameters> {
             }
         } else {
             String message = "CPD found duplicate code.";
-            CpdReportParameters report = getParameters().getReportParameters().get().get(0);
+            Report report = getParameters().getReportParameters().get().get(0);
             if (report != null) {
                 File reportUrl = report.getDestination();
                 message += " See the report at " + asClickableFileUrl(reportUrl);
