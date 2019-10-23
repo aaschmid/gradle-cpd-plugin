@@ -80,12 +80,6 @@ jacocoTestReport {
     }
 }
 
-artifacts {
-    archives jar
-    archives javadocJar
-    archives sourcesJar
-}
-
 task integTest(type: Test) {
     inputs.files jar
     shouldRunAfter 'test'
@@ -118,7 +112,6 @@ gradlePlugin {
 }
 
 // -- build and publish artifacts -------------------------------------------------------------------------------------
-
 signing {
     // requires gradle.properties, see http://www.gradle.org/docs/current/userguide/signing_plugin.html
     required {
