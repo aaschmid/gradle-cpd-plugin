@@ -2,6 +2,8 @@ package de.aaschmid.gradle.plugins.cpd.test
 
 import spock.lang.Issue
 
+import java.nio.file.Files
+
 import static de.aaschmid.gradle.plugins.cpd.test.Lang.*
 import static org.gradle.testkit.runner.TaskOutcome.*
 
@@ -81,7 +83,7 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
     @Issue("https://github.com/aaschmid/gradle-cpd-plugin/issues/38")
     def "Cpd should not produce 'cpdCheck.txt' on duplicate 'java' comments in source"() {
         given:
-        buildFileWithPluginAndRepos([ 'java']) << """
+        buildFileWithPluginAndRepos([ 'java' ]) << """
             cpdCheck{
                 reports{
                     xml.enabled = false
@@ -187,6 +189,78 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
         report.text =~ /4,15,2,[79],.*Clazz[12]\.java,[79],.*Clazz[12]\.java/
     }
 
+    def "Cpd should produce result with automantic detection of subProjects sources if Cpd applied to parent project and 'java' plugin to sub project"() {
+        given:
+        withSubProjects('sub')
+
+        buildFileWithPluginAndRepos() << """
+            cpdCheck{
+                ignoreFailures = true
+                minimumTokenCount = 2
+            }
+
+            project(':sub') {
+                apply plugin: 'java'
+            }
+        """.stripIndent()
+
+        file("sub/src/main/java/de/aaschmid/foo").mkdirs()
+        Files.copy(testFile('de/aaschmid/foo/Bar.java').toPath(), file("sub/src/main/java/de/aaschmid/foo/Bar.java").toPath());
+        Files.copy(testFile('de/aaschmid/foo/Baz.java').toPath(), file("sub/src/main/java/de/aaschmid/foo/Baz.java").toPath());
+
+        when:
+        def result = run("cpdCheck")
+
+        then:
+        result.task(':cpdCheck').outcome == SUCCESS
+        result.output.contains("BUILD SUCCESSFUL")
+
+        def report = file('build/reports/cpd/cpdCheck.xml')
+        report.exists()
+        report.text =~ /Bar.java/
+        report.text =~ /Baz.java/
+    }
+
+    def "Cpd should produce result if applied to only parent project even if only sub project has 'groovy' plugin and sources"() {
+        given:
+        withSubProjects('subProject')
+
+        buildFileWithPluginAndRepos() << """
+            project(':subProject') {
+                apply plugin: 'groovy'
+
+                sourceSets{
+                    main{
+                        java.srcDirs = ${testPath(JAVA, 'de/aaschmid/foo')}
+                        groovy.srcDir files(${testPath(JAVA, 'de/aaschmid/clazz')})
+                    }
+                }
+            }
+
+            // configure Cpd at last because otherwise test fails, maybe because of custom source set
+            cpdCheck{
+                ignoreFailures = true
+                minimumTokenCount = 2
+            }
+        """.stripIndent()
+
+        when:
+        def result = run("cpdCheck")
+
+        then:
+        result.task(':cpdCheck').outcome == SUCCESS
+        result.output.contains("BUILD SUCCESSFUL")
+
+
+        def report = file('build/reports/cpd/cpdCheck.xml')
+        report.exists()
+        report.text =~ /Bar.java/
+        report.text =~ /Baz.java/
+        report.text =~ /Clazz.java/
+        report.text =~ /Clazz1.java/
+        report.text =~ /Clazz2.java/
+    }
+
     def "Cpd should create and fill all enabled reports"() {
         given:
         buildFileWithPluginAndRepos() << """
@@ -222,6 +296,57 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
         xml.exists()
         xml.text.contains('<duplication lines="4" tokens="9">')
         xml.text.contains('<duplication lines="2" tokens="8">')
+    }
+
+    @Issue("https://github.com/aaschmid/gradle-cpd-plugin/issues/39")
+    def "two Cpd tasks for different sources should produce proper results"() {
+        given:
+        buildFileWithPluginAndRepos([ 'java' ]) << """
+            cpd {
+                minimumTokenCount = 5
+            }
+
+            cpdCheck{
+                minimumTokenCount = 2
+                reports{
+                    ignoreFailures = true
+                    csv{
+                        destination = file('java-cpd.csv')
+                        enabled = true
+                    }
+                    xml.enabled = false
+                }
+                source = ${testPath(JAVA, 'de/aaschmid/foo')}
+            }
+
+            task cpdCheckKotlin(type: de.aaschmid.gradle.plugins.cpd.Cpd){
+                reports{
+                    language = "kotlin"
+                    xml{
+                        destination = file('kotlin-cpd.xml')
+                    }
+                }
+                source = ${testPath(KOTLIN, 'de/aaschmid/test')}
+            }
+            """.stripIndent()
+
+        when:
+        def result = run("cpdCheck", "cpdCheckKotlin")
+
+        then:
+        result.task(':cpdCheck').outcome == SUCCESS
+        result.task(':cpdCheckKotlin').outcome == FAILED
+        result.output.contains("BUILD FAILED")
+
+        def javaReport = file('java-cpd.csv')
+        javaReport.exists()
+        javaReport.text =~ /Bar.java/
+        javaReport.text =~ /Baz.java/
+
+        def kotlinReport = file('kotlin-cpd.xml')
+        kotlinReport.exists()
+        kotlinReport.text.contains('<duplication lines="4" tokens="9">')
+        kotlinReport.text.contains('<duplication lines="2" tokens="8">')
     }
 
     def "Cpd should fail if not ignoreAnnotations on duplicate annotations"() {

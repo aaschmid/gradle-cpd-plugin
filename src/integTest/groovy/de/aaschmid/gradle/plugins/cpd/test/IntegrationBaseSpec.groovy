@@ -12,6 +12,7 @@ abstract class IntegrationBaseSpec extends BaseSpec {
 
     @Rule
     protected final TemporaryFolder testProjectDir = new TemporaryFolder()
+
     protected File buildFile
     protected File settingsFile
 

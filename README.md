@@ -113,9 +113,15 @@ subprojects {
 }
 ```
 
+### Custom sourceSets
+
+If your are adding custom sourceSets (even in subProjects), it may occur that you either need to configure `cpdCheck`
+afterwards or even manually configure `source`. Unfortunately, I have had problems with this case in the integration
+tests using Gradle [TestKit](https://docs.gradle.org/current/userguide/test_kit.html).
+
 ### Examples
 
-This example shows a project where only  ```main``` sources should be checked for duplicates:
+This example shows a project where only ```main``` sources should be checked for duplicates:
 
 ```groovy
 // optional - settings for every CPD task
