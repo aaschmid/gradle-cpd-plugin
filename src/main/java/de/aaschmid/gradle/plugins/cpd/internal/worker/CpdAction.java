@@ -97,20 +97,12 @@ public abstract class CpdAction implements WorkAction<CpdWorkParameters> {
     }
 
     private Language createLanguage(String language, Properties languageProperties) {
-        ClassLoader previousContextClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            // Workaround for https://github.com/pmd/pmd/issues/1788 as Gradle Worker API uses special classloader internally
-            Thread.currentThread().setContextClassLoader(CpdExecutor.class.getClassLoader());
-
-            Language result = LanguageFactory.createLanguage(language, languageProperties);
-            logger.info("Using CPD language class '{}' for checking duplicates.", result);
-            if (result instanceof AnyLanguage) {
-                logger.warn("Could not detect CPD language for '{}', using 'any' as fallback language.", language);
-            }
-            return result;
-        } finally {
-            Thread.currentThread().setContextClassLoader(previousContextClassLoader);
+        Language result = LanguageFactory.createLanguage(language, languageProperties);
+        logger.info("Using CPD language class '{}' for checking duplicates.", result);
+        if (result instanceof AnyLanguage) {
+            logger.warn("Could not detect CPD language for '{}', using 'any' as fallback language.", language);
         }
+        return result;
     }
 
     private String asClickableFileUrl(File path) {

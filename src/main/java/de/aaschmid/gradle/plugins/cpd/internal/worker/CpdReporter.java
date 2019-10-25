@@ -29,7 +29,7 @@ class CpdReporter {
 
                 ClassLoader previousContextClassLoader = Thread.currentThread().getContextClassLoader();
                 try {
-                    // Workaround for Gradle Worker API uses special classloaders which Xerces dynamic implementation loading does not like
+                    // Workaround for Gradle Worker API using special class loader which Xerces dynamic implementation loading does not like
                     Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
 
                     renderer.render(matches.iterator(), fileWriter);

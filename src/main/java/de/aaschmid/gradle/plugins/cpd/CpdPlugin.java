@@ -125,7 +125,7 @@ public class CpdPlugin implements Plugin<Project> {
 
     private CpdExtension createExtension(Project project) {
         CpdExtension extension = project.getExtensions().create("cpd", CpdExtension.class);
-        extension.setToolVersion("6.13.0");
+        extension.setToolVersion("6.14.0");
         return extension;
     }
 
