@@ -116,7 +116,8 @@ subprojects {
 ### Custom sourceSets
 
 If your are adding custom sourceSets (even in subProjects), it may occur that you either need to configure `cpdCheck`
-afterwards or even manually configure `source`. Unfortunately, I have had problems with this case in the integration
+afterwards or even manually configure `source`. Unfortunately, I have had problems with this case in the
+[CpdAcceptanceTest](https://github.com/aaschmid/gradle-cpd-plugin/blob/master/src/integTest/groovy/de/aaschmid/gradle/plugins/cpd/test/CpdAcceptanceTest.groovy)
 tests using Gradle [TestKit](https://docs.gradle.org/current/userguide/test_kit.html).
 
 ### Examples
