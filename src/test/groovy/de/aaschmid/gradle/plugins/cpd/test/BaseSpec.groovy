@@ -1,19 +1,20 @@
 package de.aaschmid.gradle.plugins.cpd.test
 
-import de.aaschmid.gradle.plugins.cpd.CpdPlugin
 import groovy.io.FileType
-import org.gradle.api.Project
-import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.Specification
 
-abstract class BaseSpec extends Specification {
+enum Lang {
+    JAVA("java"),
+    KOTLIN("kotlin");
 
-    protected Project project
+    private final String folder
 
-    def setup() {
-        project = ProjectBuilder.builder().build()
-        project.plugins.apply(CpdPlugin)
+    Lang(String folder) {
+        this.folder = folder;
     }
+}
+
+abstract class BaseSpec extends Specification {
 
     /**
      * Creates a {@link File} with location <code>classpath:/test-data/java/${relativePath}</code> as absolute path
@@ -22,11 +23,11 @@ abstract class BaseSpec extends Specification {
      * @see File
      */
     File testFile(String relativePath) {
-        return testFile("java", relativePath)
+        return testFile(Lang.JAVA, relativePath)
     }
 
-    File testFile(String lang, String relativePath) {
-        def resourceName = "/test-data/${lang}/${relativePath}"
+    File testFile(Lang lang, String relativePath) {
+        def resourceName = "/test-data/${lang.folder}/${relativePath}"
         def resource = this.class.getResource(resourceName)
         assert resource: "${resourceName} not found on classpath"
 
@@ -41,5 +42,9 @@ abstract class BaseSpec extends Specification {
         def result = [ ]
         testFile(relativePath).eachFileRecurse(FileType.FILES){ file -> result << file }
         return result;
+    }
+
+    String testPath(Lang lang, String...relativePaths) {
+        return "['${relativePaths.collect{testFile(lang, it).getAbsolutePath()}.join("', '")}']"
     }
 }

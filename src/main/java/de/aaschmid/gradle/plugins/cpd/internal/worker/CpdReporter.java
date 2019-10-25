@@ -1,8 +1,11 @@
 package de.aaschmid.gradle.plugins.cpd.internal.worker;
 
-import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdCsvReport;
-import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdTextReport;
-import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdXmlReport;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.List;
+
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdWorkParameters.Report;
 import net.sourceforge.pmd.cpd.CSVRenderer;
 import net.sourceforge.pmd.cpd.Match;
 import net.sourceforge.pmd.cpd.SimpleRenderer;
@@ -12,29 +15,17 @@ import org.gradle.api.GradleException;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.List;
-
 class CpdReporter {
 
     private static final Logger logger = Logging.getLogger(CpdReporter.class);
 
-    private final List<CpdReportConfiguration> reports;
-
-    CpdReporter(List<CpdReportConfiguration> reports) {
-        this.reports = reports;
-    }
-
-    void generate(List<Match> matches) {
+    void generate(List<Report> reports, List<Match> matches) {
         if (logger.isInfoEnabled()) {
             logger.info("Generating reports");
         }
-        for (CpdReportConfiguration report : reports) {
-
+        for (Report report : reports) {
             CPDRenderer renderer = createRendererFor(report);
-            try (FileWriter fileWriter = new FileWriter(report.getDestination())){
+            try (FileWriter fileWriter = new FileWriter(report.getDestination())) {
 
                 ClassLoader previousContextClassLoader = Thread.currentThread().getContextClassLoader();
                 try {
@@ -55,18 +46,18 @@ class CpdReporter {
      * @param report the configured reports used
      * @return a full configured {@link CPDRenderer} to generate a CPD single file reports.
      */
-    private CPDRenderer createRendererFor(CpdReportConfiguration report) {
-        if (report instanceof CpdCsvReport) {
-            char separator = ((CpdCsvReport) report).getSeparator();
+    CPDRenderer createRendererFor(Report report) {
+        if (report instanceof Report.Csv) {
+            char separator = ((Report.Csv) report).getSeparator();
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Creating renderer to generate CSV file separated by '{}'.", separator);
             }
             return new CSVRenderer(separator);
 
-        } else if (report instanceof CpdTextReport) {
-            String lineSeparator = ((CpdTextReport) report).getLineSeparator();
-            boolean trimLeadingCommonSourceWhitespaces = ((CpdTextReport) report).getTrimLeadingCommonSourceWhitespaces();
+        } else if (report instanceof Report.Text) {
+            String lineSeparator = ((Report.Text) report).getLineSeparator();
+            boolean trimLeadingCommonSourceWhitespaces = ((Report.Text) report).getTrimLeadingCommonSourceWhitespaces();
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Creating renderer to generate simple text file separated by '{}' and trimmed '{}'.", lineSeparator, trimLeadingCommonSourceWhitespaces);
@@ -75,14 +66,14 @@ class CpdReporter {
             setTrimLeadingWhitespacesByReflection(result, trimLeadingCommonSourceWhitespaces);
             return result;
 
-        } else if (report instanceof CpdXmlReport) {
+        } else if (report instanceof Report.Xml) {
             String encoding = report.getEncoding();
             if (logger.isDebugEnabled()) {
                 logger.debug("Creating XML renderer to generate with encoding '{}'.", encoding);
             }
             return new XMLRenderer(encoding);
         }
-        throw new GradleException(String.format("Cannot create reports for unsupported %s", report.getClass().getCanonicalName()));
+        throw new GradleException(String.format("Cannot create reports for unsupported type '%s'.", report.getClass()));
     }
 
     /**
@@ -102,8 +93,8 @@ class CpdReporter {
             field.set(result, trimLeadingCommonSourceWhitespaces);
 
         } catch (Exception e) {
-            if (logger.isWarnEnabled()) { // TODO test if it is really logged?
-                logger.warn(String.format("Could not set field '%s' on created SimpleRenderer by reflection due to:", fieldName), e);
+            if (logger.isWarnEnabled()) {
+                logger.warn(String.format("Could not set field '%s' on '%s' by reflection.", result.getClass(), fieldName), e);
             }
         }
     }

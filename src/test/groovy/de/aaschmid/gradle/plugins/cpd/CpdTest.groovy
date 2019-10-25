@@ -3,9 +3,17 @@ package de.aaschmid.gradle.plugins.cpd
 import de.aaschmid.gradle.plugins.cpd.internal.CpdXmlFileReportImpl
 import de.aaschmid.gradle.plugins.cpd.test.BaseSpec
 import org.gradle.api.InvalidUserDataException
-import org.gradle.api.tasks.TaskExecutionException
+import org.gradle.api.Project
+import org.gradle.testfixtures.ProjectBuilder
 
 class CpdTest extends BaseSpec {
+
+    private Project project
+
+    def setup() {
+        project = ProjectBuilder.builder().build()
+        project.plugins.apply(CpdPlugin)
+    }
 
     def "'Cpd' task inputs are set correctly"() {
         given:
@@ -136,23 +144,15 @@ class CpdTest extends BaseSpec {
         e.getMessage() == "Task 'cpdCheck' requires at least one enabled report."
     }
 
-    def "'Cpd' should throw 'TaskExecutionException' if destination of enabled report is 'null' (non-optional property)"() {
-        given:
-        project.cpdCheck.reports{
-            csv{
-                enabled = true
-                destination = null
-            }
-            text.enabled = false
-            xml.enabled = false
+    def "'Cpd' should throw 'IllegalArgumentException' if destination of enabled report is 'null' (non-optional property)"() {
+        when:
+        project.cpdCheck.reports {
+            csv.destination = null
         }
 
-        when:
-        project.tasks.findByName('cpdCheck').execute()
-
         then:
-        def e = thrown TaskExecutionException
-        e.cause.getMessage() == "path may not be null or empty string. path='null'"
+        def e = thrown IllegalArgumentException
+        e.getMessage() == "Cannot set the value of a property using a null provider."
     }
 
     def "test 'getXmlRendererEncoding' should return set encoding"() {

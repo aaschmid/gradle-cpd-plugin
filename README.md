@@ -37,18 +37,19 @@ Explaination: v2.0 removes deprecated rendering API (= `net.sourceforge.pmd.cpd.
 
 ### Supported versions
 
-| G. CPD plugin  | Gradle      | PMD         | Java¹  |
-|:-------------- |:----------- |:----------- |:------ |
-| [v0.1][]       | 1.10 - 4.x  | 5.0.0 - 5.x | 6 - 8  |
-| [v0.2][]       | 2.0 - 4.x   | 5.0.0 - 5.x | 6 - 8  |
-| [v0.4][]       | 2.3 - 4.x   | 5.2.0 - 5.x | 6 - 8  |
-| [v1.0][]       | 2.14 - 5.0  | 5.2.0 - 5.x | 6 - 8  |
-| [v1.1][]       | 2.14 - 5.0  | 5.2.2 - 6.x | 6 - 9  |
-| [v1.2][]       | >= 3.5.1    | >= 5.2.2    | >= 8   |
-| [v1.3][]       | >= 4.10.3   | >= 5.2.2    | >= 8   |
-| [v2.0][]       | >= 4.10.3   | >= 6.1.0    | >= 8   |
+| G. CPD plugin  | Gradle       | PMD         | Java¹  |
+|:-------------- |:------------ |:----------- |:------ |
+| [v0.1][]       | 1.10 - 4.x   | 5.0.0 - 5.x | 6 - 8  |
+| [v0.2][]       | 2.0 - 4.x    | 5.0.0 - 5.x | 6 - 8  |
+| [v0.4][]       | 2.3 - 4.x    | 5.2.0 - 5.x | 6 - 8  |
+| [v1.0][]       | 2.14 - 5.0   | 5.2.0 - 5.x | 6 - 8  |
+| [v1.1][]       | 2.14 - 5.0   | 5.2.2 - 6.x | 6 - 9  |
+| [v1.2][]       | >= 3.5.1     | >= 5.2.2    | >= 8   |
+| [v1.3][]       | >= 4.10.3    | >= 5.2.2    | >= 8   |
+| [v2.0][]       | 4.10.3 - 5.5 | >= 6.1.0    | >= 8   |
+| [v3.0][]       | >= 5.6       | >= 6.10.0   | >= 8   |
 
-¹: Java version may additionally depend on [PMD][]s version which is properly reflected here.
+¹: Java version may additionally depend on [PMD][]s version which is might not be properly reflected here.
 
 Usage
 -----
@@ -112,9 +113,16 @@ subprojects {
 }
 ```
 
+### Custom sourceSets
+
+If your are adding custom sourceSets (even in subProjects), it may occur that you either need to configure `cpdCheck`
+afterwards or even manually configure `source`. Unfortunately, I have had problems with this case in the
+[CpdAcceptanceTest](https://github.com/aaschmid/gradle-cpd-plugin/blob/master/src/integTest/groovy/de/aaschmid/gradle/plugins/cpd/test/CpdAcceptanceTest.groovy)
+tests using Gradle [TestKit](https://docs.gradle.org/current/userguide/test_kit.html).
+
 ### Examples
 
-This example shows a project where only  ```main``` sources should be checked for duplicates:
+This example shows a project where only ```main``` sources should be checked for duplicates:
 
 ```groovy
 // optional - settings for every CPD task

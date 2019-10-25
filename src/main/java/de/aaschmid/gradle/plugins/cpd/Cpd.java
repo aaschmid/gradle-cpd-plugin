@@ -1,21 +1,21 @@
 package de.aaschmid.gradle.plugins.cpd;
 
-import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdAction;
-import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdExecutionConfiguration;
-import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration;
-import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdCsvReport;
-import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdTextReport;
-import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdReportConfiguration.CpdXmlReport;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import de.aaschmid.gradle.plugins.cpd.internal.CpdReportsImpl;
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdAction;
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdWorkParameters;
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdWorkParameters.Report;
 import groovy.lang.Closure;
 import org.gradle.api.Action;
 import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.FileTree;
-import org.gradle.api.logging.Logger;
-import org.gradle.api.logging.Logging;
-import org.gradle.api.reporting.Report;
 import org.gradle.api.reporting.Reporting;
+import org.gradle.api.reporting.SingleFileReport;
 import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFiles;
@@ -28,12 +28,7 @@ import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.VerificationTask;
 import org.gradle.internal.reflect.Instantiator;
 import org.gradle.util.DeprecationLogger;
-import org.gradle.workers.WorkerConfiguration;
 import org.gradle.workers.WorkerExecutor;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**
@@ -76,8 +71,6 @@ import java.util.List;
 @CacheableTask
 public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> {
 
-    private static final Logger logger = Logging.getLogger(Cpd.class);
-
     private final WorkerExecutor workerExecutor;
     private final CpdReportsImpl reports;
 
@@ -105,11 +98,9 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
     public void run() {
         checkTaskState();
 
-        workerExecutor.submit(CpdAction.class, (WorkerConfiguration config) -> {
-            config.setClasspath(getPmdClasspath());
-            config.setDisplayName("CPD worker");
-            config.setParams(createCpdExecutionConfiguration(), createCpdReportConfigurations());
-        });
+        workerExecutor
+                .classLoaderIsolation(action -> action.getClasspath().setFrom(getPmdClasspath()))
+                .submit(CpdAction.class, getCpdWorkParameters());
     }
 
     private void checkTaskState() {
@@ -124,42 +115,43 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
         }
     }
 
-    private CpdExecutionConfiguration createCpdExecutionConfiguration() {
-        return new CpdExecutionConfiguration(
-                getEncoding(),
-                getIgnoreAnnotations(),
-                getIgnoreFailures(),
-                getIgnoreIdentifiers(),
-                getIgnoreLiterals(),
-                getLanguage(),
-                getMinimumTokenCount(),
-                getSkipBlocks(),
-                getSkipBlocksPattern(),
-                getSkipDuplicateFiles(),
-                getSkipLexicalErrors(),
-                getSource().getFiles()
-        );
+    private Action<CpdWorkParameters> getCpdWorkParameters() {
+        return parameters -> {
+            parameters.getEncoding().set(getEncoding());
+            parameters.getIgnoreAnnotations().set(getIgnoreAnnotations());
+            parameters.getIgnoreFailures().set(getIgnoreFailures());
+            parameters.getIgnoreIdentifiers().set(getIgnoreIdentifiers());
+            parameters.getIgnoreLiterals().set(getIgnoreLiterals());
+            parameters.getLanguage().set(getLanguage());
+            parameters.getMinimumTokenCount().set(getMinimumTokenCount());
+            parameters.getSkipBlocks().set(getSkipBlocks());
+            parameters.getSkipBlocksPattern().set(getSkipBlocksPattern());
+            parameters.getSkipDuplicateFiles().set(getSkipDuplicateFiles());
+            parameters.getSkipLexicalErrors().set(getSkipLexicalErrors());
+            parameters.getSourceFiles().setFrom(getSource().getFiles());
+            parameters.getReportParameters().set(createReportParameters(getReports()));
+        };
     }
 
-    private List<CpdReportConfiguration> createCpdReportConfigurations() {
-        List<CpdReportConfiguration> result = new ArrayList<>();
-        for (Report report : getReports()) {
+    private List<Report> createReportParameters(CpdReports reports) {
+        List<Report> result = new ArrayList<>();
+        for (SingleFileReport report : reports) {
             if (!report.isEnabled()) {
                 continue;
             }
 
             if (report instanceof CpdCsvFileReport) {
                 Character separator = ((CpdCsvFileReport) report).getSeparator();
-                result.add(new CpdCsvReport(getEncoding(), report.getDestination(), separator));
+                result.add(new Report.Csv(getEncoding(), report.getDestination(), separator));
 
             } else if (report instanceof CpdTextFileReport) {
                 String lineSeparator = ((CpdTextFileReport) report).getLineSeparator();
                 boolean trimLeadingCommonSourceWhitespaces = ((CpdTextFileReport) report).getTrimLeadingCommonSourceWhitespaces();
-                result.add(new CpdTextReport(getEncoding(), report.getDestination(), lineSeparator, trimLeadingCommonSourceWhitespaces));
+                result.add(new Report.Text(getEncoding(), report.getDestination(), lineSeparator, trimLeadingCommonSourceWhitespaces));
 
             } else if (report instanceof CpdXmlFileReport) {
                 String encoding = getXmlRendererEncoding((CpdXmlFileReport) report);
-                result.add(new CpdXmlReport(encoding, report.getDestination()));
+                result.add(new Report.Xml(encoding, report.getDestination()));
 
             } else {
                 throw new IllegalArgumentException(String.format("Report of type '%s' not available.", report.getClass().getSimpleName()));
