@@ -144,10 +144,10 @@ uploadArchives {
             }
             repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
                 // username and password from gradle.properties
-                authentication(userName: sonatypeUsername, password: sonatypePassword )
+                authentication(userName: sonatypeUsername, password: sonatypePassword)
             }
             snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: sonatypeUsername, password: sonatypePassword )
+                authentication(userName: sonatypeUsername, password: sonatypePassword)
             }
 
             pom {
