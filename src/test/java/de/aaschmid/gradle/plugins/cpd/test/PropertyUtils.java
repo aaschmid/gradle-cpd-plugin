@@ -10,6 +10,7 @@ import org.gradle.api.provider.Property;
 public class PropertyUtils {
 
     public static <T> Property<T> property(T t) {
+        @SuppressWarnings("unchecked")
         Property<T> property = new DefaultProperty(t.getClass());
         property.set(t);
         return property;
