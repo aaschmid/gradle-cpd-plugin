@@ -3,6 +3,7 @@ package de.aaschmid.gradle.plugins.cpd.internal;
 import de.aaschmid.gradle.plugins.cpd.Cpd;
 import de.aaschmid.gradle.plugins.cpd.CpdTextFileReport;
 import de.aaschmid.gradle.plugins.cpd.test.GradleExtension;
+import org.gradle.api.tasks.TaskProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -12,9 +13,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CpdTextFileReportImplTest {
 
     @Test
-    void CpdTextFileReportImpl_shouldHaveDefaultLineSeparatorAndTrimLeadingCommonSourceWhitespaces(Cpd cpd) {
+    void CpdTextFileReportImpl_shouldHaveDefaultLineSeparatorAndTrimLeadingCommonSourceWhitespaces(TaskProvider<Cpd> cpdCheck) {
         // When:
-        CpdTextFileReportImpl result = new CpdTextFileReportImpl("text", cpd);
+        CpdTextFileReportImpl result = new CpdTextFileReportImpl("text", cpdCheck.get());
 
         // Then:
         assertThat(result.getLineSeparator()).isEqualTo(CpdTextFileReport.DEFAULT_LINE_SEPARATOR);

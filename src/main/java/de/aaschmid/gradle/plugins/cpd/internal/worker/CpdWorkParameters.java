@@ -2,11 +2,14 @@ package de.aaschmid.gradle.plugins.cpd.internal.worker;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.Objects;
 
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.workers.WorkParameters;
+
+import static java.util.Objects.requireNonNull;
 
 public interface CpdWorkParameters extends WorkParameters {
 
@@ -42,8 +45,8 @@ public interface CpdWorkParameters extends WorkParameters {
         private final File destination;
 
         Report(String encoding, File destination) {
-            this.encoding = encoding;
-            this.destination = destination;
+            this.encoding = requireNonNull(encoding, "'encoding' must not be null for any report.");
+            this.destination = requireNonNull(destination, "'destination' must not be null for any report.");
         }
 
         String getEncoding() {

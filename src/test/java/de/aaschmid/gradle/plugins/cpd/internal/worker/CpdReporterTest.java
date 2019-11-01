@@ -39,14 +39,11 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class CpdReporterTest {
 
-    @TempDir
-    Path tempDir;
-
     @InjectMocks
     CpdReporter underTest;
 
     @Test
-    void generate_shouldReThrowRendererThrownIoExceptionAsGradleException() throws Exception {
+    void generate_shouldReThrowRendererThrownIoExceptionAsGradleException(@TempDir Path tempDir) throws Exception {
         // Given:
         Report report = mock(Report.class);
         when(report.getDestination()).thenReturn(tempDir.resolve("report.file").toFile());
@@ -68,7 +65,7 @@ class CpdReporterTest {
 
     @Tag(TestTag.INTEGRATION_TEST)
     @Test
-    void generate_shouldGenerateReport() {
+    void generate_shouldGenerateReport(@TempDir Path tempDir) {
         // Given:
         File csvReportFile = tempDir.resolve("cpd.csv").toFile();
         Report.Csv csvReport = new Report.Csv("UTF-8", csvReportFile, ',');

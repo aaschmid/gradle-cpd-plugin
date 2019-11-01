@@ -1,20 +1,27 @@
 package de.aaschmid.gradle.plugins.cpd.test
 
+import de.aaschmid.gradle.plugins.cpd.test.TestFileResolver.Lang
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.UnexpectedBuildResultException
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
 
+import static de.aaschmid.gradle.plugins.cpd.test.TestFileResolver.*
 import static org.gradle.testkit.runner.internal.PluginUnderTestMetadataReading.*
 
-abstract class IntegrationBaseSpec extends BaseSpec {
+abstract class IntegrationBaseSpec extends Specification {
 
     @Rule
     protected final TemporaryFolder testProjectDir = new TemporaryFolder()
 
     protected File buildFile
     protected File settingsFile
+
+    protected static String testPath(Lang lang, String...relativePaths) {
+        return "['${relativePaths.collect{testFile(lang, it).getAbsolutePath()}.join("', '")}']"
+    }
 
     def setup() {
         buildFile = testProjectDir.newFile('build.gradle')
@@ -90,7 +97,7 @@ abstract class IntegrationBaseSpec extends BaseSpec {
      *
      * @return a{@link String} containing all the dependencies which {@link org.gradle.testkit.runner.GradleRunner#withPluginClasspath()} uses
      */
-    protected createBuildScriptWithClasspathOfGradleTestKitMechanism() {
+    protected static createBuildScriptWithClasspathOfGradleTestKitMechanism() {
         """\
             buildscript {
                 dependencies {

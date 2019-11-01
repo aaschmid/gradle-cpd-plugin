@@ -4,7 +4,8 @@ import spock.lang.Issue
 
 import java.nio.file.Files
 
-import static de.aaschmid.gradle.plugins.cpd.test.Lang.*
+import static de.aaschmid.gradle.plugins.cpd.test.TestFileResolver.*
+import static de.aaschmid.gradle.plugins.cpd.test.TestFileResolver.Lang.*
 import static org.gradle.testkit.runner.TaskOutcome.*
 
 class CpdAcceptanceTest extends IntegrationBaseSpec {
@@ -205,8 +206,8 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
         """.stripIndent()
 
         file("sub/src/main/java/de/aaschmid/foo").mkdirs()
-        Files.copy(testFile('de/aaschmid/foo/Bar.java').toPath(), file("sub/src/main/java/de/aaschmid/foo/Bar.java").toPath());
-        Files.copy(testFile('de/aaschmid/foo/Baz.java').toPath(), file("sub/src/main/java/de/aaschmid/foo/Baz.java").toPath());
+        Files.copy(testFile(JAVA, 'de/aaschmid/foo/Bar.java').toPath(), file("sub/src/main/java/de/aaschmid/foo/Bar.java").toPath())
+        Files.copy(testFile(JAVA, 'de/aaschmid/foo/Baz.java').toPath(), file("sub/src/main/java/de/aaschmid/foo/Baz.java").toPath())
 
         when:
         def result = run("cpdCheck")

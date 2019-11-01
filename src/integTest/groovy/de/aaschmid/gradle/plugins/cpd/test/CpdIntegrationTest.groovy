@@ -2,7 +2,7 @@ package de.aaschmid.gradle.plugins.cpd.test
 
 import spock.lang.Issue
 
-import static de.aaschmid.gradle.plugins.cpd.test.Lang.*
+import static de.aaschmid.gradle.plugins.cpd.test.TestFileResolver.Lang.*
 import static org.gradle.testkit.runner.TaskOutcome.*
 
 class CpdIntegrationTest extends IntegrationBaseSpec {

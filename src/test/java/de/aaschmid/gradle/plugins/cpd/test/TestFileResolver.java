@@ -2,18 +2,18 @@ package de.aaschmid.gradle.plugins.cpd.test;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.UndeclaredThrowableException;
+import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.gradle.api.Project;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 
 public class TestFileResolver {
 
@@ -45,14 +45,34 @@ public class TestFileResolver {
         return file;
     }
 
-    public static List<File> testFilesRecurseIn(Lang lang, String relativePath) {
-        try {
-            return Files
-                    .find(testFile(lang, relativePath).toPath(), Integer.MAX_VALUE, (filePath, fileAttr) -> fileAttr.isRegularFile())
-                    .map(Path::toFile)
-                    .collect(Collectors.toList());
-        } catch (IOException e) {
-            throw new UndeclaredThrowableException(e, String.format("Exception while recursively search for files in %s", relativePath));
-        }
+    public static List<File> testFilesRecurseIn(Lang lang, String... relativePaths) {
+        return Arrays.stream(relativePaths).flatMap(relativePath -> {
+            Path filePath = testFile(lang, relativePath).toPath();
+            if (Files.isDirectory(filePath)) {
+                try {
+                    return Files.find(filePath, Integer.MAX_VALUE, (path, fileAttr) -> fileAttr.isRegularFile()).map(Path::toFile);
+                } catch (IOException e) {
+                    throw new UncheckedIOException(String.format("Exception while recursively search for files in %s", relativePath), e);
+                }
+            }
+            return Stream.empty();
+        }).collect(Collectors.toList());
+    }
+
+    public static List<File> createProjectFiles(Project project, String... files) {
+        return Arrays.stream(files).map(filePath -> {
+            File file = project.file(filePath);
+            try {
+                if (file.isDirectory()) {
+                    Files.createDirectories(file.toPath());
+                } else {
+                    Files.createDirectories(file.toPath().getParent());
+                    Files.createFile(file.toPath());
+                }
+            } catch (IOException e) {
+                throw new UncheckedIOException(String.format("Exception while creating file %s", file), e);
+            }
+            return file;
+        }).collect(Collectors.toList());
     }
 }
