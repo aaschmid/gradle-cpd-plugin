@@ -2,7 +2,6 @@ package de.aaschmid.gradle.plugins.cpd.internal.worker;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.Spliterator;

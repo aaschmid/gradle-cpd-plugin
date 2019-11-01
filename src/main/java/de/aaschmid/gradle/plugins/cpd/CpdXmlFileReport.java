@@ -12,18 +12,16 @@ import org.gradle.api.tasks.Optional;
 public interface CpdXmlFileReport extends SingleFileReport {
 
     /**
-     * @return the encoding used to generate XML report; defaults to
-     *                 {@link de.aaschmid.gradle.plugins.cpd.Cpd#getEncoding()} or if also not set to
-     *                 {@code System.getProperty("file.encoding")}.
+     * @return the encoding used to generate XML report; defaults to {@link de.aaschmid.gradle.plugins.cpd.Cpd#getEncoding()} or if also not
+     * set to {@code System.getProperty("file.encoding")}.
      */
     @Input
     @Optional
     String getEncoding();
 
     /**
-     * @param encoding to be used when generating the XML report; defaults to
-     *                 {@link de.aaschmid.gradle.plugins.cpd.Cpd#getEncoding()} or if also not set to
-     *                 {@code System.getProperty("file.encoding")}.
+     * @param encoding to be used when generating the XML report; defaults to {@link de.aaschmid.gradle.plugins.cpd.Cpd#getEncoding()} or if
+     * also not set to {@code System.getProperty("file.encoding")}.
      * @see Cpd#getEncoding()
      */
     void setEncoding(String encoding);

@@ -32,8 +32,7 @@ import org.gradle.workers.WorkerExecutor;
 
 
 /**
- * Runs static code/paste (= duplication) detection on supplied source code files and generates a report of duplications
- * found.
+ * Runs static code/paste (= duplication) detection on supplied source code files and generates a report of duplications found.
  * <p>
  * Sample:
  *
@@ -200,8 +199,8 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
 
 
     /**
-     * The character set encoding (e.g., UTF-8) to use when reading the source code files but also when producing the
-     * report; defaults to {@link CpdExtension#getEncoding()}.
+     * The character set encoding (e.g., UTF-8) to use when reading the source code files but also when producing the report; defaults to
+     * {@link CpdExtension#getEncoding()}.
      * <p>
      * Example: {@code encoding = UTF-8}
      *
@@ -217,8 +216,8 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
     }
 
     /**
-     * Ignore annotations because more and more modern frameworks use annotations on classes and methods which can be very
-     * redundant and causes false positives.
+     * Ignore annotations because more and more modern frameworks use annotations on classes and methods which can be very redundant and
+     * causes false positives.
      * <p>
      * Example: {@code ignoreAnnotations = true}
      *
@@ -236,8 +235,7 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
     /**
      * Whether or not to allow the build to continue if there are warnings.
      * <p>
-     * Example: {@code ignoreFailures = true}
-     * {@inheritDoc}
+     * Example: {@code ignoreFailures = true} {@inheritDoc}
      */
     @Override
     @Input
@@ -251,8 +249,8 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
     }
 
     /**
-     * Option if CPD should ignore identifiers differences, i.e. variable names, methods names, and so forth,
-     * when evaluating a duplicate block.
+     * Option if CPD should ignore identifiers differences, i.e. variable names, methods names, and so forth, when evaluating a duplicate
+     * block.
      * <p>
      * Example: {@code ignoreIdentifiers = true}
      *
@@ -268,8 +266,8 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
     }
 
     /**
-     * Option if CPD should ignore literal value differences when evaluating a duplicate block. This means e.g. that
-     * {@code foo=42;} and {@code foo=43;} will be seen as equivalent.
+     * Option if CPD should ignore literal value differences when evaluating a duplicate block. This means e.g. that {@code foo=42;} and
+     * {@code foo=43;} will be seen as equivalent.
      * <p>
      * Example: {@code ignoreLiterals = true}
      *
@@ -301,8 +299,8 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
     }
 
     /**
-     * A positive integer indicating the minimum token count to trigger a CPD match; defaults to
-     * {@link CpdExtension#getMinimumTokenCount()}.
+     * A positive integer indicating the minimum token count to trigger a CPD match; defaults to {@link
+     * CpdExtension#getMinimumTokenCount()}.
      * <p>
      * Example: {@code minimumTokenCount = 25}
      *
@@ -369,9 +367,8 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
      * <p>
      * Example: {@code skipBlocks = false}
      *
-     * @see #skipBlocksPattern
-     *
      * @return whether blocks should be skipped by a given pattern
+     * @see #skipBlocksPattern
      */
     @Input
     public boolean getSkipBlocks() {
@@ -383,15 +380,13 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
     }
 
     /**
-     * Configures the pattern, to find the blocks to skip if enabled using {@link #skipBlocks}. It is a {@link String}
-     * property and contains of two parts, separated by {@code '|'}. The first part is the start pattern, the second part
-     * is the ending pattern.
+     * Configures the pattern, to find the blocks to skip if enabled using {@link #skipBlocks}. It is a {@link String} property and contains
+     * of two parts, separated by {@code '|'}. The first part is the start pattern, the second part is the ending pattern.
      * <p>
      * Example: {@code skipBlocksPattern = '#include <|>'}
      *
-     * @see #skipBlocks
-     *
      * @return the pattern used to skip blocks
+     * @see #skipBlocks
      */
     @Input
     public String getSkipBlocksPattern() {

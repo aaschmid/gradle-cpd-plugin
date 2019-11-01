@@ -1,5 +1,8 @@
 package de.aaschmid.gradle.plugins.cpd;
 
+import java.io.File;
+import java.util.Optional;
+
 import org.gradle.api.Incubating;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -7,7 +10,6 @@ import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.internal.ConventionMapping;
 import org.gradle.api.internal.IConventionAware;
-import org.gradle.api.internal.artifacts.DefaultExcludeRule;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.plugins.JavaBasePlugin;
@@ -17,29 +19,23 @@ import org.gradle.api.reporting.ReportingExtension;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
 import static java.util.Collections.reverseOrder;
 
 /**
- * A plugin for the finding duplicate code using <a href="http://pmd.sourceforge.net/cpd-usage.html">CPD</a> source
- * code analyzer (which is a part of <a href="http://pmd.sourceforge.net/">PMD</a>).
+ * A plugin for the finding duplicate code using <a href="http://pmd.sourceforge.net/cpd-usage.html">CPD</a> source code analyzer (which is
+ * a part of <a href="http://pmd.sourceforge.net/">PMD</a>).
  * <p>
- * Creates and registers a {@code cpd} extension with the default task options for every task of type
- * {@link Cpd}.
+ * Creates and registers a {@code cpd} extension with the default task options for every task of type {@link Cpd}.
  * <p>
  * Declares a {@code cpd} configuration which needs to be configured with the
  * <a href="http://pmd.sourceforge.net/">PMD</a> library containing the
  * <a href="http://pmd.sourceforge.net/cpd-usage.html">CPD</a> library to be used.
  * <p>
- * A {@link Cpd} task named {@code cpd} is created and configured with default options. It can be further configured
- * to analyze the source code you want, e.g. {@code source = project.files('src')}.
+ * A {@link Cpd} task named {@code cpd} is created and configured with default options. It can be further configured to analyze the source
+ * code you want, e.g. {@code source = project.files('src')}.
  * <p>
- * The created {@link Cpd} task is added to the {@code check} lifecycle task of {@link LifecycleBasePlugin} if it is also
- * applied, e.g. using {@link org.gradle.api.plugins.JavaPlugin}.
+ * The created {@link Cpd} task is added to the {@code check} lifecycle task of {@link LifecycleBasePlugin} if it is also applied, e.g.
+ * using {@link org.gradle.api.plugins.JavaPlugin}.
  * <p>
  * Sample:
  *
@@ -83,16 +79,16 @@ public class CpdPlugin implements Plugin<Project> {
         TaskProvider<Cpd> taskProvider = project.getTasks().register(TASK_NAME_CPD_CHECK, Cpd.class, task -> {
             task.setDescription("Run CPD analysis for all sources");
             project.getAllprojects().forEach(p ->
-                p.getPlugins().withType(JavaBasePlugin.class, plugin ->
-                    p.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().all(sourceSet ->
-                        sourceSet.getAllJava().getSrcDirs().forEach(task::source)
+                    p.getPlugins().withType(JavaBasePlugin.class, plugin ->
+                            p.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().all(sourceSet ->
+                                    sourceSet.getAllJava().getSrcDirs().forEach(task::source)
+                            )
                     )
-                )
             );
         });
 
         project.getPlugins().withType(LifecycleBasePlugin.class, plugin ->
-            project.getTasks().findByName(LifecycleBasePlugin.CHECK_TASK_NAME).dependsOn(taskProvider));
+                project.getTasks().findByName(LifecycleBasePlugin.CHECK_TASK_NAME).dependsOn(taskProvider));
 
         project.getGradle().getTaskGraph().whenReady(graph -> {
             String projectPath = (project.getRootProject() == project) ? project.getPath() : project.getPath() + ":";

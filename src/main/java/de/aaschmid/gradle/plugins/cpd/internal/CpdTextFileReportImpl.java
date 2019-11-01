@@ -2,8 +2,6 @@ package de.aaschmid.gradle.plugins.cpd.internal;
 
 import de.aaschmid.gradle.plugins.cpd.CpdTextFileReport;
 import org.gradle.api.Task;
-import org.gradle.api.logging.Logger;
-import org.gradle.api.logging.Logging;
 import org.gradle.api.reporting.internal.TaskGeneratedSingleFileReport;
 
 public class CpdTextFileReportImpl extends TaskGeneratedSingleFileReport implements CpdTextFileReport {

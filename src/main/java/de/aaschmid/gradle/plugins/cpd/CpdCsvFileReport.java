@@ -24,9 +24,8 @@ public interface CpdCsvFileReport extends SingleFileReport {
 
     /**
      * @param separator to be used when generating the CSV report; defaults to {@link #DEFAULT_SEPARATOR}.
-     * @throws org.gradle.api.InvalidUserDataException iif supplied {@code separator} is {@code null} ({@code char}
-     *                                                 cannot be wrapped by Gradle interally, such that unboxable
-     *                                                 {@code null}s must be checked in setter)
+     * @throws org.gradle.api.InvalidUserDataException iif supplied {@code separator} is {@code null} ({@code char} cannot be wrapped by
+     * Gradle interally, such that unboxable {@code null}s must be checked in setter)
      */
     void setSeparator(Character separator);
 
