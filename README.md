@@ -31,7 +31,7 @@ Requirements
 
 Currently this plugin requires [PMD](https://pmd.github.io/) greater or equal to version 6.1.0 such that ```toolVersion >= '6.1.0'```.
 
-Explaination: v2.0 removes deprecated rendering API (= `net.sourceforge.pmd.cpd.Renderer`) and replace it with new
+Explanation: v2.0 removes deprecated rendering API (= `net.sourceforge.pmd.cpd.Renderer`) and replace it with new
 `net.sourceforge.pmd.cpd.renderer.CPDRenderer` which was introduced with v6.1.0, see
 [PMD release notes](https://pmd.github.io/2018/02/25/PMD-6.1.0/#api-changes).
 
@@ -85,7 +85,7 @@ apply plugin: 'cpd'
 **Attention:** The plugins groupId was changed from ```de.aaschmid.gradle.plugins``` to ```de.aaschmid``` in [v1.0][].
 
 By default the copy-paste-detection looks at all source code of all projects which at least apply ```LifecycleBasePlugin```.
-If you use a different programming language and want to get it configurated out of the box, please open an issue :-)
+If you use a different programming language and want to get it configured out of the box, please open an issue :-)
 
 ### Single module project
 
@@ -148,7 +148,7 @@ cpdCheck {
 
 [CPD][] supports [Kotlin](https://kotlinlang.org/) since
 [v6.10.0](https://search.maven.org/search?q=g:net.sourceforge.pmd%20AND%20a:pmd-kotlin&core=gav). For previous versions
-you have to ignore files manuelly if you mixed it up with your Java files:
+you have to ignore files manually if you mixed it up with your Java files:
 ```groovy
 tasks.withType(Cpd) {
     exclude "*.kt"
@@ -173,7 +173,7 @@ e.g. using ```cpdCheck { }```:
 | skipDuplicateFiles | ```false```          |                            | [v0.5][] |
 | skipLexicalErrors  | ```false```          |                            | [v0.5][] |
 | skipBlocks         | ```true```           | ```'cpp'```                | [v0.4][] |
-| skipBlocksPattern  | ```'#if 0\|#endif'``` | ```'cpp'```                | [v0.4][] |
+| skipBlocksPattern  | ```'#if 0\|#endif'``` | ```'cpp'```               | [v0.4][] |
 
 If a specified `language` cannot be found, a fallback mechanism uses `net.sourceforge.pmd.cpd.AnyLanguage` instead. This
 fallback language does not run ANTLR and therefore also checks duplicates in comments.
@@ -199,7 +199,9 @@ Contributing
 
 You are very welcome to contribute by providing a patch/pull request.
 
-Please note that running the test cases my take quite long becuase the acceptance test cases (see ```de.aaschmid.gradle.plugins.cpd.test.CpdAcceptanceTest``` will download [CPD][] and its dependencies for every version. I recommend to get these dependencies in your ```localMaven()``` repository as the test cases look there for it first.
+Please note that running the test cases my take quite long because the acceptance test cases (see
+```de.aaschmid.gradle.plugins.cpd.test.CpdAcceptanceTest``` will download [CPD][] and its dependencies for every version. I recommend to
+get these dependencies in your ```localMaven()``` repository as the test cases look there for it first.
 
 [PMD]: https://pmd.github.io/
 [CPD]: https://pmd.github.io/latest/pmd_userdocs_cpd.html
@@ -213,3 +215,4 @@ Please note that running the test cases my take quite long becuase the acceptanc
 [v1.2]: /../../releases/tag/v1.2
 [v1.3]: /../../releases/tag/v1.3
 [v2.0]: /../../releases/tag/v2.0
+[v3.0]: /../../releases/tag/v3.0
