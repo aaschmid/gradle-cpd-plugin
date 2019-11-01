@@ -69,7 +69,7 @@ class CpdActionTest {
     void execute_shouldForwardCallCorrectly(Project project) {
         // Given:
         Set<File> sourceFiles = singleton(testFile(JAVA, "de/aaschmid/clazz/Clazz.java"));
-        List<Report> reports = singletonList(new Report.Csv("UTF-8", new File("cpd.csv"), ';'));
+        List<Report> reports = singletonList(new Report.Csv("UTF-8", new File("cpd.csv"), ';', true));
 
         List<Match> matches = singletonList(mock(Match.class));
         when(executor.run(any(), eq(sourceFiles))).thenReturn(matches);

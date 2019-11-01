@@ -115,22 +115,32 @@ class CpdTest {
         cpdCheck.configure(task -> task.reports(reports -> {
             reports.getCsv().setDestination(project.file(project.getBuildDir() + "/cpdCheck.csv"));
             reports.getCsv().setEnabled(true);
+            reports.getCsv().setSeparator(';');
+            reports.getCsv().setIncludeLineCount(false);
 
             reports.getText().setDestination(project.file(project.getBuildDir() + "/cpdCheck.text"));
             reports.getText().setEnabled(true);
+            reports.getText().setLineSeparator("-_-");
+            reports.getText().setTrimLeadingCommonSourceWhitespaces(true);
 
             reports.getXml().setDestination(project.file(project.getBuildDir() + "/reports/cpdCheck.xml"));
             reports.getXml().setEnabled(false);
+            reports.getXml().setEncoding("UTF-16");
         }));
 
         // Then:
         CpdReports actual = cpdCheck.get().getReports();
         assertThat(actual.getCsv().getDestination()).isEqualTo(project.file("build/cpdCheck.csv"));
         assertThat(actual.getCsv().isEnabled()).isTrue();
+        assertThat(actual.getCsv().getSeparator()).isEqualTo(';');
+        assertThat(actual.getCsv().isIncludeLineCount()).isFalse();
         assertThat(actual.getText().getDestination()).isEqualTo(project.file("build/cpdCheck.text"));
         assertThat(actual.getText().isEnabled()).isTrue();
+        assertThat(actual.getText().getLineSeparator()).isEqualTo("-_-");
+        assertThat(actual.getText().getTrimLeadingCommonSourceWhitespaces()).isTrue();
         assertThat(actual.getXml().getDestination()).isEqualTo(project.file("build/reports/cpdCheck.xml"));
         assertThat(actual.getXml().isEnabled()).isFalse();
+        assertThat(actual.getXml().getEncoding()).isEqualTo("UTF-16");
     }
 
     @Test
@@ -146,7 +156,7 @@ class CpdTest {
         Cpd actual = cpdCheck.get();
 
         // Expect:
-        assertThat(actual.getInputs().getProperties()).hasSize(44);
+        assertThat(actual.getInputs().getProperties()).hasSize(45);
         assertThat(actual.getInputs().getSourceFiles()).containsExactlyInAnyOrderElementsOf(testFilesRecurseIn(JAVA, "de/aaschmid/clazz"));
     }
 

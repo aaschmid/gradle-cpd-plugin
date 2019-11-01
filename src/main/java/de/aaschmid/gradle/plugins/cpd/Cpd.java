@@ -142,7 +142,8 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
 
             if (report instanceof CpdCsvFileReport) {
                 Character separator = ((CpdCsvFileReport) report).getSeparator();
-                result.add(new Report.Csv(getEncoding(), report.getDestination(), separator));
+                boolean includeLineCount = ((CpdCsvFileReport) report).isIncludeLineCount();
+                result.add(new Report.Csv(getEncoding(), report.getDestination(), separator, includeLineCount));
 
             } else if (report instanceof CpdTextFileReport) {
                 String lineSeparator = ((CpdTextFileReport) report).getLineSeparator();

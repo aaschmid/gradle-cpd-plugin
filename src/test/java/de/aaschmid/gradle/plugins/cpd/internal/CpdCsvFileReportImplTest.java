@@ -15,12 +15,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class CpdCsvFileReportImplTest {
 
     @Test
-    void CpdCsvFileReportImpl_shouldHaveDefaultSeparator(TaskProvider<Cpd> cpdCheck) {
+    void CpdCsvFileReportImpl_shouldHaveDefaults(TaskProvider<Cpd> cpdCheck) {
         // When:
         CpdCsvFileReportImpl result = new CpdCsvFileReportImpl("csv", cpdCheck.get());
 
         // Then:
         assertThat(result.getSeparator()).isEqualTo(CpdCsvFileReport.DEFAULT_SEPARATOR);
+        assertThat(result.isIncludeLineCount()).isEqualTo(CpdCsvFileReport.DEFAULT_INCLUDE_LINE_COUNT);
     }
 
     @Test

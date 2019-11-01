@@ -2,7 +2,6 @@ package de.aaschmid.gradle.plugins.cpd.internal.worker;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.Objects;
 
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.provider.ListProperty;
@@ -59,14 +58,20 @@ public interface CpdWorkParameters extends WorkParameters {
 
         public static class Csv extends Report {
             private final Character separator;
+            private final boolean includeLineCount;
 
-            public Csv(String encoding, File destination, Character separator) {
+            public Csv(String encoding, File destination, Character separator, boolean includeLineCount) {
                 super(encoding, destination);
                 this.separator = separator;
+                this.includeLineCount = includeLineCount;
             }
 
             Character getSeparator() {
                 return separator;
+            }
+
+            public boolean isIncludeLineCount() {
+                return includeLineCount;
             }
         }
 
@@ -84,7 +89,7 @@ public interface CpdWorkParameters extends WorkParameters {
                 return lineSeparator;
             }
 
-            boolean getTrimLeadingCommonSourceWhitespaces() {
+            boolean isTrimLeadingCommonSourceWhitespaces() {
                 return trimLeadingCommonSourceWhitespaces;
             }
         }

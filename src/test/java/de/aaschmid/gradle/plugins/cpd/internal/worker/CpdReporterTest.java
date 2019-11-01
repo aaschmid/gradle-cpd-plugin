@@ -20,6 +20,9 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -29,6 +32,7 @@ import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.contentOf;
+import static org.junit.jupiter.params.provider.Arguments.of;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -62,13 +66,20 @@ class CpdReporterTest {
 
     }
 
+    static Arguments[] generate_shouldGenerateReport() {
+        return new Arguments[] {
+            of(true, "lines,tokens,occurrences\n"),
+            of(false, "tokens,occurrences\n"),
+        };
+    }
 
     @Tag(TestTag.INTEGRATION_TEST)
-    @Test
-    void generate_shouldGenerateReport(@TempDir Path tempDir) {
+    @ParameterizedTest
+    @MethodSource
+    void generate_shouldGenerateReport(boolean includeLineCount, String expectedHeaderLine, @TempDir Path tempDir) {
         // Given:
         File csvReportFile = tempDir.resolve("cpd.csv").toFile();
-        Report.Csv csvReport = new Report.Csv("UTF-8", csvReportFile, ',');
+        Report.Csv csvReport = new Report.Csv("UTF-8", csvReportFile, ',', true);
 
         File textReportFile = tempDir.resolve("cpd.text").toFile();
         Report.Text textReport = new Report.Text("UTF-8", textReportFile, "#######", false);
@@ -90,7 +101,7 @@ class CpdReporterTest {
     @Test
     void createRendererFor_shouldReturnCorrectlyConfiguredCsvRenderer() {
         // Given:
-        Report.Csv report = new Report.Csv("UTF-8", new File("cpd.csv"), ';');
+        Report.Csv report = new Report.Csv("UTF-8", new File("cpd.csv"), ';', true);
 
         // When:
         CPDRenderer result = underTest.createRendererFor(report);
@@ -98,7 +109,8 @@ class CpdReporterTest {
         // Then:
         assertThat(result)
                 .isInstanceOf(CSVRenderer.class)
-                .hasFieldOrPropertyWithValue("separator", ';');
+                .hasFieldOrPropertyWithValue("separator", ';')
+                .hasFieldOrPropertyWithValue("lineCountPerFile", false);
     }
 
     @Test

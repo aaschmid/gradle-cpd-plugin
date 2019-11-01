@@ -49,15 +49,17 @@ class CpdReporter {
     CPDRenderer createRendererFor(Report report) {
         if (report instanceof Report.Csv) {
             char separator = ((Report.Csv) report).getSeparator();
+            boolean lineCountPerFile = !((Report.Csv) report).isIncludeLineCount();
 
             if (logger.isDebugEnabled()) {
-                logger.debug("Creating renderer to generate CSV file separated by '{}'.", separator);
+                logger.debug("Creating renderer to generate CSV file separated by '{}'{}.", separator,
+                        lineCountPerFile ? " with line count per file" : "");
             }
-            return new CSVRenderer(separator);
+            return new CSVRenderer(separator, lineCountPerFile);
 
         } else if (report instanceof Report.Text) {
             String lineSeparator = ((Report.Text) report).getLineSeparator();
-            boolean trimLeadingCommonSourceWhitespaces = ((Report.Text) report).getTrimLeadingCommonSourceWhitespaces();
+            boolean trimLeadingCommonSourceWhitespaces = ((Report.Text) report).isTrimLeadingCommonSourceWhitespaces();
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Creating renderer to generate simple text file separated by '{}' and trimmed '{}'.", lineSeparator, trimLeadingCommonSourceWhitespaces);

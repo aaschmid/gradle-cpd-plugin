@@ -187,11 +187,15 @@ Additionally, one can configure the following reports for every task analogous t
 [Reporting](https://gradle.org/docs/current/dsl/org.gradle.api.reporting.Reporting.html) as for any other reporting plugin. See also
 the example in [Usage](#usage) section above.
 
-| Report | Default  | Further options and their defaults    |
-| ------ |:--------:| ------------------------------------- |
-| csv    | disabled | ```separator = ','```                 |
+| Report | Default  | Further options and their defaults                    |
+| ------ |:--------:| ----------------------------------------------------- |
+| csv    | disabled | ```separator = ','```, ```includeLineCount = true```¹ |
 | text   | disabled | ```lineSeparator = '====================================================================='```, ```trimLeadingCommonSourceWhitespaces = false``` |
-| xml    | enabled  | ```encoding = <<System default>>```   |
+| xml    | enabled  | ```encoding = <<System default>>```                   |
+
+¹: Since [v3.1][] but note that property `includeLineCount` is originally named `lineCountPerFile` and meaning is inverted which means that
+`false` shows line count and `true` hides it, see
+[here](https://github.com/pmd/pmd/blob/master/pmd-core/src/main/java/net/sourceforge/pmd/cpd/CSVRenderer.java#L63).
 
 
 Contributing
@@ -216,3 +220,4 @@ get these dependencies in your ```localMaven()``` repository as the test cases l
 [v1.3]: /../../releases/tag/v1.3
 [v2.0]: /../../releases/tag/v2.0
 [v3.0]: /../../releases/tag/v3.0
+[v3.1]: /../../releases/tag/v3.1
