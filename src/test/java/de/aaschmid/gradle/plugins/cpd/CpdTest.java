@@ -123,6 +123,9 @@ class CpdTest {
             reports.getText().setLineSeparator("-_-");
             reports.getText().setTrimLeadingCommonSourceWhitespaces(true);
 
+            reports.getVs().setDestination(project.file("cpdCheck.vs"));
+            reports.getVs().setEnabled(true);
+
             reports.getXml().setDestination(project.file(project.getBuildDir() + "/reports/cpdCheck.xml"));
             reports.getXml().setEnabled(false);
             reports.getXml().setEncoding("UTF-16");
@@ -138,6 +141,8 @@ class CpdTest {
         assertThat(actual.getText().isEnabled()).isTrue();
         assertThat(actual.getText().getLineSeparator()).isEqualTo("-_-");
         assertThat(actual.getText().getTrimLeadingCommonSourceWhitespaces()).isTrue();
+        assertThat(actual.getVs().getDestination()).isEqualTo(project.file("cpdCheck.vs"));
+        assertThat(actual.getVs().isEnabled()).isTrue();
         assertThat(actual.getXml().getDestination()).isEqualTo(project.file("build/reports/cpdCheck.xml"));
         assertThat(actual.getXml().isEnabled()).isFalse();
         assertThat(actual.getXml().getEncoding()).isEqualTo("UTF-16");
@@ -156,7 +161,7 @@ class CpdTest {
         Cpd actual = cpdCheck.get();
 
         // Expect:
-        assertThat(actual.getInputs().getProperties()).hasSize(45);
+        assertThat(actual.getInputs().getProperties()).hasSize(50);
         assertThat(actual.getInputs().getSourceFiles()).containsExactlyInAnyOrderElementsOf(testFilesRecurseIn(JAVA, "de/aaschmid/clazz"));
     }
 
@@ -169,6 +174,7 @@ class CpdTest {
                 report.getCsv().setEnabled(false);
                 report.getText().setDestination(project.file("cpdCheck.txt"));
                 report.getText().setEnabled(true);
+                report.getVs().setDestination(project.file("cpd.vs"));
             });
             task.source(testFile(JAVA, "."));
         });
@@ -178,6 +184,7 @@ class CpdTest {
         assertThat(actual.getOutputs().getFiles()).containsExactlyInAnyOrder(
                 project.file(project.getBuildDir() + "/cpd.csv"),
                 project.file("cpdCheck.txt"),
+                project.file("cpd.vs"),
                 project.file(project.getBuildDir() + "/reports/cpd/cpdCheck.xml")
         );
     }
@@ -212,6 +219,7 @@ class CpdTest {
         cpdCheck.configure(task -> task.reports(report -> {
             report.getCsv().setEnabled(false);
             report.getText().setEnabled(false);
+            report.getVs().setEnabled(false);
             report.getXml().setEnabled(false);
         }));
         Cpd actual = cpdCheck.get();

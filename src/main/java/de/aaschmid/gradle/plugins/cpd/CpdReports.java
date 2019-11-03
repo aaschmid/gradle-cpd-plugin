@@ -10,8 +10,9 @@ import org.gradle.api.tasks.Nested;
  * One of
  * <ul>
  * <li>csv
- * <li>text (default)
- * <li>xml
+ * <li>text
+ * <li>vs
+ * <li>xml (default)
  * </ul>
  * <p>
  * The reporting aspects of a {@link Cpd} task can be configured as such:
@@ -42,6 +43,12 @@ public interface CpdReports extends ReportContainer<SingleFileReport> {
      */
     @Nested
     CpdTextFileReport getText();
+
+    /**
+     * @return The CPD (single file) 'vs' report
+     */
+    @Nested
+    CpdVsFileReport getVs();
 
     /**
      * @return The CPD (single file) 'XML' report

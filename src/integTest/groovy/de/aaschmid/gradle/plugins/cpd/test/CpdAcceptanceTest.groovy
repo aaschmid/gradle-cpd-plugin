@@ -385,6 +385,11 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
             cpdCheck{
                 ignoreAnnotations = true
                 minimumTokenCount = 40
+                reports {
+                    vs.enabled = true
+                    xml.enabled = false
+
+                }
                 source = ${testPath(JAVA, 'de/aaschmid/annotation')}
             }
             """.stripIndent()
@@ -396,10 +401,9 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
         result.task(':cpdCheck').outcome == SUCCESS
         result.output.contains("BUILD SUCCESSFUL")
 
-        def report = file('build/reports/cpd/cpdCheck.xml')
+        def report = file('build/reports/cpd/cpdCheck.vs')
         report.exists()
-        // TODO do better?
-        report.text =~ /<pmd-cpd\/>/
+        report.text.isEmpty()
     }
 
     def "Cpd should fail if ignoreIdentifiers on different identifiers"() {
@@ -459,8 +463,7 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
                 ignoreLiterals = true
                 minimumTokenCount = 20
                 reports{
-                    csv.enabled = true
-                    xml.enabled = false
+                    vs.enabled = true
                 }
                 source = ${testPath(JAVA, 'de/aaschmid/literal')}
             }
@@ -472,11 +475,15 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
         then:
         result.task(':cpdCheck').outcome == FAILED
         result.output.contains("BUILD FAILED")
-        result.output =~ /CPD found duplicate code\. See the report at file:\/\/.*\/cpdCheck.csv/
+        result.output =~ /CPD found duplicate code\. See the report at file:\/\/.*\/cpdCheck.vs/
 
-        def report = file('build/reports/cpd/cpdCheck.csv')
-        report.exists()
-        report.text =~ /9,27,2,5,.*Literal[12]\.java,5,.*Literal[12]\.java/
+        def vsReport = file('build/reports/cpd/cpdCheck.vs')
+        vsReport.exists()
+        vsReport.text =~ /Literal[12].java\(5\): Between lines 5 and 14/
+
+        def xmlReport = file('build/reports/cpd/cpdCheck.xml')
+        xmlReport.exists()
+        xmlReport.text =~ /<duplication lines="9" tokens="27">\s+<file line="5"\s+path=".*Literal[12].java"\/>/
     }
 
     def "Cpd should not fail if not ignoreLiterals on different literals"() {
@@ -498,7 +505,6 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
 
         def report = file('build/reports/cpd/cpdCheck.xml') // TODO file exists always; same as for other tools?
         report.exists()
-        // TODO do better?
         report.text =~ /<pmd-cpd\/>/
     }
 
