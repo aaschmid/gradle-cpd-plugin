@@ -6,9 +6,11 @@ import java.lang.reflect.Field;
 import java.util.List;
 
 import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdWorkParameters.Report;
+import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdWorkParameters.Report.Xml;
 import net.sourceforge.pmd.cpd.CSVRenderer;
 import net.sourceforge.pmd.cpd.Match;
 import net.sourceforge.pmd.cpd.SimpleRenderer;
+import net.sourceforge.pmd.cpd.VSRenderer;
 import net.sourceforge.pmd.cpd.XMLRenderer;
 import net.sourceforge.pmd.cpd.renderer.CPDRenderer;
 import org.gradle.api.GradleException;
@@ -68,8 +70,11 @@ class CpdReporter {
             setTrimLeadingWhitespacesByReflection(result, trimLeadingCommonSourceWhitespaces);
             return result;
 
+        } else if (report instanceof Report.Vs) {
+            return new VSRenderer();
+
         } else if (report instanceof Report.Xml) {
-            String encoding = report.getEncoding();
+            String encoding = ((Xml) report).getEncoding();
             if (logger.isDebugEnabled()) {
                 logger.debug("Creating XML renderer to generate with encoding '{}'.", encoding);
             }

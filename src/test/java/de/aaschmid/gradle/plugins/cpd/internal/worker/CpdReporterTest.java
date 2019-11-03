@@ -13,11 +13,13 @@ import net.sourceforge.pmd.cpd.SimpleRenderer;
 import net.sourceforge.pmd.cpd.SourceCode;
 import net.sourceforge.pmd.cpd.SourceCode.StringCodeLoader;
 import net.sourceforge.pmd.cpd.TokenEntry;
+import net.sourceforge.pmd.cpd.VSRenderer;
 import net.sourceforge.pmd.cpd.XMLRenderer;
 import net.sourceforge.pmd.cpd.renderer.CPDRenderer;
 import org.gradle.api.GradleException;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -66,23 +68,25 @@ class CpdReporterTest {
 
     }
 
-    static Arguments[] generate_shouldGenerateReport() {
-        return new Arguments[] {
-            of(true, "lines,tokens,occurrences\n"),
-            of(false, "tokens,occurrences\n"),
-        };
-    }
-
     @Tag(TestTag.INTEGRATION_TEST)
-    @ParameterizedTest
-    @MethodSource
-    void generate_shouldGenerateReport(boolean includeLineCount, String expectedHeaderLine, @TempDir Path tempDir) {
+    @Test // ParameterizedTest not possible because Source provider does not allow arguments like @TempDir
+    void generate_shouldGenerateReport(@TempDir Path tempDir) {
         // Given:
         File csvReportFile = tempDir.resolve("cpd.csv").toFile();
-        Report.Csv csvReport = new Report.Csv("UTF-8", csvReportFile, ',', true);
+        Report.Csv csvReport = new Report.Csv(csvReportFile, ',', true);
+
+        File csvReportFileWithoutLines = tempDir.resolve("cpdWithoutLines.csv").toFile();
+        Report.Csv csvReportWithoutLines = new Report.Csv(csvReportFileWithoutLines, ';', false);
 
         File textReportFile = tempDir.resolve("cpd.text").toFile();
-        Report.Text textReport = new Report.Text("UTF-8", textReportFile, "#######", false);
+        Report.Text textReport = new Report.Text(textReportFile, "#######", false);
+
+        File vsReportFile = tempDir.resolve("cpd.vs").toFile();
+        Report.Vs vsReport = new Report.Vs(vsReportFile);
+
+        File xmlReportFile = tempDir.resolve("cpd.xml").toFile();
+        Report.Xml xmlReport = new Report.Xml(xmlReportFile, "ISO-8859-15");
+
 
         Mark mark = new Mark(new TokenEntry("1", "Clazz1.java", 1));
         mark.setLineCount(1);
@@ -91,17 +95,20 @@ class CpdReporterTest {
         Match match = new Match(5, mark, mark);
 
         // When:
-        underTest.generate(asList(csvReport, textReport), asList(match, match));
+        underTest.generate(asList(csvReport, csvReportWithoutLines, textReport, vsReport, xmlReport), asList(match, match));
 
         // Then:
         assertThat(contentOf(csvReportFile)).startsWith("lines,tokens,occurrences\n");
+        assertThat(contentOf(csvReportFileWithoutLines)).startsWith("tokens;occurrences\n");
         assertThat(contentOf(textReportFile)).startsWith("Found a 1 line (5 tokens) duplication in the following files: \n");
+        assertThat(contentOf(vsReportFile)).startsWith("Clazz1.java(1): Between lines 1 and 2\n");
+        assertThat(contentOf(xmlReportFile)).startsWith("<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\n");
     }
 
     @Test
     void createRendererFor_shouldReturnCorrectlyConfiguredCsvRenderer() {
         // Given:
-        Report.Csv report = new Report.Csv("UTF-8", new File("cpd.csv"), ';', true);
+        Report.Csv report = new Report.Csv(new File("cpd.csv"), ';', true);
 
         // When:
         CPDRenderer result = underTest.createRendererFor(report);
@@ -116,7 +123,7 @@ class CpdReporterTest {
     @Test
     void createRendererFor_shouldReturnCorrectlyConfiguredSimpleRenderer() {
         // Given:
-        Report.Text report = new Report.Text("UTF-8", new File("cpd.txt"), "---", true);
+        Report.Text report = new Report.Text(new File("cpd.txt"), "---", true);
 
         // When:
         CPDRenderer result = underTest.createRendererFor(report);
@@ -129,9 +136,21 @@ class CpdReporterTest {
     }
 
     @Test
+    void createRendererFor_shouldReturnCorrectlyConfiguredVsRenderer() {
+        // Given:
+        Report.Vs report = new Report.Vs(new File("cpd.vs"));
+
+        // When:
+        CPDRenderer result = underTest.createRendererFor(report);
+
+        // Then:
+        assertThat(result).isInstanceOf(VSRenderer.class);
+    }
+
+    @Test
     void createRendererFor_shouldReturnCorrectlyConfiguredXmlRenderer() {
         // Given:
-        Report.Xml report = new Report.Xml("ISO-8859-1", new File("cpd.xml"));
+        Report.Xml report = new Report.Xml(new File("cpd.xml"), "ISO-8859-1");
 
         // When:
         CPDRenderer result = underTest.createRendererFor(report);
@@ -145,7 +164,7 @@ class CpdReporterTest {
     @Test
     void createRendererFor_shouldThrowGradleExceptionOnUnknownReportType() {
         // Given:
-        Report report = new Report("ISO-8859-1", new File("cpd.xml")) {
+        Report report = new Report(new File("cpd.xml")) {
         };
 
         // Expect:

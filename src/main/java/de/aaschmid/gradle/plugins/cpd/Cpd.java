@@ -142,16 +142,19 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
             if (report instanceof CpdCsvFileReport) {
                 Character separator = ((CpdCsvFileReport) report).getSeparator();
                 boolean includeLineCount = ((CpdCsvFileReport) report).isIncludeLineCount();
-                result.add(new Report.Csv(getEncoding(), report.getDestination(), separator, includeLineCount));
+                result.add(new Report.Csv(report.getDestination(), separator, includeLineCount));
 
             } else if (report instanceof CpdTextFileReport) {
                 String lineSeparator = ((CpdTextFileReport) report).getLineSeparator();
                 boolean trimLeadingCommonSourceWhitespaces = ((CpdTextFileReport) report).getTrimLeadingCommonSourceWhitespaces();
-                result.add(new Report.Text(getEncoding(), report.getDestination(), lineSeparator, trimLeadingCommonSourceWhitespaces));
+                result.add(new Report.Text(report.getDestination(), lineSeparator, trimLeadingCommonSourceWhitespaces));
+
+            } else if (report instanceof CpdVsFileReport) {
+                result.add(new Report.Vs(report.getDestination()));
 
             } else if (report instanceof CpdXmlFileReport) {
                 String encoding = getXmlRendererEncoding((CpdXmlFileReport) report);
-                result.add(new Report.Xml(encoding, report.getDestination()));
+                result.add(new Report.Xml(report.getDestination(), encoding));
 
             } else {
                 throw new IllegalArgumentException(String.format("Report of type '%s' not available.", report.getClass().getSimpleName()));

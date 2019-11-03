@@ -69,7 +69,7 @@ class CpdActionTest {
     void execute_shouldForwardCallCorrectly(Project project) {
         // Given:
         Set<File> sourceFiles = singleton(testFile(JAVA, "de/aaschmid/clazz/Clazz.java"));
-        List<Report> reports = singletonList(new Report.Csv("UTF-8", new File("cpd.csv"), ';', true));
+        List<Report> reports = singletonList(new Report.Csv(new File("cpd.csv"), ';', true));
 
         List<Match> matches = singletonList(mock(Match.class));
         when(executor.run(any(), eq(sourceFiles))).thenReturn(matches);
@@ -92,7 +92,7 @@ class CpdActionTest {
     @Test
     void execute_shouldThrowGradleExceptionIfIgnoreFailuresIsFalse(Project project) {
         // Given:
-        Report.Xml report = new Report.Xml("UTF-8", new File("cpd.xml"));
+        Report.Xml report = new Report.Xml(new File("cpd.xml"), "UTF-8");
 
         List<Match> matches = singletonList(mock(Match.class));
         when(executor.run(any(), any())).thenReturn(matches);
@@ -180,7 +180,7 @@ class CpdActionTest {
 
     private void stubParametersWithDefaults(Project project) {
         Set<File> sourceFiles = singleton(testFile(JAVA, "de/aaschmid/clazz/Clazz.java"));
-        Report.Text report = new Report.Text("UTF-8", new File("cpd.text"), "\n", false);
+        Report.Text report = new Report.Text(new File("cpd.text"), "\n", false);
 
         when(parameters.getEncoding()).thenReturn(property("US-ASCII"));
         when(parameters.getIgnoreAnnotations()).thenReturn(property(false));

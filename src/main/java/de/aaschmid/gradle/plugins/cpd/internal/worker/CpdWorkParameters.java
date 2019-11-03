@@ -40,16 +40,10 @@ public interface CpdWorkParameters extends WorkParameters {
 
 
     abstract class Report implements Serializable {
-        private final String encoding;
         private final File destination;
 
-        Report(String encoding, File destination) {
-            this.encoding = requireNonNull(encoding, "'encoding' must not be null for any report.");
+        Report( File destination) {
             this.destination = requireNonNull(destination, "'destination' must not be null for any report.");
-        }
-
-        String getEncoding() {
-            return encoding;
         }
 
         File getDestination() {
@@ -60,8 +54,8 @@ public interface CpdWorkParameters extends WorkParameters {
             private final Character separator;
             private final boolean includeLineCount;
 
-            public Csv(String encoding, File destination, Character separator, boolean includeLineCount) {
-                super(encoding, destination);
+            public Csv(File destination, Character separator, boolean includeLineCount) {
+                super(destination);
                 this.separator = separator;
                 this.includeLineCount = includeLineCount;
             }
@@ -70,7 +64,7 @@ public interface CpdWorkParameters extends WorkParameters {
                 return separator;
             }
 
-            public boolean isIncludeLineCount() {
+            boolean isIncludeLineCount() {
                 return includeLineCount;
             }
         }
@@ -79,8 +73,8 @@ public interface CpdWorkParameters extends WorkParameters {
             private final String lineSeparator;
             private final boolean trimLeadingCommonSourceWhitespaces;
 
-            public Text(String encoding, File destination, String lineSeparator, boolean trimLeadingCommonSourceWhitespaces) {
-                super(encoding, destination);
+            public Text(File destination, String lineSeparator, boolean trimLeadingCommonSourceWhitespaces) {
+                super(destination);
                 this.lineSeparator = lineSeparator;
                 this.trimLeadingCommonSourceWhitespaces = trimLeadingCommonSourceWhitespaces;
             }
@@ -94,9 +88,22 @@ public interface CpdWorkParameters extends WorkParameters {
             }
         }
 
+        public static class Vs extends Report {
+            public Vs(File destination) {
+                super(destination);
+            }
+        }
+
         public static class Xml extends Report {
-            public Xml(String encoding, File destination) {
-                super(encoding, destination);
+            private final String encoding;
+
+            public Xml(File destination, String encoding) {
+                super(destination);
+                this.encoding = encoding;
+            }
+
+            String getEncoding() {
+                return encoding;
             }
         }
     }
