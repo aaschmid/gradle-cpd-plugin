@@ -10,8 +10,6 @@ import static org.gradle.testkit.runner.TaskOutcome.*
 
 class CpdAcceptanceTest extends IntegrationBaseSpec {
 
-    // TODO Test incremental build feature? how?
-
     def "Cpd will be skipped if no source is set"() {
         given:
         buildFileWithPluginAndRepos() << """
@@ -31,8 +29,6 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
         result.output.contains("BUILD SUCCESSFUL")
         !result.output.contains('WARNING: Due to the absence of \'LifecycleBasePlugin\' on root project')
     }
-
-    // TODO use pmd dependency if pmd plugin applied?
 
     def "Cpd fails if no report is enabled"() {
         given:
@@ -94,8 +90,6 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
             }
         """.stripIndent()
 
-        print(buildFile.text)
-
         when:
         def result = run("cpdCheck")
 
@@ -123,13 +117,10 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
             }
         """.stripIndent()
 
-        println(buildFile.text)
-
         when:
         def result = run("cpdCheck")
 
         then:
-        println(result.output)
         result.task(':cpdCheck').outcome == SUCCESS
         result.output.contains("BUILD SUCCESSFUL")
 
@@ -450,9 +441,8 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
         result.task(':cpdCheck').outcome == SUCCESS
         result.output.contains("BUILD SUCCESSFUL")
 
-        def report = file('build/reports/cpd/cpdCheck.xml') // TODO file exists always; same as for other tools?
+        def report = file('build/reports/cpd/cpdCheck.xml')
         report.exists()
-        // TODO do better?
         report.text =~ /<pmd-cpd\/>/
     }
 
@@ -503,7 +493,7 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
         result.task(':cpdCheck').outcome == SUCCESS
         result.output.contains("BUILD SUCCESSFUL")
 
-        def report = file('build/reports/cpd/cpdCheck.xml') // TODO file exists always; same as for other tools?
+        def report = file('build/reports/cpd/cpdCheck.xml')
         report.exists()
         report.text =~ /<pmd-cpd\/>/
     }
@@ -552,9 +542,8 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
         result.task(':cpdCheck').outcome == SUCCESS
         result.output.contains("BUILD SUCCESSFUL")
 
-        def report = file('build/reports/cpd/cpdCheck.xml') // TODO file exists always; same as for other tools?
+        def report = file('build/reports/cpd/cpdCheck.xml')
         report.exists()
-        // TODO do better?
         report.text =~ /<pmd-cpd\/>/
     }
 
@@ -596,9 +585,49 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
         result.task(':cpdCheck').outcome == SUCCESS
         result.output.contains("BUILD SUCCESSFUL")
 
-        def report = file('build/reports/cpd/cpdCheck.xml') // TODO file exists always; same as for other tools?
+        def report = file('build/reports/cpd/cpdCheck.xml')
         report.exists()
-        // TODO do better?
         report.text =~ /<pmd-cpd\/>/
     }
+
+    def "Cpd should be up-to-date on second run with same input and loaded from cache with same input but removed output"() {
+        given:
+        buildFileWithPluginAndRepos() << """
+            cpdCheck{
+                ignoreFailures = true
+                minimumTokenCount = 5
+                reports{
+                    vs.enabled = true
+                    xml.enabled = false
+                }
+                exclude '**/lexical/**'
+                source = ${testPath(JAVA, '.')}
+            }
+            """.stripIndent()
+
+        when:
+        def firstResult = run("cpdCheck")
+        then:
+        firstResult.task(':cpdCheck').outcome == SUCCESS
+        firstResult.output.contains("BUILD SUCCESSFUL")
+
+        when:
+        def secondResult = run("cpdCheck")
+        then:
+        secondResult.task(':cpdCheck').outcome == UP_TO_DATE
+        secondResult.output.contains("BUILD SUCCESSFUL")
+        !(secondResult.output =~ /CPD found duplicate code\. See the report at file:\/\/.*\/cpdCheck.vs/)
+
+        and:
+        file('build').deleteDir()
+
+        when:
+        def thirdResult = run('--build-cache', "cpdCheck")
+        then:
+        thirdResult.task(':cpdCheck').outcome == FROM_CACHE
+        thirdResult.output.contains("BUILD SUCCESSFUL")
+        !(thirdResult.output =~ /CPD found duplicate code\. See the report at file:\/\/.*\/cpdCheck.vs/)
+    }
+
+    // TODO use pmd dependency if pmd plugin applied? <- is this tested somewhere implicitely by switching version? otherwise can we switch version and test for failure / incompatibility?
 }

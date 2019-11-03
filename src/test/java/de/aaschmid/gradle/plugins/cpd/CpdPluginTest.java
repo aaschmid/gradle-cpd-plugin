@@ -3,13 +3,16 @@ package de.aaschmid.gradle.plugins.cpd;
 import java.io.File;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import de.aaschmid.gradle.plugins.cpd.test.GradleExtension;
 import net.sourceforge.pmd.cpd.Tokenizer;
+import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Configuration.State;
+import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.plugins.GroovyPlugin;
 import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.api.plugins.JavaPlugin;
@@ -17,16 +20,22 @@ import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.plugins.ReportingBasePlugin;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskProvider;
+import org.gradle.language.base.plugins.LanguageBasePlugin;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
+import org.gradle.language.cpp.plugins.CppPlugin;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static de.aaschmid.gradle.plugins.cpd.test.TestFileResolver.Lang.JAVA;
 import static de.aaschmid.gradle.plugins.cpd.test.TestFileResolver.createProjectFiles;
 import static de.aaschmid.gradle.plugins.cpd.test.TestFileResolver.testFile;
 import static de.aaschmid.gradle.plugins.cpd.test.TestFileResolver.testFilesRecurseIn;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.*;
 
 @ExtendWith(GradleExtension.class)
 class CpdPluginTest {
@@ -134,10 +143,24 @@ class CpdPluginTest {
         assertThat(t.getSource()).isEmpty();
     }
 
-    @Test
-    void CpdPlugin_shouldAddCpdCheckTaskAsDependencyOfCheckLifecycleTaskIfLifecycleBasePluginIsApplied(Project project, TaskProvider<Cpd> cpdCheck) {
+    static Stream<Class<? extends Plugin>> CpdPlugin_shouldAddCpdCheckTaskAsDependencyOfCheckLifecycleTaskIfPluginIsApplied() {
+        return Stream.of(
+                LifecycleBasePlugin.class,
+                BasePlugin.class,
+                LanguageBasePlugin.class,
+                JavaBasePlugin.class,
+
+                JavaPlugin.class,
+                GroovyPlugin.class,
+                CppPlugin.class
+            );
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    void CpdPlugin_shouldAddCpdCheckTaskAsDependencyOfCheckLifecycleTaskIfPluginIsApplied(Class<? extends Plugin> pluginClass, Project project, TaskProvider<Cpd> cpdCheck) {
         // When:
-        project.getPlugins().apply(LifecycleBasePlugin.class);
+        project.getPlugins().apply(pluginClass);
 
         // Then:
         Task check = project.getTasks().getByName("check");
@@ -149,7 +172,6 @@ class CpdPluginTest {
 
     @Test
     void CpdPlugin_shouldAddCpdCheckTaskAsDependencyOfCheckLifecycleTaskIfJavaPluginIsApplied(Project project, TaskProvider<Cpd> cpdCheck) {
-        // TODO duplicate to above, maybe do subproject here
         // When:
         project.getPlugins().apply(JavaBasePlugin.class);
 
@@ -199,7 +221,6 @@ class CpdPluginTest {
         Project subProject2 = ProjectBuilder.builder().withName("sub2").withParent(project).build();
         subProject2.getPlugins().apply(GroovyPlugin.class);
         createProjectFiles(subProject2, "src/main/groovy/Clazz.groovy", "src/main/resources/clazz.properties");
-        // TODO abstract these file names / test file generation
 
         subProject1.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME, sourceSet -> {
             sourceSet.getJava().srcDir(testFile(JAVA, "de/aaschmid/annotation"));
