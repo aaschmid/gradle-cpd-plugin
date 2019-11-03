@@ -628,6 +628,4 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
         thirdResult.output.contains("BUILD SUCCESSFUL")
         !(thirdResult.output =~ /CPD found duplicate code\. See the report at file:\/\/.*\/cpdCheck.vs/)
     }
-
-    // TODO use pmd dependency if pmd plugin applied? <- is this tested somewhere implicitely by switching version? otherwise can we switch version and test for failure / incompatibility?
 }

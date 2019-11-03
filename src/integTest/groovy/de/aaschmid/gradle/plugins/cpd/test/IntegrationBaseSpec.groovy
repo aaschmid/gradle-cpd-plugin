@@ -102,11 +102,10 @@ abstract class IntegrationBaseSpec extends Specification {
             buildscript {
                 dependencies {
                     classpath files(
-                        '${
-            readImplementationClasspath()
-                    .findAll{ !it.path.contains("net.sourceforge.pmd") }
-                    .join("',\n                        '")
-        }'
+                        '${readImplementationClasspath()
+                               .findAll{ !it.path.contains("net.sourceforge.pmd") }
+                               .join("',\n                        '")
+                        }'
                     )
                 }
             }
