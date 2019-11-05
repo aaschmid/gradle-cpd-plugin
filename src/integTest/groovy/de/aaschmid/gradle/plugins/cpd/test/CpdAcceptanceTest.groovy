@@ -590,7 +590,7 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
         report.text =~ /<pmd-cpd\/>/
     }
 
-    def "Cpd should be up-to-date on second run with same input and loaded from cache with same input but removed output"() {
+    def "Cpd should be up-to-date on second run with same input"() {
         given:
         buildFileWithPluginAndRepos() << """
             cpdCheck{
@@ -617,15 +617,45 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
         secondResult.task(':cpdCheck').outcome == UP_TO_DATE
         secondResult.output.contains("BUILD SUCCESSFUL")
         !(secondResult.output =~ /CPD found duplicate code\. See the report at file:\/\/.*\/cpdCheck.vs/)
+    }
+
+    def "Cpd should be loaded from cache on second run with same input on clean build"() {
+        given:
+        settingsFile << """
+            buildCache {
+                local(DirectoryBuildCache) {
+                    directory = "\${rootDir}/build-cache"
+                }
+            }
+            """.stripIndent()
+
+        buildFileWithPluginAndRepos() << """
+            cpdCheck{
+                ignoreFailures = true
+                minimumTokenCount = 5
+                reports{
+                    vs.enabled = true
+                    xml.enabled = false
+                }
+                exclude '**/lexical/**'
+                source = ${testPath(JAVA, '.')}
+            }
+            """.stripIndent()
+
+        when:
+        def firstResult = run('--build-cache', "cpdCheck")
+        then:
+        firstResult.task(':cpdCheck').outcome == SUCCESS
+        firstResult.output.contains("BUILD SUCCESSFUL")
 
         and:
         file('build').deleteDir()
 
         when:
-        def thirdResult = run('--build-cache', "cpdCheck")
+        def secondResult = run('--build-cache', "cpdCheck")
         then:
-        thirdResult.task(':cpdCheck').outcome == FROM_CACHE
-        thirdResult.output.contains("BUILD SUCCESSFUL")
-        !(thirdResult.output =~ /CPD found duplicate code\. See the report at file:\/\/.*\/cpdCheck.vs/)
+        secondResult.task(':cpdCheck').outcome == FROM_CACHE
+        secondResult.output.contains("BUILD SUCCESSFUL")
+        !(secondResult.output =~ /CPD found duplicate code\. See the report at file:\/\/.*\/cpdCheck.vs/)
     }
 }
