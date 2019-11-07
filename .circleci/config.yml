@@ -1,20 +1,45 @@
 version: 2
+
+build-job: &build-job
+    steps:
+        - checkout
+
+        - restore_cache:
+            key: gradle-{{ checksum "build.gradle" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+
+        - run: ./gradlew --build-cache build
+
+        - store_test_results:
+            path: ./build/test-results
+
+        - save_cache:
+            paths:
+                - ~/.gradle
+            key: gradle-{{ checksum "build.gradle" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+
 jobs:
-    build:
+    build-jdk8:
         docker:
             - image: circleci/openjdk:8-jdk
-        steps:
-            - checkout
+        <<: *build-job
+    build-jdk9:
+        docker:
+            - image: circleci/openjdk:9.0.1-jdk
+        <<: *build-job
+    build-jdk10:
+        docker:
+            - image: circleci/openjdk:10-jdk
+        <<: *build-job
+    build-jdk11:
+        docker:
+            - image: circleci/openjdk:11-jdk
+        <<: *build-job
 
-            - restore_cache:
-                key: gradle-{{ checksum "build.gradle" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
-
-            - run: ./gradlew --build-cache build
-
-            - store_test_results:
-                path: ./build/test-results
-
-            - save_cache:
-                paths:
-                    - ~/.gradle
-                key: gradle-{{ checksum "build.gradle" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+workflows:
+    version: 2
+    build_and_deploy:
+        jobs:
+            - build-jdk8
+            - build-jdk9
+            - build-jdk10
+            - build-jdk11
