@@ -5,7 +5,10 @@ build-job: &build-job
         - checkout
 
         - restore_cache:
-            key: gradle-{{ checksum "build.gradle" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+            keys:
+                - gradle-repo-v1-{{ .Branch }}-{{ checksum "build.gradle" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+                - gradle-repo-v1-{{ .Branch }}-
+                - gradle-repo-v1-
 
         - run: ./gradlew --build-cache build
 
@@ -15,7 +18,7 @@ build-job: &build-job
         - save_cache:
             paths:
                 - ~/.gradle
-            key: gradle-{{ checksum "build.gradle" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+            key: gradle-repo-v1-{{ .Branch }}-{{ checksum "build.gradle" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
 
 jobs:
     build-jdk8:
