@@ -94,9 +94,6 @@ task integTest(type: Test) {
     testClassesDirs = sourceSets.integTest.output.classesDirs
 
     classpath = sourceSets.integTest.runtimeClasspath
-
-    reports.junitXml.destination = file("${project.buildDir}/integTest-results")
-    reports.html.destination = file("${project.reportsDir}/${name}")
 }
 check.dependsOn integTest
 
