@@ -12,8 +12,8 @@ import org.gradle.api.reporting.internal.TaskReportContainer;
 
 public class CpdReportsImpl extends TaskReportContainer<SingleFileReport> implements CpdReports {
 
-    public CpdReportsImpl(Cpd task) {
-        super(SingleFileReport.class, task, CollectionCallbackActionDecorator.NOOP);
+    public CpdReportsImpl(Cpd task, CollectionCallbackActionDecorator callbackActionDecorator) {
+        super(SingleFileReport.class, task, callbackActionDecorator);
 
         add(CpdCsvFileReportImpl.class, "csv", task);
         add(CpdTextFileReportImpl.class, "text", task);

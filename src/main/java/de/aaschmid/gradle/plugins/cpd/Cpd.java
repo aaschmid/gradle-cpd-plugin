@@ -14,6 +14,7 @@ import org.gradle.api.Action;
 import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.FileTree;
+import org.gradle.api.internal.CollectionCallbackActionDecorator;
 import org.gradle.api.reporting.Reporting;
 import org.gradle.api.reporting.SingleFileReport;
 import org.gradle.api.tasks.CacheableTask;
@@ -27,7 +28,6 @@ import org.gradle.api.tasks.SourceTask;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.VerificationTask;
 import org.gradle.internal.reflect.Instantiator;
-import org.gradle.util.DeprecationLogger;
 import org.gradle.workers.WorkerExecutor;
 
 
@@ -88,9 +88,9 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
 
 
     @Inject
-    public Cpd(Instantiator instantiator, WorkerExecutor workerExecutor) {
+    public Cpd(CollectionCallbackActionDecorator callbackActionDecorator, Instantiator instantiator, WorkerExecutor workerExecutor) {
+        this.reports = instantiator.newInstance(CpdReportsImpl.class, this, callbackActionDecorator);
         this.workerExecutor = workerExecutor;
-        this.reports = DeprecationLogger.whileDisabled(() -> instantiator.newInstance(CpdReportsImpl.class, this));
     }
 
     @TaskAction
