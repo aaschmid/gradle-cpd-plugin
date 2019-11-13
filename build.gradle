@@ -4,7 +4,7 @@ plugins {
     id "com.github.kt3k.coveralls" version "2.6.3"
 
     id "java-gradle-plugin"
-    id "io.freefair.maven-jars" version "2.9.5"
+    id "io.freefair.maven-jars" version "2.9.5" // <- can be replace with java { with*Jar() } since Gradle 6.0
 
     id "maven"
     id "signing"
@@ -47,6 +47,12 @@ dependencies {
     integTestImplementation "org.junit.vintage:junit-vintage-engine:5.5.2"
     integTestImplementation("org.spockframework:spock-core:1.3-groovy-2.4") {
         exclude module: "groovy-all"
+    }
+}
+
+javadoc {
+    if(JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
     }
 }
 
