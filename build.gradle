@@ -7,6 +7,7 @@ plugins {
     id "io.freefair.maven-jars" version "2.9.5" // <- can be replace with java { with*Jar() } since Gradle 6.0
 
     id "maven"
+    id "maven-publish"
     id "signing"
     id "com.gradle.plugin-publish" version "0.10.1"
     id "com.jfrog.bintray" version "1.8.4"
@@ -111,7 +112,8 @@ gradlePlugin {
             id = "de.aaschmid.cpd"
             implementationClass = "de.aaschmid.gradle.plugins.cpd.CpdPlugin"
         }
-        // Note: this has to be commented out for publishPlugins
+        // Note: comment out for "publishPlugins" because old plugin ids are no longer supported
+        //       but working while downloading plugin from MavenCentral
         legacyCpd {
             id = "cpd"
             implementationClass = "de.aaschmid.gradle.plugins.cpd.CpdPlugin"
@@ -119,15 +121,25 @@ gradlePlugin {
     }
 }
 
-// -- build and publish artifacts -------------------------------------------------------------------------------------
-signing {
-    // requires gradle.properties, see http://www.gradle.org/docs/current/userguide/signing_plugin.html
-    required {
-        gradle.taskGraph.hasTask("uploadArchives")
-    }
-    sign configurations.archives
-}
+// -- sign and publish artifacts -------------------------------------------------------------------------------------
 
+// Steps:
+//   0. Set correct artifact version above, commit and create a tag prefixed with "v"
+//   1. Prepare ~/.gradle/gradle.properties in order to contain signing keys and required passwords for publishing
+//   2. "build"
+//   3. Optional: "uploadArchives" <- should be no longer required because of bintray MavenCentral sync
+//   4. "bintrayUpload"
+//   5. Comment out "legacyCpd" in "gradlePlugin" closure and "publishPlugin"
+//   6. Finish milestone, release on Github
+//
+// Note: "publish" or "publishToMavenLocal" does not work yet and for me it is quite unclear why, see also
+//       * https://docs.gradle.org/current/userguide/plugins.html\#sec:plugin_markers
+//       * https://docs.gradle.org/current/userguide/java_gradle_plugin.html
+//       * ...
+
+ext.isReleaseVersion = !project.version.endsWith("-SNAPSHOT")
+
+// username and password from gradle.properties otherwise empty
 if (!hasProperty("sonatypeUsername")) {
     ext.sonatypeUsername = ""
 }
@@ -135,6 +147,11 @@ if (!hasProperty("sonatypePassword")) {
     ext.sonatypePassword = ""
 }
 
+tasks.withType(GenerateModuleMetadata) {
+    enabled = isReleaseVersion // signing of these artifacts causes failure for snapshot versions
+}
+
+// old way for Maven Central (because new maven-publish has strange interactions with gradle-plugins plugins)
 uploadArchives {
     repositories {
         mavenDeployer {
@@ -185,12 +202,73 @@ uploadArchives {
     }
 }
 
+// new way for Bintray and plugins.gradle.org
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            pom {
+                name = "gradle-cpd-plugin"
+                packaging = "jar"
+                description = project.description
+                url = "https://github.com/aaschmid/gradle-cpd-plugin"
+
+                developers {
+                    developer {
+                        id = "aaschmid"
+                        name = "Andreas Schmid"
+                        email = "service@aaschmid.de"
+                    }
+                }
+
+                licenses {
+                    license {
+                        name = "The Apache Software License, Version 2.0"
+                        url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                        distribution = "repo"
+                    }
+                }
+
+                scm {
+                    connection = "scm:git@github.com:aaschmid/gradle-cpd-plugin.git"
+                    developerConnection = "scm:git@github.com:aaschmid/gradle-cpd-plugin.git"
+                    url = "scm:git@github.com:aaschmid/gradle-cpd-plugin.git"
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+            url = isReleaseVersion ? releasesRepoUrl : snapshotRepoUrl
+
+            credentials  {
+                username = sonatypeUsername
+                password = sonatypePassword
+            }
+
+            metadataSources {
+                gradleMetadata()
+            }
+        }
+    }
+}
+
 if (!hasProperty("bintrayUsername")) {
     ext.bintrayUsername = ""
 }
 if (!hasProperty("bintrayApiKey")) {
     ext.bintrayApiKey = ""
 }
+if (!hasProperty("sonatypeTokenUser")) {
+    ext.sonatypeTokenUser = ""
+}
+if (!hasProperty("sonatypeTokenPassword")) {
+    ext.sonatypeTokenPassword = ""
+}
+
 bintray {
     user = bintrayUsername
     key = bintrayApiKey
@@ -206,12 +284,32 @@ bintray {
             released  = new Date()
             vcsTag = "https://github.com/aaschmid/gradle-cpd-plugin/releases/tag/v${project.version}"
             attributes = ["gradle-plugin": "de.aaschmid.cpd:de.aaschmid:gradle-cpd-plugin"]
+            gpg {
+                sign = true
+                // passphrase = 'passphrase' //Optional. The passphrase for GPG signing'
+            }
+            mavenCentralSync {
+                sync = true
+                user = sonatypeTokenUser
+                password = sonatypeTokenPassword
+                close = "0"
+            }
         }
-        configurations = ["archives"]
+        publications = ["mavenJava"]
     }
 }
 
-// Note: The plugin has to be uploaded to Bintray first
+// requires gradle.properties, see http://www.gradle.org/docs/current/userguide/signing_plugin.html
+signing {
+    // requires gradle.properties, see http://www.gradle.org/docs/current/userguide/signing_plugin.html
+    required {
+        isReleaseVersion && (gradle.taskGraph.hasTask("publish") || gradle.taskGraph.hasTask("uploadArchives"))
+    }
+    sign configurations.archives            // for "uploadArchives" and Maven Central
+    sign publishing.publications.mavenJava  // for "publish" and "bintrayUpload"
+}
+
+
 pluginBundle {
     website = "https://github.com/aaschmid/gradle-cpd-plugin"
     vcsUrl = "https://github.com/aaschmid/gradle-cpd-plugin"
