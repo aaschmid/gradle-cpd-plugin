@@ -301,7 +301,6 @@ bintray {
 
 // requires gradle.properties, see http://www.gradle.org/docs/current/userguide/signing_plugin.html
 signing {
-    // requires gradle.properties, see http://www.gradle.org/docs/current/userguide/signing_plugin.html
     required {
         isReleaseVersion && (gradle.taskGraph.hasTask("publish") || gradle.taskGraph.hasTask("uploadArchives"))
     }
