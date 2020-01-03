@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 
 build-job: &build-job
     steps:
@@ -6,19 +6,18 @@ build-job: &build-job
 
         - restore_cache:
             keys:
-                - gradle-repo-v1-{{ .Branch }}-{{ checksum "build.gradle" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
-                - gradle-repo-v1-{{ .Branch }}-
+                - gradle-repo-v1-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
                 - gradle-repo-v1-
 
         - run: ./gradlew --build-cache build
 
-        - store_test_results:
-            path: ./build/test-results
-
         - save_cache:
             paths:
                 - ~/.gradle
-            key: gradle-repo-v1-{{ .Branch }}-{{ checksum "build.gradle" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+            key: gradle-repo-v1-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+
+        - store_test_results:
+            path: ./build/test-results
 
 jobs:
     build-jdk8:
