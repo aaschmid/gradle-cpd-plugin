@@ -11,6 +11,11 @@ build-job: &build-job
 
         - run: ./gradlew --build-cache build
 
+        - run:
+            command: |
+                ./gradlew jacocoTestReport
+                bash <(curl -s https://codecov.io/bash)
+
         - save_cache:
             paths:
                 - ~/.gradle

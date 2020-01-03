@@ -81,17 +81,6 @@ test {
     }
 }
 
-jacoco {
-    toolVersion = "0.8.3"
-}
-
-jacocoTestReport {
-    reports {
-        xml.enabled = true // coveralls plugin depends on xml format report
-        html.enabled = false
-    }
-}
-
 task integTest(type: Test) {
     inputs.files jar
     shouldRunAfter "test"
@@ -103,6 +92,24 @@ task integTest(type: Test) {
     classpath = sourceSets.integTest.runtimeClasspath
 }
 check.dependsOn integTest
+
+jacoco {
+    toolVersion = "0.8.5"
+}
+
+task jacocoMerge(type: JacocoMerge) {
+    executionData tasks.withType(Test)
+    dependsOn test, integTest
+}
+
+jacocoTestReport {
+    executionData jacocoMerge.destinationFile
+    reports {
+        xml.enabled = true
+        html.enabled = false
+    }
+    dependsOn jacocoMerge
+}
 
 gradlePlugin {
     testSourceSets sourceSets.test, sourceSets.integTest
