@@ -21,7 +21,7 @@ ext {
     isBuildOnJenkins = System.getenv("BUILD_TAG")?.startsWith("jenkins-") ?: false
 }
 
-sourceCompatibility = "1.8"
+sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
     mavenCentral()
@@ -61,7 +61,7 @@ jar {
     manifest {
         attributes (
             "Built-By": "Gradle ${gradle.gradleVersion}",
-            "Built-Date": new Date(),
+            "Built-Date": new Date().format("yyyy-MM-dd"), // using now would destroy incremental build feature
             "Specification-Title": "gradle-cpd-plugin",
             "Specification-Version": project.version,
             "Specification-Vendor": "Andreas Schmid, service@aaschmid.de",
@@ -81,17 +81,6 @@ test {
     }
 }
 
-jacoco {
-    toolVersion = "0.8.3"
-}
-
-jacocoTestReport {
-    reports {
-        xml.enabled = true // coveralls plugin depends on xml format report
-        html.enabled = false
-    }
-}
-
 task integTest(type: Test) {
     inputs.files jar
     shouldRunAfter "test"
@@ -103,6 +92,24 @@ task integTest(type: Test) {
     classpath = sourceSets.integTest.runtimeClasspath
 }
 check.dependsOn integTest
+
+jacoco {
+    toolVersion = "0.8.5"
+}
+
+task jacocoMerge(type: JacocoMerge) {
+    executionData tasks.withType(Test)
+    dependsOn test, integTest
+}
+
+jacocoTestReport {
+    executionData jacocoMerge.destinationFile
+    reports {
+        xml.enabled = true
+        html.enabled = false
+    }
+    dependsOn jacocoMerge
+}
 
 gradlePlugin {
     testSourceSets sourceSets.test, sourceSets.integTest
