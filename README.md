@@ -1,6 +1,7 @@
 [![TravisCI](https://travis-ci.org/aaschmid/gradle-cpd-plugin.svg?branch=master)](https://travis-ci.org/aaschmid/gradle-cpd-plugin)
 [![CircleCI](https://circleci.com/gh/aaschmid/gradle-cpd-plugin.svg?style=svg)](https://circleci.com/gh/aaschmid/gradle-cpd-plugin)
 [![Coverage Status](https://coveralls.io/repos/github/aaschmid/gradle-cpd-plugin/badge.svg?branch=master)](https://coveralls.io/github/aaschmid/gradle-cpd-plugin?branch=master)
+[![codecov](https://codecov.io/gh/aaschmid/gradle-cpd-plugin/branch/master/graph/badge.svg)](https://codecov.io/gh/aaschmid/gradle-cpd-plugin)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.aaschmid/gradle-cpd-plugin/badge.svg)](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22de.aaschmid%22%20AND%20a%3A%22gradle-cpd-plugin%22)
 [![Bintray](https://api.bintray.com/packages/aaschmid/gradle-plugins/gradle-cpd-plugin/images/download.svg)](https://bintray.com/aaschmid/gradle-plugins/gradle-cpd-plugin/_latestVersion)
 [![license](https://img.shields.io/github/license/aaschmid/gradle-cpd-plugin.svg)](https://github.com/aaschmid/gradle-cpd-plugin)
