@@ -74,55 +74,27 @@ public class CpdPlugin implements Plugin<Project> {
 
         CpdExtension extension = createExtension(project);
         createConfiguration(project, extension);
+
         setupTaskDefaults(project, extension);
+        createTask(project);
 
-        TaskProvider<Cpd> taskProvider = project.getTasks().register(TASK_NAME_CPD_CHECK, Cpd.class, task -> {
-            task.setDescription("Run CPD analysis for all sources");
-            project.getAllprojects().forEach(p ->
-                    p.getPlugins().withType(JavaBasePlugin.class, plugin ->
-                            p.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().all(sourceSet ->
-                                    sourceSet.getAllJava().getSrcDirs().forEach(task::source)
-                            )
-                    )
-            );
-        });
-
-        project.getPlugins().withType(LifecycleBasePlugin.class, plugin ->
-                project.getTasks().findByName(LifecycleBasePlugin.CHECK_TASK_NAME).dependsOn(taskProvider));
-
-        project.getGradle().getTaskGraph().whenReady(graph -> {
-            String projectPath = (project.getRootProject() == project) ? project.getPath() : project.getPath() + ":";
-            if (!graph.hasTask(projectPath + TASK_NAME_CPD_CHECK)) {
-                if (logger.isWarnEnabled()) {
-                    Optional<Task> lastCheckTask = graph.getAllTasks().stream().sorted(reverseOrder()).filter(t ->
-                            t.getName().endsWith(LifecycleBasePlugin.CHECK_TASK_NAME)).findFirst();
-                    if (lastCheckTask.isPresent()) { // it is possible to just execute a task before 'check', e.g. "compileJava"
-                        Task task = lastCheckTask.get();
-                        String message = "\n" +
-                                "WARNING: Due to the absence of '" + LifecycleBasePlugin.class.getSimpleName() +
-                                "' on " + project + " the task ':" + TASK_NAME_CPD_CHECK +
-                                "' could not be added to task graph. Therefore CPD will not be executed. To prevent this, manually add a task dependency of ':" +
-                                TASK_NAME_CPD_CHECK + "' to a '" + LifecycleBasePlugin.CHECK_TASK_NAME +
-                                "' task of a subproject.\n" +
-                                "1) Directly to " + task.getProject() + ":\n" +
-                                "    " + task.getName() + ".dependsOn(':" + TASK_NAME_CPD_CHECK + "')\n" +
-                                "2) Indirectly, e.g. via " + project + ":\n" +
-                                "    project('" + task.getProject().getPath() + "') {\n" +
-                                "        plugins.withType(LifecycleBasePlugin) { // <- just required if 'java' plugin is applied within subproject\n" +
-                                "            " + task.getName() + ".dependsOn(" + TASK_NAME_CPD_CHECK + ")\n" +
-                                "        }\n" +
-                                "    }\n";
-                        logger.warn(message);
-                    }
-                }
-            }
-        });
+        checkThatCpdCheckWasAutomaticallyAddedToTaskGraphOrWarn(project);
     }
 
     private CpdExtension createExtension(Project project) {
         CpdExtension extension = project.getExtensions().create("cpd", CpdExtension.class);
         extension.setToolVersion("6.14.0");
         return extension;
+    }
+
+    private void createConfiguration(Project project, CpdExtension extension) {
+        Configuration configuration = project.getConfigurations().create("cpd");
+        configuration.setDescription("The CPD libraries to be used for this project.");
+        configuration.setTransitive(true);
+        configuration.setVisible(false);
+
+        configuration.defaultDependencies(d ->
+                d.add(project.getDependencies().create("net.sourceforge.pmd:pmd-dist:" + extension.getToolVersion())));
     }
 
     /** Set up task defaults for every created {@link Cpd} task. */
@@ -153,13 +125,49 @@ public class CpdPlugin implements Plugin<Project> {
         });
     }
 
-    private void createConfiguration(Project project, CpdExtension extension) {
-        Configuration configuration = project.getConfigurations().create("cpd");
-        configuration.setDescription("The CPD libraries to be used for this project.");
-        configuration.setTransitive(true);
-        configuration.setVisible(false);
+    private void createTask(Project project) {
+        TaskProvider<Cpd> taskProvider = project.getTasks().register(TASK_NAME_CPD_CHECK, Cpd.class, task -> {
+            task.setDescription("Run CPD analysis for all sources");
+            project.getAllprojects().forEach(p ->
+                    p.getPlugins().withType(JavaBasePlugin.class, plugin ->
+                            p.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().all(sourceSet ->
+                                    sourceSet.getAllJava().getSrcDirs().forEach(task::source)
+                            )
+                    )
+            );
+        });
 
-        configuration.defaultDependencies(d ->
-                d.add(project.getDependencies().create("net.sourceforge.pmd:pmd-dist:" + extension.getToolVersion())));
+        project.getPlugins().withType(LifecycleBasePlugin.class, plugin ->
+                project.getTasks().findByName(LifecycleBasePlugin.CHECK_TASK_NAME).dependsOn(taskProvider));
+    }
+
+    private void checkThatCpdCheckWasAutomaticallyAddedToTaskGraphOrWarn(Project project) {
+        project.getGradle().getTaskGraph().whenReady(graph -> {
+            String projectPath = (project.getRootProject() == project) ? project.getPath() : project.getPath() + ":";
+            if (!graph.hasTask(projectPath + TASK_NAME_CPD_CHECK)) {
+                if (logger.isWarnEnabled()) {
+                    Optional<Task> lastCheckTask = graph.getAllTasks().stream().sorted(reverseOrder()).filter(t ->
+                            t.getName().endsWith(LifecycleBasePlugin.CHECK_TASK_NAME)).findFirst();
+                    if (lastCheckTask.isPresent()) { // it is possible to just execute a task before 'check', e.g. "compileJava"
+                        Task task = lastCheckTask.get();
+                        String message = "\n" +
+                                "WARNING: Due to the absence of '" + LifecycleBasePlugin.class.getSimpleName() +
+                                "' on " + project + " the task ':" + TASK_NAME_CPD_CHECK +
+                                "' could not be added to task graph. Therefore CPD will not be executed. To prevent this, manually add a task dependency of ':" +
+                                TASK_NAME_CPD_CHECK + "' to a '" + LifecycleBasePlugin.CHECK_TASK_NAME +
+                                "' task of a subproject.\n" +
+                                "1) Directly to " + task.getProject() + ":\n" +
+                                "    " + task.getName() + ".dependsOn(':" + TASK_NAME_CPD_CHECK + "')\n" +
+                                "2) Indirectly, e.g. via " + project + ":\n" +
+                                "    project('" + task.getProject().getPath() + "') {\n" +
+                                "        plugins.withType(LifecycleBasePlugin) { // <- just required if 'java' plugin is applied within subproject\n" +
+                                "            " + task.getName() + ".dependsOn(" + TASK_NAME_CPD_CHECK + ")\n" +
+                                "        }\n" +
+                                "    }\n";
+                        logger.warn(message);
+                    }
+                }
+            }
+        });
     }
 }
