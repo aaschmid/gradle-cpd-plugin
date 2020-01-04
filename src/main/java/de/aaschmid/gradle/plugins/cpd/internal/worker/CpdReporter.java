@@ -45,6 +45,9 @@ class CpdReporter {
     }
 
     /**
+     * Note: This cannot be implemented in {@link Report} subclasses because they must be independent of {@link
+     * CPDRenderer} because only worker classloader knows about PMD / CPD library.
+     *
      * @param report the configured reports used
      * @return a full configured {@link CPDRenderer} to generate a CPD single file reports.
      */
