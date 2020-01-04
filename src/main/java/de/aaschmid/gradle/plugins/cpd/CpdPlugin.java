@@ -8,6 +8,7 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.execution.TaskExecutionGraph;
 import org.gradle.api.internal.ConventionMapping;
 import org.gradle.api.internal.IConventionAware;
 import org.gradle.api.logging.Logger;
@@ -145,29 +146,33 @@ public class CpdPlugin implements Plugin<Project> {
         project.getGradle().getTaskGraph().whenReady(graph -> {
             String projectPath = (project.getRootProject() == project) ? project.getPath() : project.getPath() + ":";
             if (!graph.hasTask(projectPath + TASK_NAME_CPD_CHECK)) {
-                if (logger.isWarnEnabled()) {
-                    Optional<Task> lastCheckTask = graph.getAllTasks().stream().sorted(reverseOrder()).filter(t ->
-                            t.getName().endsWith(LifecycleBasePlugin.CHECK_TASK_NAME)).findFirst();
-                    if (lastCheckTask.isPresent()) { // it is possible to just execute a task before 'check', e.g. "compileJava"
-                        Task task = lastCheckTask.get();
-                        String message = "\n" +
-                                "WARNING: Due to the absence of '" + LifecycleBasePlugin.class.getSimpleName() +
-                                "' on " + project + " the task ':" + TASK_NAME_CPD_CHECK +
-                                "' could not be added to task graph. Therefore CPD will not be executed. To prevent this, manually add a task dependency of ':" +
-                                TASK_NAME_CPD_CHECK + "' to a '" + LifecycleBasePlugin.CHECK_TASK_NAME +
-                                "' task of a subproject.\n" +
-                                "1) Directly to " + task.getProject() + ":\n" +
-                                "    " + task.getName() + ".dependsOn(':" + TASK_NAME_CPD_CHECK + "')\n" +
-                                "2) Indirectly, e.g. via " + project + ":\n" +
-                                "    project('" + task.getProject().getPath() + "') {\n" +
-                                "        plugins.withType(LifecycleBasePlugin) { // <- just required if 'java' plugin is applied within subproject\n" +
-                                "            " + task.getName() + ".dependsOn(" + TASK_NAME_CPD_CHECK + ")\n" +
-                                "        }\n" +
-                                "    }\n";
-                        logger.warn(message);
-                    }
-                }
+                logWarningIfCheckTaskOnTaskGraph(project, graph);
             }
         });
+    }
+
+    private void logWarningIfCheckTaskOnTaskGraph(Project project, TaskExecutionGraph graph) {
+        if (logger.isWarnEnabled()) {
+            Optional<Task> lastCheckTask = graph.getAllTasks().stream().sorted(reverseOrder())
+                    .filter(t -> t.getName().endsWith(LifecycleBasePlugin.CHECK_TASK_NAME)).findFirst();
+            if (lastCheckTask.isPresent()) { // it is possible to just execute a task before "check", e.g. "compileJava"
+                Task task = lastCheckTask.get();
+                String message = "\n" +
+                        "WARNING: Due to the absence of '" + LifecycleBasePlugin.class.getSimpleName() +
+                        "' on " + project + " the task ':" + TASK_NAME_CPD_CHECK +
+                        "' could not be added to task graph. Therefore CPD will not be executed. To prevent this, manually add a task dependency of ':" +
+                        TASK_NAME_CPD_CHECK + "' to a '" + LifecycleBasePlugin.CHECK_TASK_NAME +
+                        "' task of a subproject.\n" +
+                        "1) Directly to " + task.getProject() + ":\n" +
+                        "    " + task.getName() + ".dependsOn(':" + TASK_NAME_CPD_CHECK + "')\n" +
+                        "2) Indirectly, e.g. via " + project + ":\n" +
+                        "    project('" + task.getProject().getPath() + "') {\n" +
+                        "        plugins.withType(LifecycleBasePlugin) { // <- just required if 'java' plugin is applied within subproject\n" +
+                        "            " + task.getName() + ".dependsOn(" + TASK_NAME_CPD_CHECK + ")\n" +
+                        "        }\n" +
+                        "    }\n";
+                logger.warn(message);
+            }
+        }
     }
 }
