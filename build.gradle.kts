@@ -49,6 +49,11 @@ dependencies {
     }
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
 jacoco {
     toolVersion = "0.8.6"
 }
