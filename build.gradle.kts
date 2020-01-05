@@ -45,4 +45,12 @@ dependencies {
     }
 }
 
+tasks {
+    named<Javadoc>("javadoc") {
+        if (JavaVersion.current().isJava9Compatible) {
+            (options as StandardJavadocDocletOptions).addBooleanOption("html5", true)
+        }
+    }
+}
+
 apply(from = "legacy-build.gradle")

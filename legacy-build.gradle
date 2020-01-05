@@ -1,11 +1,5 @@
 sourceCompatibility = JavaVersion.VERSION_1_8
 
-javadoc {
-    if (JavaVersion.current().isJava9Compatible()) {
-        options.addBooleanOption('html5', true)
-    }
-}
-
 jar {
     manifest {
         attributes (
