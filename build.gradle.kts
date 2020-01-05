@@ -1,3 +1,6 @@
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
 plugins {
     groovy
     jacoco
@@ -49,6 +52,24 @@ tasks {
     named<Javadoc>("javadoc") {
         if (JavaVersion.current().isJava9Compatible) {
             (options as StandardJavadocDocletOptions).addBooleanOption("html5", true)
+        }
+    }
+
+    jar {
+        manifest {
+            val now = LocalDate.now()
+            val today = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+
+            attributes(
+                    "Built-By" to "Gradle ${gradle.gradleVersion}",
+                    "Built-Date" to today, // using now would destroy incremental build feature
+                    "Specification-Title" to "gradle-cpd-plugin",
+                    "Specification-Version" to project.version,
+                    "Specification-Vendor" to "Andreas Schmid, service@aaschmid.de",
+                    "Implementation-Title" to "gradle-cpd-plugin",
+                    "Implementation-Version" to project.version,
+                    "Implementation-Vendor" to "Andreas Schmid, service@aaschmid.de"
+            )
         }
     }
 }

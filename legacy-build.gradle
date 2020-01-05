@@ -1,20 +1,5 @@
 sourceCompatibility = JavaVersion.VERSION_1_8
 
-jar {
-    manifest {
-        attributes (
-            "Built-By": "Gradle ${gradle.gradleVersion}",
-            "Built-Date": new Date().format("yyyy-MM-dd"), // using now would destroy incremental build feature
-            "Specification-Title": "gradle-cpd-plugin",
-            "Specification-Version": project.version,
-            "Specification-Vendor": "Andreas Schmid, service@aaschmid.de",
-            "Implementation-Title": "gradle-cpd-plugin",
-            "Implementation-Version": project.version,
-            "Implementation-Vendor": "Andreas Schmid, service@aaschmid.de",
-        )
-    }
-}
-
 java {
     withJavadocJar()
     withSourcesJar()
