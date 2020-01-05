@@ -18,6 +18,7 @@ import org.gradle.api.internal.CollectionCallbackActionDecorator;
 import org.gradle.api.reporting.Reporting;
 import org.gradle.api.reporting.SingleFileReport;
 import org.gradle.api.tasks.CacheableTask;
+import org.gradle.api.tasks.Classpath;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Nested;
@@ -194,7 +195,7 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
         return reports;
     }
 
-    //@Override to be compatible with earlier versions too
+    @Override
     public CpdReports reports(Action<? super CpdReports> action) {
         action.execute(this.reports);
         return this.reports;
@@ -323,8 +324,7 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
      *
      * @return CPD libraries classpath
      */
-    @InputFiles
-    @PathSensitive(PathSensitivity.NAME_ONLY)
+    @Classpath
     public FileCollection getPmdClasspath() {
         return pmdClasspath;
     }
