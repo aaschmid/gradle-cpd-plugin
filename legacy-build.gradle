@@ -5,24 +5,6 @@ java {
     withSourcesJar()
 }
 
-jacoco {
-    toolVersion = "0.8.6"
-}
-
-task jacocoMerge(type: JacocoMerge) {
-    executionData tasks.withType(Test)
-    dependsOn test, integTest
-}
-
-jacocoTestReport {
-    executionData jacocoMerge.destinationFile
-    reports {
-        xml.enabled = true
-        html.enabled = false
-    }
-    dependsOn jacocoMerge
-}
-
 gradlePlugin {
     testSourceSets sourceSets.test, sourceSets.integTest
 
