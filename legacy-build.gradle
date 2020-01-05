@@ -5,18 +5,6 @@ java {
     withSourcesJar()
 }
 
-task integTest(type: Test) {
-    inputs.files jar
-    shouldRunAfter "test"
-
-    ignoreFailures = isBuildOnJenkins
-
-    testClassesDirs = sourceSets.integTest.output.classesDirs
-
-    classpath = sourceSets.integTest.runtimeClasspath
-}
-check.dependsOn integTest
-
 jacoco {
     toolVersion = "0.8.6"
 }

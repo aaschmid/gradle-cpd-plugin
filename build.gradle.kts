@@ -82,6 +82,19 @@ tasks {
             exceptionFormat = TestExceptionFormat.FULL
         }
     }
+
+    val integTest = register("integTest", Test::class) {
+        inputs.files(jar)
+        shouldRunAfter(test)
+
+        ignoreFailures = isBuildOnJenkins
+
+        testClassesDirs = sourceSets.named("integTest").get().output.classesDirs
+        classpath = sourceSets.named("integTest").get().runtimeClasspath
+    }
+    check {
+        dependsOn(integTest)
+    }
 }
 
 apply(from = "legacy-build.gradle")
