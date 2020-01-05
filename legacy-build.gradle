@@ -1,16 +1,5 @@
 sourceCompatibility = JavaVersion.VERSION_1_8
 
-repositories {
-    mavenCentral()
-}
-
-sourceSets {
-    integTest {
-        compileClasspath += main.output + test.output
-        runtimeClasspath += main.output + test.output
-    }
-}
-
 dependencies {
     compileOnly "net.sourceforge.pmd:pmd-dist:6.10.0"
 

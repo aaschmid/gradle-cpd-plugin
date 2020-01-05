@@ -17,4 +17,15 @@ version = "3.3-SNAPSHOT"
 
 val isBuildOnJenkins by extra(System.getenv("BUILD_TAG")?.startsWith("jenkins-") ?: false)
 
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    register("integTest") {
+        compileClasspath += main.get().output + test.get().output
+        runtimeClasspath += main.get().output + test.get().output
+    }
+}
+
 apply(from = "legacy-build.gradle")
