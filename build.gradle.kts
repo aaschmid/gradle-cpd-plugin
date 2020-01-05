@@ -115,4 +115,22 @@ tasks {
     }
 }
 
+gradlePlugin {
+    pluginSourceSet(sourceSets.main.get())
+    testSourceSets(sourceSets.test.get(), sourceSets.named("integTest").get())
+
+    plugins {
+        register("cpd") {
+            id = "de.aaschmid.cpd"
+            implementationClass = "de.aaschmid.gradle.plugins.cpd.CpdPlugin"
+        }
+        // Note: comment out for "publishPlugins" because old plugin ids are no longer supported
+        //       but working while downloading plugin from MavenCentral
+        register("legacyCpd") {
+            id = "cpd"
+            implementationClass = "de.aaschmid.gradle.plugins.cpd.CpdPlugin"
+        }
+    }
+}
+
 apply(from = "legacy-build.gradle")
