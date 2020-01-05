@@ -26,7 +26,8 @@ Gradle CPD plugin
 What is it
 ----------
 
-A [Gradle](http://gradle.org) plugin to find duplicate code using [PMD][]s copy/paste detection (= [CPD][]).
+A [Gradle](http://gradle.org) plugin to find duplicate code using [PMD][]s copy/paste detection (= [CPD][]). See also
+https://plugins.gradle.org/plugin/de.aaschmid.cpd.
 
 
 Requirements
