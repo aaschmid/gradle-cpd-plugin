@@ -28,4 +28,21 @@ sourceSets {
     }
 }
 
+dependencies {
+    compileOnly("net.sourceforge.pmd:pmd-dist:6.10.0")
+
+    testImplementation("net.sourceforge.pmd:pmd-dist:6.10.0")
+    testImplementation("com.google.guava:guava:28.1-jre")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.5.2")
+    testImplementation("org.assertj:assertj-core:3.13.2")
+    testImplementation("org.mockito:mockito-core:3.1.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:3.1.0")
+
+    "integTestImplementation"("org.assertj:assertj-core:3.13.2")
+    "integTestImplementation"("org.junit.vintage:junit-vintage-engine:5.5.2")
+    "integTestImplementation"("org.spockframework:spock-core:1.3-groovy-2.5") {
+        exclude(module = "groovy-all")
+    }
+}
+
 apply(from = "legacy-build.gradle")
