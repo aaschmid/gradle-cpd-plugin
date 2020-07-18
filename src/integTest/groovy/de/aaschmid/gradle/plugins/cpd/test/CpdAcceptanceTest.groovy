@@ -658,4 +658,49 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
         secondResult.output.contains("BUILD SUCCESSFUL")
         !(secondResult.output =~ /CPD found duplicate code\. See the report at file:\/\/.*\/cpdCheck.vs/)
     }
+
+    @Issue("https://github.com/aaschmid/gradle-cpd-plugin/issues/50")
+    def "Cpd should correctly ignore testFixture subProjects code if explicitly set so"() {
+        given:
+        withSubProjects('foo')
+
+        buildFile << """
+        """
+
+        file("foo/src/main/java/de/aaschmid/clazz").mkdirs()
+        file("foo/src/test/java/de/aaschmid/clazz").mkdirs()
+        file("foo/src/testFixtures/java/de/aaschmid/clazz").mkdirs()
+        Files.copy(testFile(JAVA, 'de/aaschmid/clazz/Clazz.java').toPath(), file("foo/src/main/java/de/aaschmid/clazz/Clazz.java").toPath())
+        Files.copy(testFile(JAVA, 'de/aaschmid/clazz/Clazz.java').toPath(), file("foo/src/test/java/de/aaschmid/clazz/Clazz.java").toPath())
+        Files.copy(testFile(JAVA, 'de/aaschmid/clazz/Clazz.java').toPath(), file("foo/src/testFixtures/java/de/aaschmid/clazz/Clazz.java").toPath())
+
+        testProjectDir.newFile('foo/build.gradle') << """
+            plugins {
+                id 'de.aaschmid.cpd'
+                id 'java'
+                id 'java-test-fixtures'
+            }
+            repositories {
+                mavenLocal()
+                mavenCentral()
+            }
+
+            cpdCheck {
+                minimumTokenCount = 10
+                source = files("src/main/java")
+            }
+        """.stripIndent()
+
+        when:
+        def result = run(":foo:cpdCheck")
+
+        then:
+        result.task(':foo:cpdCheck').outcome == SUCCESS
+        result.output.contains("BUILD SUCCESSFUL")
+
+
+        def report = file('foo/build/reports/cpd/cpdCheck.xml')
+        report.exists()
+        !(report.text =~ /Clazz.java/)
+    }
 }
