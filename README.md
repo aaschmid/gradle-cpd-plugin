@@ -165,7 +165,7 @@ or
 cpdCheck {
     source = []
     allprojects.forEach { project ->
-        project.plugins.withType(JavaBasePlugin) { plugin ->
+        project.plugins.withType(JavaPlugin) { plugin ->
             project.sourceSets.main.java.forEach { s -> rootProject.cpdCheck.source(s) }
         }
     }
@@ -174,9 +174,9 @@ cpdCheck {
 or same using kotlin DSL (Note: That works only if all `subprojects` have `sourceSets` `main` and `test` e.g. by appling the `java` plugins. Otherwise you can just filter for `JavaBasePlugin` before)
 ```kotlin
 setSource(files(
-        // only check java source code
-        subprojects.flatMap { it.the<SourceSetContainer>()["main"].java.srcDirs },
-        subprojects.flatMap { it.the<SourceSetContainer>()["test"].java.srcDirs }
+    // only check java source code
+    subprojects.flatMap { it.the<SourceSetContainer>()["main"].java.srcDirs },
+    subprojects.flatMap { it.the<SourceSetContainer>()["test"].java.srcDirs }
 ))
 ```
 or if you need a new cpd task for kotlin and not all `subprojects` apply a `java` plugin (see also [here](https://github.com/aaschmid/gradle-cpd-plugin/issues/39#issuecomment-488730600))
@@ -186,7 +186,7 @@ tasks.register<Cpd>("cpdKotlin") {
     exclude { it.file.extension.contains("java") }
 
     allprojects.forEach { project ->
-        project.plugins.withType<JavaBasePlugin> {
+        project.plugins.withType<JavaPlugin> {
             project.convention.getPlugin<JavaPluginConvention>().sourceSets.configureEach {
                 allJava.srcDirTrees.forEach { this@register.source(it) }
             }
