@@ -1,5 +1,7 @@
 package de.aaschmid.gradle.plugins.cpd.internal;
 
+import javax.inject.Inject;
+
 import de.aaschmid.gradle.plugins.cpd.Cpd;
 import de.aaschmid.gradle.plugins.cpd.CpdCsvFileReport;
 import de.aaschmid.gradle.plugins.cpd.CpdReports;
@@ -12,6 +14,7 @@ import org.gradle.api.reporting.internal.TaskReportContainer;
 
 public class CpdReportsImpl extends TaskReportContainer<SingleFileReport> implements CpdReports {
 
+    @Inject
     public CpdReportsImpl(Cpd task, CollectionCallbackActionDecorator callbackActionDecorator) {
         super(SingleFileReport.class, task, callbackActionDecorator);
 

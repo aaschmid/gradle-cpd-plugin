@@ -14,7 +14,7 @@ import org.gradle.api.Action;
 import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.FileTree;
-import org.gradle.api.internal.CollectionCallbackActionDecorator;
+import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.reporting.Reporting;
 import org.gradle.api.reporting.SingleFileReport;
 import org.gradle.api.tasks.CacheableTask;
@@ -28,7 +28,6 @@ import org.gradle.api.tasks.SkipWhenEmpty;
 import org.gradle.api.tasks.SourceTask;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.VerificationTask;
-import org.gradle.internal.reflect.Instantiator;
 import org.gradle.workers.WorkerExecutor;
 
 
@@ -72,7 +71,7 @@ import org.gradle.workers.WorkerExecutor;
 public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> {
 
     private final WorkerExecutor workerExecutor;
-    private final CpdReportsImpl reports;
+    private final CpdReports reports;
 
     private String encoding;
     private boolean ignoreAnnotations;
@@ -88,8 +87,8 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
     private String skipBlocksPattern;
 
     @Inject
-    public Cpd(CollectionCallbackActionDecorator callbackActionDecorator, Instantiator instantiator, WorkerExecutor workerExecutor) {
-        this.reports = instantiator.newInstance(CpdReportsImpl.class, this, callbackActionDecorator);
+    public Cpd(ObjectFactory objectFactory, WorkerExecutor workerExecutor) {
+        this.reports = objectFactory.newInstance(CpdReportsImpl.class, this);
         this.workerExecutor = workerExecutor;
     }
 
@@ -109,7 +108,7 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
         if (getMinimumTokenCount() <= 0) {
             throw new InvalidUserDataException(String.format("Task '%s' requires 'minimumTokenCount' to be greater than zero.", getName()));
         }
-        if (reports.getEnabled().isEmpty()) {
+        if (getReports().getEnabled().isEmpty()) {
             throw new InvalidUserDataException(String.format("Task '%s' requires at least one enabled report.", getName()));
         }
     }

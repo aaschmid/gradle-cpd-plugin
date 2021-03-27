@@ -119,9 +119,9 @@ public class CpdPlugin implements Plugin<Project> {
             extensionMapping.map("reportsDir", () -> project.getExtensions().getByType(ReportingExtension.class).file("cpd"));
 
             task.getReports().all(report -> {
-                ConventionMapping reportMapping = ((IConventionAware) report).getConventionMapping();
-                reportMapping.map("enabled", () -> "xml".equals(report.getName()));
-                reportMapping.map("destination", () -> new File(extension.getReportsDir(), task.getName() + "." + report.getName()));
+                report.getRequired().convention("xml".equals(report.getName()));
+                report.getOutputLocation().convention(project.getLayout().getProjectDirectory().file(project.provider(() ->
+                    new File(extension.getReportsDir(), task.getName() + "." + report.getName()).getAbsolutePath())));
             });
         });
     }
