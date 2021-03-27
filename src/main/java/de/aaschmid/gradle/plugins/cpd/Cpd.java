@@ -87,7 +87,6 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
     private boolean skipBlocks;
     private String skipBlocksPattern;
 
-
     @Inject
     public Cpd(CollectionCallbackActionDecorator callbackActionDecorator, Instantiator instantiator, WorkerExecutor workerExecutor) {
         this.reports = instantiator.newInstance(CpdReportsImpl.class, this, callbackActionDecorator);
@@ -150,7 +149,7 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
                 boolean trimLeadingCommonSourceWhitespaces = ((CpdTextFileReport) report).getTrimLeadingCommonSourceWhitespaces();
                 result.add(new Report.Text(report.getDestination(), lineSeparator, trimLeadingCommonSourceWhitespaces));
 
-            } else if (report instanceof CpdVsFileReport) {
+            } else if (report.getName().equals("vs")) {
                 result.add(new Report.Vs(report.getDestination()));
 
             } else if (report instanceof CpdXmlFileReport) {

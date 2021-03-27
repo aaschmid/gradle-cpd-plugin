@@ -8,6 +8,10 @@ import de.aaschmid.gradle.plugins.cpd.test.GradleExtension;
 import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
+import org.gradle.api.file.FileSystemLocation;
+import org.gradle.api.file.FileSystemLocationProperty;
+import org.gradle.api.file.RegularFileProperty;
+import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.TaskProvider;
 import org.junit.jupiter.api.Test;
@@ -25,6 +29,8 @@ import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.params.provider.Arguments.of;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(GradleExtension.class)
 class CpdTest {
@@ -248,8 +254,8 @@ class CpdTest {
         // Given:
         cpdCheck.configure(task -> task.setEncoding(taskEncoding));
 
-        CpdXmlFileReportImpl report = new CpdXmlFileReportImpl("xml", cpdCheck.get());
-        report.setEncoding(reportEncoding);
+        CpdXmlFileReportImpl report = mock(CpdXmlFileReportImpl.class);
+        when(report.getEncoding()).thenReturn(reportEncoding);
 
         // Expect:
         assertThat(cpdCheck.get().getXmlRendererEncoding(report)).isEqualTo(expected);

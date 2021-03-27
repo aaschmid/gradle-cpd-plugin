@@ -11,7 +11,7 @@ public class PropertyUtils {
 
     public static <T> Property<T> property(T t) {
         @SuppressWarnings("unchecked")
-        Property<T> property = new DefaultProperty(t.getClass());
+        Property<T> property = new DefaultProperty<T>((Class<T>) t.getClass());
         property.set(t);
         return property;
     }
