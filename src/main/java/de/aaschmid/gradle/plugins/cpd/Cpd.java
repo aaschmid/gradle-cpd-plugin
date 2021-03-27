@@ -169,7 +169,7 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
     String getEncodingOrFallback() {
         String encoding = getEncoding();
         if (encoding == null) {
-            encoding = providerFactory.systemProperty("file.encoding").get();
+            encoding = providerFactory.systemProperty("file.encoding").forUseAtConfigurationTime().get();
         }
         return encoding;
     }
