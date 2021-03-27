@@ -196,18 +196,6 @@ class CpdTest {
     }
 
     @Test
-    void Cpd_shouldThrowInvalidUserDataExceptionIfEncodingIsNull(TaskProvider<Cpd> cpdCheck) {
-        // Given:
-        cpdCheck.configure(task -> task.setEncoding(null));
-        Cpd actual = cpdCheck.get();
-
-        // Expect:
-        assertThatThrownBy(() -> actual.getActions().forEach(a -> a.execute(actual)))
-                .isInstanceOf(InvalidUserDataException.class)
-                .hasMessage("Task 'cpdCheck' requires 'encoding' but was: null.");
-    }
-
-    @Test
     void Cpd_shouldThrowInvalidUserDataExceptionIfMinimumTokenCountIsMinusOne(TaskProvider<Cpd> cpdCheck) {
         // Given:
         cpdCheck.configure(task -> task.setMinimumTokenCount(-1));

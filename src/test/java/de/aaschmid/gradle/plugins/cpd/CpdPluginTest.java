@@ -47,7 +47,7 @@ class CpdPluginTest {
 
     @Test
     void CpdPlugin_shouldCreateAndConfigureCpdExtension(CpdExtension cpd) {
-        assertThat(cpd.getEncoding()).isEqualTo(System.getProperty("file.encoding"));
+        assertThat(cpd.getEncoding()).isNull();
         assertThat(cpd.isIgnoreAnnotations()).isFalse();
         assertThat(cpd.isIgnoreIdentifiers()).isFalse();
         assertThat(cpd.isIgnoreFailures()).isFalse();
@@ -80,7 +80,8 @@ class CpdPluginTest {
         assertThat(t.getDescription()).isEqualTo("Run CPD analysis for all sources");
         assertThat(t.getGroup()).isNull();
 
-        assertThat(t.getEncoding()).isEqualTo(System.getProperty("file.encoding"));
+        assertThat(t.getEncoding()).isNull();
+        assertThat(t.getEncodingOrFallback()).isEqualTo(System.getProperty("file.encoding"));
         assertThat(t.getIgnoreAnnotations()).isFalse();
         assertThat(t.getIgnoreFailures()).isFalse();
         assertThat(t.getIgnoreIdentifiers()).isFalse();
@@ -116,7 +117,8 @@ class CpdPluginTest {
         assertThat(t.getDescription()).isNull();
         assertThat(t.getGroup()).isNull();
 
-        assertThat(t.getEncoding()).isEqualTo(System.getProperty("file.encoding"));
+        assertThat(t.getEncoding()).isNull();
+        assertThat(t.getEncodingOrFallback()).isEqualTo(System.getProperty("file.encoding"));
         assertThat(t.getIgnoreAnnotations()).isFalse();
         assertThat(t.getIgnoreFailures()).isFalse();
         assertThat(t.getIgnoreIdentifiers()).isFalse();

@@ -15,13 +15,16 @@ import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.model.ObjectFactory;
+import org.gradle.api.provider.ProviderFactory;
 import org.gradle.api.reporting.Reporting;
 import org.gradle.api.reporting.SingleFileReport;
 import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Classpath;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFiles;
+import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.Nested;
+import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.SkipWhenEmpty;
@@ -70,6 +73,7 @@ import org.gradle.workers.WorkerExecutor;
 @CacheableTask
 public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> {
 
+    private final ProviderFactory providerFactory;
     private final WorkerExecutor workerExecutor;
     private final CpdReports reports;
 
@@ -87,7 +91,8 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
     private String skipBlocksPattern;
 
     @Inject
-    public Cpd(ObjectFactory objectFactory, WorkerExecutor workerExecutor) {
+    public Cpd(ObjectFactory objectFactory, ProviderFactory providerFactory, WorkerExecutor workerExecutor) {
+        this.providerFactory = providerFactory;
         this.reports = objectFactory.newInstance(CpdReportsImpl.class, this);
         this.workerExecutor = workerExecutor;
     }
@@ -102,9 +107,6 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
     }
 
     private void checkTaskState() {
-        if (getEncoding() == null) {
-            throw new InvalidUserDataException(String.format("Task '%s' requires 'encoding' but was: %s.", getName(), getEncoding()));
-        }
         if (getMinimumTokenCount() <= 0) {
             throw new InvalidUserDataException(String.format("Task '%s' requires 'minimumTokenCount' to be greater than zero.", getName()));
         }
@@ -115,7 +117,7 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
 
     private Action<CpdWorkParameters> getCpdWorkParameters() {
         return parameters -> {
-            parameters.getEncoding().set(getEncoding());
+            parameters.getEncoding().set(getEncodingOrFallback());
             parameters.getIgnoreAnnotations().set(getIgnoreAnnotations());
             parameters.getIgnoreFailures().set(getIgnoreFailures());
             parameters.getIgnoreIdentifiers().set(getIgnoreIdentifiers());
@@ -163,13 +165,20 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
     }
 
     // VisibleForTesting
+    @Internal
+    String getEncodingOrFallback() {
+        String encoding = getEncoding();
+        if (encoding == null) {
+            encoding = providerFactory.systemProperty("file.encoding").get();
+        }
+        return encoding;
+    }
+
+    // VisibleForTesting
     String getXmlRendererEncoding(CpdXmlFileReport report) {
         String encoding = report.getEncoding();
         if (encoding == null) {
-            encoding = getEncoding();
-        }
-        if (encoding == null) {
-            encoding = System.getProperty("file.encoding");
+            return getEncodingOrFallback();
         }
         return encoding;
     }
@@ -209,6 +218,7 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
      * @return the charset encoding
      */
     @Input
+    @Optional
     public String getEncoding() {
         return encoding;
     }
