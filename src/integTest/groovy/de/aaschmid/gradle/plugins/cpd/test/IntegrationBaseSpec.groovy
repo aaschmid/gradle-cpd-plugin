@@ -77,7 +77,7 @@ abstract class IntegrationBaseSpec extends Specification {
                     .withProjectDir(testProjectDir.root)
                     .withArguments(arguments)
                     .withPluginClasspath()
-                    .withDebug(true)
+//                    .withDebug(true)
                     .build()
         } catch (UnexpectedBuildResultException e) {
             return e.buildResult

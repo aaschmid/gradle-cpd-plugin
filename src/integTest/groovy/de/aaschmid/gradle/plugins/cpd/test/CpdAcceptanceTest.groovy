@@ -658,4 +658,48 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
         secondResult.output.contains("BUILD SUCCESSFUL")
         !(secondResult.output =~ /CPD found duplicate code\. See the report at file:\/\/.*\/cpdCheck.vs/)
     }
+
+    @Issue("https://github.com/aaschmid/gradle-cpd-plugin/issues/54")
+    def "Cpd task can be loaded from the configuration cache"() {
+        given:
+        buildFileWithPluginAndRepos() << """
+            cpdCheck{
+//                ignoreFailures = true
+//                minimumTokenCount = 15
+                reports{
+                    csv.enabled = true
+                    xml.enabled = false
+                }
+                source files(${testPath(JAVA, 'de/aaschmid/clazz')})
+            }
+            """.stripIndent()
+
+        when:
+        def result = run("--configuration-cache", "--configuration-cache-problems=warn", "cpdCheck")
+        println result.output
+
+        then:
+        result.task(':cpdCheck').outcome == SUCCESS
+        result.output.contains("BUILD SUCCESSFUL")
+
+        def report = file('build/reports/cpd/cpdCheck.csv')
+        report.exists()
+//        report.text =~ /4,15,2,[79],.*Clazz[12]\.java,[79],.*Clazz[12]\.java/
+
+        // remove report in order to force re-execution of `cpdCheck`
+        report.delete()
+
+        when:
+        def result2 = run("--configuration-cache", "--configuration-cache-problems=warn", "cpdCheck")
+        println result2.output
+
+        then:
+        result2.task(':cpdCheck').outcome == SUCCESS
+        result2.output.contains('Reusing configuration cache.')
+        result2.output.contains("BUILD SUCCESSFUL")
+
+        def report2 = file('build/reports/cpd/cpdCheck.csv')
+        report2.exists()
+//        report2.text =~ /4,15,2,[79],.*Clazz[12]\.java,[79],.*Clazz[12]\.java/
+    }
 }
