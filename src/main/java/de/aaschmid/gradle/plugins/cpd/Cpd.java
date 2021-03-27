@@ -10,11 +10,13 @@ import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdAction;
 import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdWorkParameters;
 import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdWorkParameters.Report;
 import groovy.lang.Closure;
+import groovy.lang.DelegatesTo;
 import org.gradle.api.Action;
 import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.model.ObjectFactory;
+import org.gradle.api.plugins.quality.PmdReports;
 import org.gradle.api.provider.ProviderFactory;
 import org.gradle.api.reporting.Reporting;
 import org.gradle.api.reporting.SingleFileReport;
@@ -31,6 +33,7 @@ import org.gradle.api.tasks.SkipWhenEmpty;
 import org.gradle.api.tasks.SourceTask;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.VerificationTask;
+import org.gradle.util.ClosureBackedAction;
 import org.gradle.workers.WorkerExecutor;
 
 
@@ -192,8 +195,8 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
     }
 
     @Override
-    public CpdReports reports(Closure closure) {
-        return (CpdReports) reports.configure(closure);
+    public CpdReports reports(@DelegatesTo(value = CpdReports.class, strategy = Closure.DELEGATE_FIRST) Closure closure) {
+        return reports(new ClosureBackedAction<>(closure));
     }
 
     @Override
@@ -207,7 +210,6 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
         action.execute(this.reports);
         return this.reports;
     }
-
 
     /**
      * The character set encoding (e.g., UTF-8) to use when reading the source code files but also when producing the report; defaults to
