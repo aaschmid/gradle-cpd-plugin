@@ -83,7 +83,7 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
     private boolean ignoreIdentifiers;
     private boolean ignoreLiterals;
     private String language;
-    private Integer minimumTokenCount;
+    private int minimumTokenCount;
     private FileCollection pmdClasspath;
     private boolean skipDuplicateFiles;
     private boolean skipLexicalErrors;
@@ -319,11 +319,11 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
      * @return the minimum token cound
      */
     @Input
-    public Integer getMinimumTokenCount() {
+    public int getMinimumTokenCount() {
         return minimumTokenCount;
     }
 
-    public void setMinimumTokenCount(Integer minimumTokenCount) {
+    public void setMinimumTokenCount(int minimumTokenCount) {
         this.minimumTokenCount = minimumTokenCount;
     }
 
