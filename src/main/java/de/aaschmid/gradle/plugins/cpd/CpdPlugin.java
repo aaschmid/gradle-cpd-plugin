@@ -9,6 +9,8 @@ import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.execution.TaskExecutionGraph;
+import org.gradle.api.file.ProjectLayout;
+import org.gradle.api.file.RegularFile;
 import org.gradle.api.internal.ConventionMapping;
 import org.gradle.api.internal.IConventionAware;
 import org.gradle.api.logging.Logger;
@@ -16,11 +18,14 @@ import org.gradle.api.logging.Logging;
 import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.plugins.ReportingBasePlugin;
+import org.gradle.api.provider.Provider;
+import org.gradle.api.provider.ProviderFactory;
 import org.gradle.api.reporting.ReportingExtension;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
 
 import static java.util.Collections.reverseOrder;
+import static org.gradle.api.internal.lambdas.SerializableLambdas.action;
 
 /**
  * A plugin for the finding duplicate code using <a href="http://pmd.sourceforge.net/cpd-usage.html">CPD</a> source code analyzer (which is
@@ -118,9 +123,11 @@ public class CpdPlugin implements Plugin<Project> {
             ConventionMapping extensionMapping = ((IConventionAware) extension).getConventionMapping();
             extensionMapping.map("reportsDir", () -> project.getExtensions().getByType(ReportingExtension.class).file("cpd"));
 
+            ProjectLayout layout = project.getLayout();
+            ProviderFactory providers = project.getProviders();
             task.getReports().all(report -> {
                 report.getRequired().convention("xml".equals(report.getName()));
-                report.getOutputLocation().convention(project.getLayout().getProjectDirectory().file(project.provider(() ->
+                report.getOutputLocation().convention(layout.getProjectDirectory().file(providers.provider(() ->
                     new File(extension.getReportsDir(), task.getName() + "." + report.getName()).getAbsolutePath())));
             });
         });
