@@ -1,16 +1,15 @@
 plugins {
     id "groovy"
     id "jacoco"
-    id "com.github.kt3k.coveralls" version "2.6.3"
+    id "com.github.kt3k.coveralls" version "2.11.0"
 
     id "java-gradle-plugin"
-    id "io.freefair.maven-jars" version "2.9.5" // <- can be replace with java { with*Jar() } since Gradle 6.0
 
     id "maven"
     id "maven-publish"
     id "signing"
-    id "com.gradle.plugin-publish" version "0.10.1"
-    id "com.jfrog.bintray" version "1.8.4"
+    id "com.gradle.plugin-publish" version "0.13.0"
+    id "com.jfrog.bintray" version "1.8.5"
 }
 
 description = "Gradle plugin to find duplicate code using PMDs copy/paste detection (= CPD)"
@@ -52,7 +51,7 @@ dependencies {
 }
 
 javadoc {
-    if(JavaVersion.current().isJava9Compatible()) {
+    if (JavaVersion.current().isJava9Compatible()) {
         options.addBooleanOption('html5', true)
     }
 }
@@ -70,6 +69,11 @@ jar {
             "Implementation-Vendor": "Andreas Schmid, service@aaschmid.de",
         )
     }
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
 test {
