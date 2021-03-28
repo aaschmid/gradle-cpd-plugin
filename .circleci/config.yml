@@ -29,22 +29,9 @@ jobs:
         docker:
             - image: circleci/openjdk:8-jdk
         <<: *build-job
-    jdk9:
-        docker:
-            - image: circleci/openjdk:9.0.1-jdk
-        <<: *build-job
-    jdk10:
-        docker:
-            - image: circleci/openjdk:10-jdk
-        <<: *build-job
     jdk11:
         docker:
             - image: circleci/openjdk:11-jdk
-        <<: *build-job
-    jdk12:
-        docker:
-            # No image provided by circleci yet (such as "circleci/openjdk:12-jdk")
-            - image: codeaches/openjdk:12-jdk
         <<: *build-job
     jdk13:
         docker:
@@ -58,18 +45,18 @@ jobs:
         docker:
             - image: circleci/openjdk:15-jdk-buster
         <<: *build-job
+    jdk16:
+        docker:
+            - image: circleci/openjdk:16-jdk-buster
+        <<: *build-job
 
 workflows:
     version: 2
     build:
         jobs:
             - jdk8
-            - jdk9
-            - jdk10
             - jdk11
-            - jdk12
-            # JDK 13 build fails due to spotbugs, see https://github.com/spotbugs/spotbugs/issues/1012
-            # - jdk13
-            # JDK 14 and 15 do not work with Gradle / Groovy yet, see https://github.com/gradle/gradle/issues/10248
-            # - jdk14
-            # - jdk15
+            - jdk13
+            - jdk14
+            - jdk15
+            # - jdk16  # Not supported by Gradle 6.6
