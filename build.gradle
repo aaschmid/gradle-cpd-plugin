@@ -98,7 +98,7 @@ task integTest(type: Test) {
 check.dependsOn integTest
 
 jacoco {
-    toolVersion = "0.8.5"
+    toolVersion = "0.8.6"
 }
 
 task jacocoMerge(type: JacocoMerge) {
