@@ -1,8 +1,3 @@
-java {
-    withJavadocJar()
-    withSourcesJar()
-}
-
 // -- sign and publish artifacts -------------------------------------------------------------------------------------
 
 // Steps:
