@@ -1,34 +1,4 @@
 
-bintray {
-    user = bintrayUsername
-    key = bintrayApiKey
-    pkg {
-        repo = "gradle-plugins"
-        name = "gradle-cpd-plugin"
-        userOrg = bintrayUsername
-        licenses = ["Apache-2.0"]
-        vcsUrl = "https://github.com/aaschmid/gradle-cpd-plugin.git"
-        version {
-            name = project.version
-            desc = "Gradle plugin to find duplicate code using PMDs copy/paste detection (= CPD) in version ${project.version}."
-            released  = new Date()
-            vcsTag = "https://github.com/aaschmid/gradle-cpd-plugin/releases/tag/v${project.version}"
-            attributes = ["gradle-plugin": "de.aaschmid.cpd:de.aaschmid:gradle-cpd-plugin"]
-            gpg {
-                sign = true
-                // passphrase = 'passphrase' //Optional. The passphrase for GPG signing'
-            }
-            mavenCentralSync {
-                sync = true
-                user = sonatypeTokenUser
-                password = sonatypeTokenPassword
-                close = "1"
-            }
-        }
-        publications = ["mavenJava"]
-    }
-}
-
 pluginBundle {
     website = "https://github.com/aaschmid/gradle-cpd-plugin"
     vcsUrl = "https://github.com/aaschmid/gradle-cpd-plugin"

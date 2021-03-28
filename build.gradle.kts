@@ -228,4 +228,35 @@ configure<SigningExtension> {
     sign(the<PublishingExtension>().publications["mavenJava"]) // for "publish" and "bintrayUpload"
 }
 
+// Not perfect yet, see https://github.com/bintray/gradle-bintray-plugin/issues/258
+bintray {
+    user = bintrayUsername
+    key = bintrayApiKey
+    with(pkg) {
+        repo = "gradle-plugins"
+        name = "gradle-cpd-plugin"
+        userOrg = bintrayUsername
+        setLicenses("Apache-2.0")
+        vcsUrl = "https://github.com/aaschmid/gradle-cpd-plugin.git"
+        with(version) {
+            name = project.version as String
+            desc = "Gradle plugin to find duplicate code using PMDs copy/paste detection (= CPD) in version ${project.version}."
+            released  = LocalDate.now().toString()
+            vcsTag = "https://github.com/aaschmid/gradle-cpd-plugin/releases/tag/v${project.version}"
+            attributes = mapOf("gradle-plugin" to "de.aaschmid.cpd:de.aaschmid:gradle-cpd-plugin")
+            with(gpg) {
+                sign = true
+                // passphrase = 'passphrase' //Optional. The passphrase for GPG signing'
+            }
+            with(mavenCentralSync) {
+                sync = true
+                user = sonatypeTokenUser
+                password = sonatypeTokenPassword
+                close = "1"
+            }
+        }
+        setPublications("mavenJava")
+    }
+}
+
 apply(from = "legacy-build.gradle")
