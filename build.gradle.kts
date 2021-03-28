@@ -128,13 +128,13 @@ gradlePlugin {
     testSourceSets(sourceSets.test.get(), sourceSets.named("integTest").get())
 
     plugins {
-        register("cpd") {
+        create("cpd") {
             id = "de.aaschmid.cpd"
             implementationClass = "de.aaschmid.gradle.plugins.cpd.CpdPlugin"
         }
         // Note: comment out for "publishPlugins" because old plugin ids are no longer supported
         //       but working while downloading plugin from MavenCentral
-        register("legacyCpd") {
+        create("legacyCpd") {
             id = "cpd"
             implementationClass = "de.aaschmid.gradle.plugins.cpd.CpdPlugin"
         }
@@ -259,4 +259,22 @@ bintray {
     }
 }
 
-apply(from = "legacy-build.gradle")
+// See documentation on https://plugins.gradle.org/docs/publish-plugin
+pluginBundle {
+    website = "https://github.com/aaschmid/gradle-cpd-plugin"
+    vcsUrl = "https://github.com/aaschmid/gradle-cpd-plugin"
+
+    description = "A Gradle plugin to find duplicate code using PMDs copy/paste detection (= CPD)."
+    tags = listOf("duplicates", "cpd", "copy-paste-detection")
+
+    (plugins) {
+        "cpd" {
+            displayName = "Gradle CPD plugin"
+        }
+    }
+
+    mavenCoordinates {
+        groupId = project.group as String
+        artifactId = "gradle-cpd-plugin"
+    }
+}
