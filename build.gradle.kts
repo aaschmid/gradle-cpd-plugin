@@ -222,4 +222,10 @@ configure<PublishingExtension> {
     }
 }
 
+// requires gradle.properties, see http://www.gradle.org/docs/current/userguide/signing_plugin.html
+configure<SigningExtension> {
+    setRequired({ isReleaseVersion && gradle.taskGraph.hasTask("publish") })
+    sign(the<PublishingExtension>().publications["mavenJava"]) // for "publish" and "bintrayUpload"
+}
+
 apply(from = "legacy-build.gradle")

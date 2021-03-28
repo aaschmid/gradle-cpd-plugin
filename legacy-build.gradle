@@ -1,9 +1,4 @@
 
-tasks.withType(GenerateModuleMetadata) {
-    enabled = isReleaseVersion // signing of these artifacts causes failure for snapshot versions
-}
-
-
 bintray {
     user = bintrayUsername
     key = bintrayApiKey
@@ -33,15 +28,6 @@ bintray {
         publications = ["mavenJava"]
     }
 }
-
-// requires gradle.properties, see http://www.gradle.org/docs/current/userguide/signing_plugin.html
-signing {
-    required {
-        isReleaseVersion && gradle.taskGraph.hasTask("publish")
-    }
-    sign publishing.publications.mavenJava  // for "publish" and "bintrayUpload"
-}
-
 
 pluginBundle {
     website = "https://github.com/aaschmid/gradle-cpd-plugin"
