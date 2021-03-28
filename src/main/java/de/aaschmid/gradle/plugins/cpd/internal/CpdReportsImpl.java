@@ -1,23 +1,26 @@
 package de.aaschmid.gradle.plugins.cpd.internal;
 
+import javax.inject.Inject;
+
 import de.aaschmid.gradle.plugins.cpd.Cpd;
 import de.aaschmid.gradle.plugins.cpd.CpdCsvFileReport;
 import de.aaschmid.gradle.plugins.cpd.CpdReports;
 import de.aaschmid.gradle.plugins.cpd.CpdTextFileReport;
-import de.aaschmid.gradle.plugins.cpd.CpdVsFileReport;
 import de.aaschmid.gradle.plugins.cpd.CpdXmlFileReport;
 import org.gradle.api.internal.CollectionCallbackActionDecorator;
 import org.gradle.api.reporting.SingleFileReport;
+import org.gradle.api.reporting.internal.TaskGeneratedSingleFileReport;
 import org.gradle.api.reporting.internal.TaskReportContainer;
 
 public class CpdReportsImpl extends TaskReportContainer<SingleFileReport> implements CpdReports {
 
+    @Inject
     public CpdReportsImpl(Cpd task, CollectionCallbackActionDecorator callbackActionDecorator) {
         super(SingleFileReport.class, task, callbackActionDecorator);
 
         add(CpdCsvFileReportImpl.class, "csv", task);
         add(CpdTextFileReportImpl.class, "text", task);
-        add(CpdVsFileReportImpl.class, "vs", task);
+        add(TaskGeneratedSingleFileReport.class, "vs", task);
         add(CpdXmlFileReportImpl.class, "xml", task);
     }
 
@@ -32,8 +35,8 @@ public class CpdReportsImpl extends TaskReportContainer<SingleFileReport> implem
     }
 
     @Override
-    public CpdVsFileReport getVs() {
-        return (CpdVsFileReport) getByName("vs");
+    public SingleFileReport getVs() {
+        return getByName("vs");
     }
 
     @Override

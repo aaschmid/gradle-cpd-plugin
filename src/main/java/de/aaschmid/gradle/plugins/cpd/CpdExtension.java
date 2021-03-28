@@ -23,7 +23,7 @@ import org.gradle.api.plugins.quality.CodeQualityExtension;
  */
 public class CpdExtension extends CodeQualityExtension {
 
-    private String encoding = System.getProperty("file.encoding");
+    private String encoding;
     private boolean ignoreAnnotations = false;
     private boolean ignoreIdentifiers = false;
     private boolean ignoreLiterals = false;

@@ -53,6 +53,7 @@ Explanation: v2.0 removes deprecated rendering API (= `net.sourceforge.pmd.cpd.R
 | [v2.0][]       | 4.10.3 - 5.5 | >= 6.1.0    | >= 8   |
 | [v3.0][]       | 5.6 - 5.x    | >= 6.10.0   | >= 8   |
 | [v3.1][]       | >= 5.6       | >= 6.10.0   | >= 8   |
+| [v3.2][]       | >= 6.6       | >= 6.10.0   | >= 8   |
 
 ¹: Java version may additionally depend on [PMD][]s version which is might not be properly reflected here.
 
@@ -159,7 +160,7 @@ source = subprojects*.sourceSets*.main*.java*.srcDirs
 or
 ```groovy
 source = subprojects*.sourceSets*.main*.java*.srcDirs + subprojects*.sourceSets*.test*.java*.srcDirs
-``` 
+```
 or
 ```groovy
 cpdCheck {

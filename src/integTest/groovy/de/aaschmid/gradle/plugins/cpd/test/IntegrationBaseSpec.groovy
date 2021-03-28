@@ -84,6 +84,19 @@ abstract class IntegrationBaseSpec extends Specification {
         }
     }
 
+    protected BuildResult runWithoutDebug(String... arguments) {
+        try {
+            return GradleRunner.create()
+                .withProjectDir(testProjectDir.root)
+                .withArguments(arguments)
+                .withPluginClasspath()
+                .withDebug(false) // `true` fails if `--configuration-cache`, see https://github.com/gradle/gradle/issues/14125
+                .build()
+        } catch (UnexpectedBuildResultException e) {
+            return e.buildResult
+        }
+    }
+
     /**
      * As the Gradle test kit does not support the old plugin mechanism, this method generates a {@code buildscript}
      * code block with the same dependencies as {@link org.gradle.testkit.runner.GradleRunner#withPluginClasspath()} or

@@ -48,7 +48,7 @@ public interface CpdReports extends ReportContainer<SingleFileReport> {
      * @return The CPD (single file) 'vs' report
      */
     @Nested
-    CpdVsFileReport getVs();
+    SingleFileReport getVs();
 
     /**
      * @return The CPD (single file) 'XML' report
