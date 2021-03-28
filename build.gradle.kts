@@ -162,4 +162,64 @@ val bintrayApiKey by extra(findProperty("bintrayApiKey")?.toString() ?: "")
 val sonatypeTokenUser by extra(findProperty("sonatypeTokenUser")?.toString() ?: "")
 val sonatypeTokenPassword by extra(findProperty("sonatypeTokenPassword")?.toString() ?: "")
 
+// new way for Bintray and plugins.gradle.org
+configure<PublishingExtension> {
+    publications {
+        register<MavenPublication>("mavenJava") {
+            val archivesBaseName = project.the<BasePluginConvention>().archivesBaseName
+            artifactId = archivesBaseName
+            from(components["java"])
+
+            pom {
+                packaging = "jar"
+
+                name.set(archivesBaseName)
+                description.set(project.description)
+                url.set("https://github.com/TNG/junit-dataprovider")
+
+
+                developers {
+                    developer {
+                        id.set("aaschmid")
+                        name.set("Andreas Schmid")
+                        email.set("service@aaschmid.de")
+                    }
+                }
+
+
+                licenses {
+                    license {
+                        name.set("The Apache Software License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                        distribution.set("repo")
+                    }
+                }
+
+                scm {
+                    connection.set("scm:git@github.com:aaschmid/gradle-cpd-plugin.git")
+                    developerConnection.set("scm:git@github.com:aaschmid/gradle-cpd-plugin.git")
+                    url.set("scm:git@github.com:aaschmid/gradle-cpd-plugin.git")
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            val releasesRepoUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
+            val snapshotRepoUrl = uri("https://oss.sonatype.org/content/repositories/snapshots/")
+            url = if (isReleaseVersion) releasesRepoUrl else snapshotRepoUrl
+
+            credentials  {
+                username = sonatypeUsername
+                password = sonatypePassword
+            }
+
+            metadataSources {
+                gradleMetadata()
+            }
+        }
+    }
+}
+
 apply(from = "legacy-build.gradle")
