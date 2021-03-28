@@ -5,7 +5,6 @@ plugins {
 
     id "java-gradle-plugin"
 
-    id "maven"
     id "maven-publish"
     id "signing"
     id "com.gradle.plugin-publish" version "0.13.0"
@@ -138,15 +137,10 @@ gradlePlugin {
 //   0. Set correct artifact version above, commit and create a tag prefixed with "v"
 //   1. Prepare ~/.gradle/gradle.properties in order to contain signing keys and required passwords for publishing
 //   2. "build"
-//   3. Optional: "uploadArchives" <- should be no longer required because of bintray MavenCentral sync
-//   4. "bintrayUpload"
-//   5. Comment out "legacyCpd" in "gradlePlugin" closure and "publishPlugin"
-//   6. Finish milestone, release on Github
-//
-// Note: "publish" or "publishToMavenLocal" does not work yet and for me it is quite unclear why, see also
-//       * https://docs.gradle.org/current/userguide/plugins.html\#sec:plugin_markers
-//       * https://docs.gradle.org/current/userguide/java_gradle_plugin.html
-//       * ...
+//   3. "bintrayUpload"
+//   4. Comment out "legacyCpd" in "gradlePlugin" closure and "publishPlugin"
+//   5. Finish milestone, release on Github
+//   6. Check bintray if sync and release was done on oss.sonatype.org
 
 ext.isReleaseVersion = !project.version.endsWith("-SNAPSHOT")
 
@@ -160,57 +154,6 @@ if (!hasProperty("sonatypePassword")) {
 
 tasks.withType(GenerateModuleMetadata) {
     enabled = isReleaseVersion // signing of these artifacts causes failure for snapshot versions
-}
-
-// old way for Maven Central (because new maven-publish has strange interactions with gradle-plugins plugins)
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            beforeDeployment { deployment ->
-                signing.signPom(deployment)
-            }
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                // username and password from gradle.properties
-                authentication(userName: sonatypeUsername, password: sonatypePassword)
-            }
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: sonatypeUsername, password: sonatypePassword)
-            }
-
-            pom {
-                project {
-                    name "gradle-cpd-plugin"
-                    packaging "jar"
-                    description project.description
-                    url "https://github.com/aaschmid/gradle-cpd-plugin"
-
-                    scm {
-                        url "scm:git@github.com:aaschmid/gradle-cpd-plugin.git"
-                        connection "scm:git@github.com:aaschmid/gradle-cpd-plugin.git"
-                        developerConnection "scm:git@github.com:aaschmid/gradle-cpd-plugin.git"
-                    }
-
-                    licenses {
-                        license {
-                            name "The Apache Software License, Version 2.0"
-                            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
-                            distribution "repo"
-                        }
-                    }
-
-                    developers {
-                        developer {
-                            id "aaschmid"
-                            name "Andreas Schmid"
-                        }
-                    }
-                }
-                whenConfigured { pom ->
-                    pom.dependencies.removeAll(pom.dependencies.findAll{ dep -> dep.scope in [ "compile", "test" ] })
-                }
-            }
-        }
-    }
 }
 
 // new way for Bintray and plugins.gradle.org
@@ -303,7 +246,7 @@ bintray {
                 sync = true
                 user = sonatypeTokenUser
                 password = sonatypeTokenPassword
-                close = "0"
+                close = "1"
             }
         }
         publications = ["mavenJava"]
@@ -313,9 +256,8 @@ bintray {
 // requires gradle.properties, see http://www.gradle.org/docs/current/userguide/signing_plugin.html
 signing {
     required {
-        isReleaseVersion && (gradle.taskGraph.hasTask("publish") || gradle.taskGraph.hasTask("uploadArchives"))
+        isReleaseVersion && gradle.taskGraph.hasTask("publish")
     }
-    sign configurations.archives            // for "uploadArchives" and Maven Central
     sign publishing.publications.mavenJava  // for "publish" and "bintrayUpload"
 }
 
