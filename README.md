@@ -274,3 +274,4 @@ get these dependencies in your ```localMaven()``` repository as the test cases l
 [v2.0]: /../../releases/tag/v2.0
 [v3.0]: /../../releases/tag/v3.0
 [v3.1]: /../../releases/tag/v3.1
+[v3.2]: /../../releases/tag/v3.2
