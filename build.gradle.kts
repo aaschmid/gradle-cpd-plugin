@@ -141,4 +141,25 @@ gradlePlugin {
     }
 }
 
+// -- sign and publish artifacts -------------------------------------------------------------------------------------
+
+// Steps:
+//   0. Set correct artifact version above, commit and create a tag prefixed with "v"
+//   1. Prepare ~/.gradle/gradle.properties in order to contain signing keys and required passwords for publishing
+//   2. "build"
+//   3. "bintrayUpload"
+//   4. Comment out "legacyCpd" in "gradlePlugin" closure and "publishPlugin"
+//   5. Finish milestone, release on Github
+//   6. Check bintray if sync and release was done on oss.sonatype.org
+
+val isReleaseVersion by extra(!project.version.toString().endsWith("-SNAPSHOT"))
+
+// usernames and passwords from `gradle.properties` otherwise empty
+val sonatypeUsername by extra(findProperty("sonatypeUsername")?.toString() ?: "")
+val sonatypePassword by extra(findProperty("sonatypePassword")?.toString() ?: "")
+val bintrayUsername by extra(findProperty("bintrayUsername")?.toString() ?: "")
+val bintrayApiKey by extra(findProperty("bintrayApiKey")?.toString() ?: "")
+val sonatypeTokenUser by extra(findProperty("sonatypeTokenUser")?.toString() ?: "")
+val sonatypeTokenPassword by extra(findProperty("sonatypeTokenPassword")?.toString() ?: "")
+
 apply(from = "legacy-build.gradle")
