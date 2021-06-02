@@ -196,8 +196,8 @@ class CpdIntegrationTest extends IntegrationBaseSpec {
                 ignoreFailures = true
                 minimumTokenCount = 15
                 reports{
-                    csv.enabled = true
-                    xml.enabled = false
+                    csv.required = true
+                    xml.required = false
                 }
                 source = ${testPath(JAVA, 'de/aaschmid/clazz')}
             }

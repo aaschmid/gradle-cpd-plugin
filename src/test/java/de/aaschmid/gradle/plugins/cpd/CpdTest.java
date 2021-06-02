@@ -119,38 +119,38 @@ class CpdTest {
     void Cpd_shouldAllowConfigurationOfCpdTaskReportProperties(Project project, TaskProvider<Cpd> cpdCheck) {
         // When:
         cpdCheck.configure(task -> task.reports(reports -> {
-            reports.getCsv().setDestination(project.file(project.getBuildDir() + "/cpdCheck.csv"));
-            reports.getCsv().setEnabled(true);
+            reports.getCsv().getOutputLocation().set(project.file(project.getBuildDir() + "/cpdCheck.csv"));
+            reports.getCsv().getRequired().set(true);
             reports.getCsv().setSeparator(';');
             reports.getCsv().setIncludeLineCount(false);
 
-            reports.getText().setDestination(project.file(project.getBuildDir() + "/cpdCheck.text"));
-            reports.getText().setEnabled(true);
+            reports.getText().getOutputLocation().set(project.file(project.getBuildDir() + "/cpdCheck.text"));
+            reports.getText().getRequired().set(true);
             reports.getText().setLineSeparator("-_-");
             reports.getText().setTrimLeadingCommonSourceWhitespaces(true);
 
-            reports.getVs().setDestination(project.file("cpdCheck.vs"));
-            reports.getVs().setEnabled(true);
+            reports.getVs().getOutputLocation().set(project.file("cpdCheck.vs"));
+            reports.getVs().getRequired().set(true);
 
-            reports.getXml().setDestination(project.file(project.getBuildDir() + "/reports/cpdCheck.xml"));
-            reports.getXml().setEnabled(false);
+            reports.getXml().getOutputLocation().set(project.file(project.getBuildDir() + "/reports/cpdCheck.xml"));
+            reports.getXml().getRequired().set(false);
             reports.getXml().setEncoding("UTF-16");
         }));
 
         // Then:
         CpdReports actual = cpdCheck.get().getReports();
-        assertThat(actual.getCsv().getDestination()).isEqualTo(project.file("build/cpdCheck.csv"));
-        assertThat(actual.getCsv().isEnabled()).isTrue();
+        assertThat(actual.getCsv().getOutputLocation().get().getAsFile()).isEqualTo(project.file("build/cpdCheck.csv"));
+        assertThat(actual.getCsv().getRequired().get()).isTrue();
         assertThat(actual.getCsv().getSeparator()).isEqualTo(';');
         assertThat(actual.getCsv().isIncludeLineCount()).isFalse();
-        assertThat(actual.getText().getDestination()).isEqualTo(project.file("build/cpdCheck.text"));
-        assertThat(actual.getText().isEnabled()).isTrue();
+        assertThat(actual.getText().getOutputLocation().get().getAsFile()).isEqualTo(project.file("build/cpdCheck.text"));
+        assertThat(actual.getText().getRequired().get()).isTrue();
         assertThat(actual.getText().getLineSeparator()).isEqualTo("-_-");
         assertThat(actual.getText().getTrimLeadingCommonSourceWhitespaces()).isTrue();
-        assertThat(actual.getVs().getDestination()).isEqualTo(project.file("cpdCheck.vs"));
-        assertThat(actual.getVs().isEnabled()).isTrue();
-        assertThat(actual.getXml().getDestination()).isEqualTo(project.file("build/reports/cpdCheck.xml"));
-        assertThat(actual.getXml().isEnabled()).isFalse();
+        assertThat(actual.getVs().getOutputLocation().get().getAsFile()).isEqualTo(project.file("cpdCheck.vs"));
+        assertThat(actual.getVs().getRequired().get()).isTrue();
+        assertThat(actual.getXml().getOutputLocation().get().getAsFile()).isEqualTo(project.file("build/reports/cpdCheck.xml"));
+        assertThat(actual.getXml().getRequired().get()).isFalse();
         assertThat(actual.getXml().getEncoding()).isEqualTo("UTF-16");
     }
 
@@ -159,8 +159,8 @@ class CpdTest {
         // Given:
         cpdCheck.configure(task -> {
             task.reports(report -> {
-                report.getText().setDestination(project.file(project.getBuildDir() + "/cpdCheck.text"));
-                report.getText().setEnabled(true);
+                report.getText().getOutputLocation().set(project.file(project.getBuildDir() + "/cpdCheck.text"));
+                report.getText().getRequired().set(true);
             });
             task.source(testFile(JAVA, "de/aaschmid/clazz/"));
         });
@@ -176,11 +176,11 @@ class CpdTest {
         // Given:
         cpdCheck.configure(task -> {
             task.reports(report -> {
-                report.getCsv().setDestination(project.file(project.getBuildDir() + "/cpd.csv"));
-                report.getCsv().setEnabled(false);
-                report.getText().setDestination(project.file("cpdCheck.txt"));
-                report.getText().setEnabled(true);
-                report.getVs().setDestination(project.file("cpd.vs"));
+                report.getCsv().getOutputLocation().set(project.file(project.getBuildDir() + "/cpd.csv"));
+                report.getCsv().getRequired().set(false);
+                report.getText().getOutputLocation().set(project.file("cpdCheck.txt"));
+                report.getText().getRequired().set(true);
+                report.getVs().getOutputLocation().set(project.file("cpd.vs"));
             });
             task.source(testFile(JAVA, "."));
         });
@@ -211,17 +211,17 @@ class CpdTest {
     void Cpd_shouldThrowInvalidUserDataExceptionIfTwoReportsAreEnabled(TaskProvider<Cpd> cpdCheck) {
         // Given:
         cpdCheck.configure(task -> task.reports(report -> {
-            report.getCsv().setEnabled(false);
-            report.getText().setEnabled(false);
-            report.getVs().setEnabled(false);
-            report.getXml().setEnabled(false);
+            report.getCsv().getRequired().set(false);
+            report.getText().getRequired().set(false);
+            report.getVs().getRequired().set(false);
+            report.getXml().getRequired().set(false);
         }));
         Cpd actual = cpdCheck.get();
 
         // Expect:
         assertThatThrownBy(() -> actual.getActions().forEach(a -> a.execute(actual)))
                 .isInstanceOf(InvalidUserDataException.class)
-                .hasMessage("Task 'cpdCheck' requires at least one enabled report.");
+                .hasMessage("Task 'cpdCheck' requires at least one required report.");
     }
 
     static Arguments[] getXmlRendererEncoding() {

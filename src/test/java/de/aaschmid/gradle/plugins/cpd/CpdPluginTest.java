@@ -91,14 +91,14 @@ class CpdPluginTest {
 
         assertThat(t.getPmdClasspath()).isEqualTo(cpdConfiguration);
 
-        assertThat(t.getReports().getCsv().getDestination()).isEqualTo(project.file("build/reports/cpd/cpdCheck.csv"));
-        assertThat(t.getReports().getCsv().isEnabled()).isFalse();
-        assertThat(t.getReports().getText().getDestination()).isEqualTo(project.file("build/reports/cpd/cpdCheck.text"));
-        assertThat(t.getReports().getText().isEnabled()).isFalse();
-        assertThat(t.getReports().getVs().getDestination()).isEqualTo(project.file("build/reports/cpd/cpdCheck.vs"));
-        assertThat(t.getReports().getVs().isEnabled()).isFalse();
-        assertThat(t.getReports().getXml().getDestination()).isEqualTo(project.file("build/reports/cpd/cpdCheck.xml"));
-        assertThat(t.getReports().getXml().isEnabled()).isTrue();
+        assertThat(t.getReports().getCsv().getOutputLocation().get().getAsFile()).isEqualTo(project.file("build/reports/cpd/cpdCheck.csv"));
+        assertThat(t.getReports().getCsv().getRequired().get()).isFalse();
+        assertThat(t.getReports().getText().getOutputLocation().get().getAsFile()).isEqualTo(project.file("build/reports/cpd/cpdCheck.text"));
+        assertThat(t.getReports().getText().getRequired().get()).isFalse();
+        assertThat(t.getReports().getVs().getOutputLocation().get().getAsFile()).isEqualTo(project.file("build/reports/cpd/cpdCheck.vs"));
+        assertThat(t.getReports().getVs().getRequired().get()).isFalse();
+        assertThat(t.getReports().getXml().getOutputLocation().get().getAsFile()).isEqualTo(project.file("build/reports/cpd/cpdCheck.xml"));
+        assertThat(t.getReports().getXml().getRequired().get()).isTrue();
 
         assertThat(t.getSkipDuplicateFiles()).isFalse();
         assertThat(t.getSkipLexicalErrors()).isFalse();
@@ -128,14 +128,14 @@ class CpdPluginTest {
 
         assertThat(t.getPmdClasspath()).isEqualTo(cpdConfiguration);
 
-        assertThat(t.getReports().getCsv().getDestination()).isEqualTo(project.file("build/reports/cpd/cpdCustom.csv"));
-        assertThat(t.getReports().getCsv().isEnabled()).isFalse();
-        assertThat(t.getReports().getText().getDestination()).isEqualTo(project.file("build/reports/cpd/cpdCustom.text"));
-        assertThat(t.getReports().getText().isEnabled()).isFalse();
-        assertThat(t.getReports().getVs().getDestination()).isEqualTo(project.file("build/reports/cpd/cpdCustom.vs"));
-        assertThat(t.getReports().getVs().isEnabled()).isFalse();
-        assertThat(t.getReports().getXml().getDestination()).isEqualTo(project.file("build/reports/cpd/cpdCustom.xml"));
-        assertThat(t.getReports().getXml().isEnabled()).isTrue();
+        assertThat(t.getReports().getCsv().getOutputLocation().get().getAsFile()).isEqualTo(project.file("build/reports/cpd/cpdCustom.csv"));
+        assertThat(t.getReports().getCsv().getRequired().get()).isFalse();
+        assertThat(t.getReports().getText().getOutputLocation().get().getAsFile()).isEqualTo(project.file("build/reports/cpd/cpdCustom.text"));
+        assertThat(t.getReports().getText().getRequired().get()).isFalse();
+        assertThat(t.getReports().getVs().getOutputLocation().get().getAsFile()).isEqualTo(project.file("build/reports/cpd/cpdCustom.vs"));
+        assertThat(t.getReports().getVs().getRequired().get()).isFalse();
+        assertThat(t.getReports().getXml().getOutputLocation().get().getAsFile()).isEqualTo(project.file("build/reports/cpd/cpdCustom.xml"));
+        assertThat(t.getReports().getXml().getRequired().get()).isTrue();
 
         assertThat(t.getSkipDuplicateFiles()).isFalse();
         assertThat(t.getSkipLexicalErrors()).isFalse();
@@ -299,10 +299,10 @@ class CpdPluginTest {
         assertThat(task.getIgnoreLiterals()).isTrue();
         assertThat(task.getLanguage()).isEqualTo("ruby");
         assertThat(task.getMinimumTokenCount()).isEqualTo(25);
-        assertThat(task.getReports().getCsv().getDestination()).isEqualTo(project.file("cpd-reports/cpdCheck.csv"));
-        assertThat(task.getReports().getText().getDestination()).isEqualTo(project.file("cpd-reports/cpdCheck.text"));
-        assertThat(task.getReports().getVs().getDestination()).isEqualTo(project.file("cpd-reports/cpdCheck.vs"));
-        assertThat(task.getReports().getXml().getDestination()).isEqualTo(project.file("cpd-reports/cpdCheck.xml"));
+        assertThat(task.getReports().getCsv().getOutputLocation().get().getAsFile()).isEqualTo(project.file("cpd-reports/cpdCheck.csv"));
+        assertThat(task.getReports().getText().getOutputLocation().get().getAsFile()).isEqualTo(project.file("cpd-reports/cpdCheck.text"));
+        assertThat(task.getReports().getVs().getOutputLocation().get().getAsFile()).isEqualTo(project.file("cpd-reports/cpdCheck.vs"));
+        assertThat(task.getReports().getXml().getOutputLocation().get().getAsFile()).isEqualTo(project.file("cpd-reports/cpdCheck.xml"));
         assertThat(task.getSkipDuplicateFiles()).isTrue();
         assertThat(task.getSkipLexicalErrors()).isTrue();
         assertThat(task.getSkipBlocks()).isFalse();

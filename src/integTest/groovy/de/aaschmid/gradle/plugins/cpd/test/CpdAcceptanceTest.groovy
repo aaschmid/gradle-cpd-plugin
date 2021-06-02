@@ -30,14 +30,14 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
         !result.output.contains('WARNING: Due to the absence of \'LifecycleBasePlugin\' on root project')
     }
 
-    def "Cpd fails if no report is enabled"() {
+    def "Cpd fails if no report is required"() {
         given:
         buildFileWithPluginAndRepos() << """
             cpdCheck{
                 reports{
-                    csv.enabled = false
-                    text.enabled = false
-                    xml.enabled = false
+                    csv.required = false
+                    text.required = false
+                    xml.required = false
                 }
                 source = '.'
             }
@@ -49,7 +49,7 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
         then:
         result.task(':cpdCheck').outcome == FAILED
         result.output.contains("BUILD FAILED")
-        result.output.contains("Task 'cpdCheck' requires at least one enabled report.")
+        result.output.contains("Task 'cpdCheck' requires at least one required report.")
 
         !file('build/reports/cpdCheck.csv').exists()
     }
@@ -83,8 +83,8 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
         buildFileWithPluginAndRepos([ 'java' ]) << """
             cpdCheck{
                 reports{
-                    xml.enabled = false
-                    text.enabled = true
+                    xml.required = false
+                    text.required = true
                 }
                 source = ${testPath(JAVA, 'de/aaschmid/test', 'de/aaschmid/duplicate')}
             }
@@ -110,8 +110,8 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
                 language = 'kotlin'
                 minimumTokenCount = 10
                 reports{
-                    xml.enabled = false
-                    text.enabled = true
+                    xml.required = false
+                    text.required = true
                 }
                 source = ${testPath(KOTLIN, 'de/aaschmid/test')}
             }
@@ -135,8 +135,8 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
             cpdCheck{
                 minimumTokenCount = 15
                 reports{
-                    csv.enabled = true
-                    xml.enabled = false
+                    csv.required = true
+                    xml.required = false
                 }
                 source = ${testPath(JAVA, 'de/aaschmid/clazz')}
             }
@@ -162,8 +162,8 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
                 ignoreFailures = true
                 minimumTokenCount = 15
                 reports{
-                    csv.enabled = true
-                    xml.enabled = false
+                    csv.required = true
+                    xml.required = false
                 }
                 source files(${testPath(JAVA, 'de/aaschmid/clazz')})
             }
@@ -253,16 +253,16 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
         report.text =~ /Clazz2.java/
     }
 
-    def "Cpd should create and fill all enabled reports"() {
+    def "Cpd should create and fill all required reports"() {
         given:
         buildFileWithPluginAndRepos() << """
             cpdCheck {
                 language = 'kotlin'
                 minimumTokenCount = 5
                 reports {
-                    csv.enabled = false
-                    text.enabled = true
-                    xml.enabled = true
+                    csv.required = false
+                    text.required = true
+                    xml.required = true
                 }
                 source = ${testPath(KOTLIN, '.')}
             }
@@ -303,10 +303,10 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
                 reports{
                     ignoreFailures = true
                     csv{
-                        destination = file('java-cpd.csv')
-                        enabled = true
+                        outputLocation = file('java-cpd.csv')
+                        required = true
                     }
-                    xml.enabled = false
+                    xml.required = false
                 }
                 source = ${testPath(JAVA, 'de/aaschmid/foo')}
             }
@@ -315,7 +315,7 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
                 reports{
                     language = "kotlin"
                     xml{
-                        destination = file('kotlin-cpd.xml')
+                        outputLocation = file('kotlin-cpd.xml')
                     }
                 }
                 source = ${testPath(KOTLIN, 'de/aaschmid/test')}
@@ -348,8 +348,8 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
                 ignoreAnnotations = false
                 minimumTokenCount = 40
                 reports{
-                    csv.enabled = true
-                    xml.enabled = false
+                    csv.required = true
+                    xml.required = false
                 }
                 source = ${testPath(JAVA, 'de/aaschmid/annotation')}
             }
@@ -377,8 +377,8 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
                 ignoreAnnotations = true
                 minimumTokenCount = 40
                 reports {
-                    vs.enabled = true
-                    xml.enabled = false
+                    vs.required = true
+                    xml.required = false
 
                 }
                 source = ${testPath(JAVA, 'de/aaschmid/annotation')}
@@ -404,8 +404,8 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
                 ignoreIdentifiers = true
                 minimumTokenCount = 15
                 reports{
-                    csv.enabled = true
-                    xml.enabled = false
+                    csv.required = true
+                    xml.required = false
                 }
                 source = ${testPath(JAVA, 'de/aaschmid/identifier')}
             }
@@ -453,7 +453,7 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
                 ignoreLiterals = true
                 minimumTokenCount = 20
                 reports{
-                    vs.enabled = true
+                    vs.required = true
                 }
                 source = ${testPath(JAVA, 'de/aaschmid/literal')}
             }
@@ -504,8 +504,8 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
             cpdCheck{
                 minimumTokenCount = 5
                 reports{
-                    csv.enabled = true
-                    xml.enabled = false
+                    csv.required = true
+                    xml.required = false
                 }
                 skipDuplicateFiles = false
                 source = ${testPath(JAVA, 'de/aaschmid/duplicate', 'de/aaschmid/test')}
@@ -597,8 +597,8 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
                 ignoreFailures = true
                 minimumTokenCount = 5
                 reports{
-                    vs.enabled = true
-                    xml.enabled = false
+                    vs.required = true
+                    xml.required = false
                 }
                 exclude '**/lexical/**'
                 source = ${testPath(JAVA, '.')}
@@ -634,8 +634,8 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
                 ignoreFailures = true
                 minimumTokenCount = 5
                 reports{
-                    vs.enabled = true
-                    xml.enabled = false
+                    vs.required = true
+                    xml.required = false
                 }
                 exclude '**/lexical/**'
                 source = ${testPath(JAVA, '.')}
@@ -665,8 +665,8 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
         buildFileWithPluginAndRepos() << """
             cpdCheck{
                 reports{
-                    csv.enabled = true
-                    xml.enabled = false
+                    csv.required = true
+                    xml.required = false
                 }
                 source files(${testPath(JAVA, 'de/aaschmid/clazz')})
             }
