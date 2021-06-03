@@ -53,13 +53,13 @@ import org.gradle.workers.WorkerExecutor;
  *     // set minimum token count causing a duplication warning
  *     minimumTokenCount = 10
  *
- *     // enable CSV reports and customize destination, disable xml report
+ *     // enable CSV reports and customize outputLocation, disable xml report
  *     reports {
  *         csv {
- *             enabled = true
- *             destination = file("${buildDir}/cpd.csv")
+ *             required = true
+ *             outputLocation = file("${buildDir}/cpd.csv")
  *         }
- *         xml.enabled = false
+ *         xml.required = false
  *     }
  *
  *     // explicitly include all Ruby files and exclude tests
@@ -113,8 +113,8 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
         if (getMinimumTokenCount() <= 0) {
             throw new InvalidUserDataException(String.format("Task '%s' requires 'minimumTokenCount' to be greater than zero.", getName()));
         }
-        if (getReports().getEnabled().isEmpty()) {
-            throw new InvalidUserDataException(String.format("Task '%s' requires at least one enabled report.", getName()));
+        if (getReports().getEnabledReports().isEmpty()) {
+            throw new InvalidUserDataException(String.format("Task '%s' requires at least one required report.", getName()));
         }
     }
 
@@ -139,26 +139,26 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
     private List<Report> createReportParameters(CpdReports reports) {
         List<Report> result = new ArrayList<>();
         for (SingleFileReport report : reports) {
-            if (!report.isEnabled()) {
+            if (!report.getRequired().get()) {
                 continue;
             }
 
             if (report instanceof CpdCsvFileReport) {
                 Character separator = ((CpdCsvFileReport) report).getSeparator();
                 boolean includeLineCount = ((CpdCsvFileReport) report).isIncludeLineCount();
-                result.add(new Report.Csv(report.getDestination(), separator, includeLineCount));
+                result.add(new Report.Csv(report.getOutputLocation().get().getAsFile(), separator, includeLineCount));
 
             } else if (report instanceof CpdTextFileReport) {
                 String lineSeparator = ((CpdTextFileReport) report).getLineSeparator();
                 boolean trimLeadingCommonSourceWhitespaces = ((CpdTextFileReport) report).getTrimLeadingCommonSourceWhitespaces();
-                result.add(new Report.Text(report.getDestination(), lineSeparator, trimLeadingCommonSourceWhitespaces));
+                result.add(new Report.Text(report.getOutputLocation().get().getAsFile(), lineSeparator, trimLeadingCommonSourceWhitespaces));
 
             } else if (report.getName().equals("vs")) {
-                result.add(new Report.Vs(report.getDestination()));
+                result.add(new Report.Vs(report.getOutputLocation().get().getAsFile()));
 
             } else if (report instanceof CpdXmlFileReport) {
                 String encoding = getXmlRendererEncoding((CpdXmlFileReport) report);
-                result.add(new Report.Xml(report.getDestination(), encoding));
+                result.add(new Report.Xml(report.getOutputLocation().get().getAsFile(), encoding));
 
             } else {
                 throw new IllegalArgumentException(String.format("Report of type '%s' not available.", report.getClass().getSimpleName()));

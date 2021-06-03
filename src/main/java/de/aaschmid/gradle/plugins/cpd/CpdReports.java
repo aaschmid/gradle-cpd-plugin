@@ -19,10 +19,10 @@ import org.gradle.api.tasks.Nested;
  * <pre>
  * cpdCheck {
  *     reports {
- *         csv.enabled = false
+ *         csv.required = false
  *         text {
- *             enabled = true
- *             destination = file("${buildDir}/cpd.txt"
+ *             required = true
+ *             outputLocation = file("${buildDir}/cpd.txt"
  *         }
  *     }
  * }

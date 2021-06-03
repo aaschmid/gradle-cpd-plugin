@@ -42,7 +42,7 @@ public interface CpdWorkParameters extends WorkParameters {
     abstract class Report implements Serializable {
         private final File destination;
 
-        Report( File destination) {
+        Report(File destination) {
             this.destination = requireNonNull(destination, "'destination' must not be null for any report.");
         }
 
