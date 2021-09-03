@@ -146,7 +146,7 @@ public class CpdPlugin implements Plugin<Project> {
         });
 
         project.getPlugins().withType(LifecycleBasePlugin.class, plugin ->
-                project.getTasks().findByName(LifecycleBasePlugin.CHECK_TASK_NAME).dependsOn(taskProvider));
+                project.getTasks().named(LifecycleBasePlugin.CHECK_TASK_NAME).configure(t -> t.dependsOn(taskProvider)));
     }
 
     private void checkThatCpdCheckWasAutomaticallyAddedToTaskGraphOrWarn(Project project) {
