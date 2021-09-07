@@ -117,7 +117,7 @@ class CpdIntegrationTest extends IntegrationBaseSpec {
             }
 
             project(':sub') {
-                apply plugin: 'cpd'
+                apply plugin: 'de.aaschmid.cpd'
                 apply plugin: 'java'
             }
             """.stripIndent()

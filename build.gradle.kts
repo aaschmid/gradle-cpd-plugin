@@ -9,10 +9,7 @@ plugins {
 
     `java-gradle-plugin`
 
-    `maven-publish`
-    signing
     id("com.gradle.plugin-publish") version "0.13.0"
-    id("com.jfrog.bintray") version "1.8.5"
 }
 
 description = "Gradle plugin to find duplicate code using PMDs copy/paste detection (= CPD)"
@@ -132,12 +129,6 @@ gradlePlugin {
             id = "de.aaschmid.cpd"
             implementationClass = "de.aaschmid.gradle.plugins.cpd.CpdPlugin"
         }
-        // Note: comment out for "publishPlugins" because old plugin ids are no longer supported
-        //       but working while downloading plugin from MavenCentral
-        create("legacyCpd") {
-            id = "cpd"
-            implementationClass = "de.aaschmid.gradle.plugins.cpd.CpdPlugin"
-        }
     }
 }
 
@@ -146,118 +137,10 @@ gradlePlugin {
 // Steps:
 //   0. Set correct artifact version above, commit and create a tag prefixed with "v"
 //   1. Prepare ~/.gradle/gradle.properties in order to contain signing keys and required passwords for publishing
-//   2. "build"
-//   3. "bintrayUpload"
-//   4. Comment out "legacyCpd" in "gradlePlugin" closure and "publishPlugin"
-//   5. Finish milestone, release on Github
-//   6. Check bintray if sync and release was done on oss.sonatype.org
+//   2. "./gradlew build publishPlugin"
+//   3. Finish milestone and release on Github
 
 val isReleaseVersion by extra(!project.version.toString().endsWith("-SNAPSHOT"))
-
-// usernames and passwords from `gradle.properties` otherwise empty
-val sonatypeUsername by extra(findProperty("sonatypeUsername")?.toString() ?: "")
-val sonatypePassword by extra(findProperty("sonatypePassword")?.toString() ?: "")
-val bintrayUsername by extra(findProperty("bintrayUsername")?.toString() ?: "")
-val bintrayApiKey by extra(findProperty("bintrayApiKey")?.toString() ?: "")
-val sonatypeTokenUser by extra(findProperty("sonatypeTokenUser")?.toString() ?: "")
-val sonatypeTokenPassword by extra(findProperty("sonatypeTokenPassword")?.toString() ?: "")
-
-// new way for Bintray and plugins.gradle.org
-configure<PublishingExtension> {
-    publications {
-        register<MavenPublication>("mavenJava") {
-            val archivesBaseName = project.the<BasePluginConvention>().archivesBaseName
-            artifactId = archivesBaseName
-            from(components["java"])
-
-            pom {
-                packaging = "jar"
-
-                name.set(archivesBaseName)
-                description.set(project.description)
-                url.set("https://github.com/TNG/junit-dataprovider")
-
-
-                developers {
-                    developer {
-                        id.set("aaschmid")
-                        name.set("Andreas Schmid")
-                        email.set("service@aaschmid.de")
-                    }
-                }
-
-
-                licenses {
-                    license {
-                        name.set("The Apache Software License, Version 2.0")
-                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                        distribution.set("repo")
-                    }
-                }
-
-                scm {
-                    connection.set("scm:git@github.com:aaschmid/gradle-cpd-plugin.git")
-                    developerConnection.set("scm:git@github.com:aaschmid/gradle-cpd-plugin.git")
-                    url.set("scm:git@github.com:aaschmid/gradle-cpd-plugin.git")
-                }
-            }
-        }
-    }
-
-    repositories {
-        maven {
-            val releasesRepoUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
-            val snapshotRepoUrl = uri("https://oss.sonatype.org/content/repositories/snapshots/")
-            url = if (isReleaseVersion) releasesRepoUrl else snapshotRepoUrl
-
-            credentials  {
-                username = sonatypeUsername
-                password = sonatypePassword
-            }
-
-            metadataSources {
-                gradleMetadata()
-            }
-        }
-    }
-}
-
-// requires gradle.properties, see http://www.gradle.org/docs/current/userguide/signing_plugin.html
-configure<SigningExtension> {
-    setRequired({ isReleaseVersion && gradle.taskGraph.hasTask("publish") })
-    sign(the<PublishingExtension>().publications["mavenJava"]) // for "publish" and "bintrayUpload"
-}
-
-// Not perfect yet, see https://github.com/bintray/gradle-bintray-plugin/issues/258
-bintray {
-    user = bintrayUsername
-    key = bintrayApiKey
-    with(pkg) {
-        repo = "gradle-plugins"
-        name = "gradle-cpd-plugin"
-        userOrg = bintrayUsername
-        setLicenses("Apache-2.0")
-        vcsUrl = "https://github.com/aaschmid/gradle-cpd-plugin.git"
-        with(version) {
-            name = project.version as String
-            desc = "Gradle plugin to find duplicate code using PMDs copy/paste detection (= CPD) in version ${project.version}."
-            released  = LocalDate.now().toString()
-            vcsTag = "https://github.com/aaschmid/gradle-cpd-plugin/releases/tag/v${project.version}"
-            attributes = mapOf("gradle-plugin" to "de.aaschmid.cpd:de.aaschmid:gradle-cpd-plugin")
-            with(gpg) {
-                sign = true
-                // passphrase = 'passphrase' //Optional. The passphrase for GPG signing'
-            }
-            with(mavenCentralSync) {
-                sync = true
-                user = sonatypeTokenUser
-                password = sonatypeTokenPassword
-                close = "1"
-            }
-        }
-        setPublications("mavenJava")
-    }
-}
 
 // See documentation on https://plugins.gradle.org/docs/publish-plugin
 pluginBundle {
