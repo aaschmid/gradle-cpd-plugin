@@ -66,7 +66,7 @@ This plugin is available using either the new [Gradle plugins DSL](https://gradl
 
 ```groovy
 plugins {
-    id 'de.aaschmid.cpd' version '2.0'
+    id 'de.aaschmid.cpd' version '3.3'
 }
 ```
 
@@ -82,10 +82,10 @@ buildscript {
     }
 
     dependencies {
-        classpath 'de.aaschmid:gradle-cpd-plugin:2.0'
+        classpath 'de.aaschmid:gradle-cpd-plugin:3.3'
     }
 }
-apply plugin: 'cpd'
+apply plugin: 'de.aaschmid.cpd'
 ```
 
 **Attention:** The plugins groupId was changed from ```de.aaschmid.gradle.plugins``` to ```de.aaschmid``` in [v1.0][].
