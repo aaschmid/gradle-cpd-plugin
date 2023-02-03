@@ -82,10 +82,10 @@ buildscript {
     }
 
     dependencies {
-        classpath 'de.aaschmid:gradle-cpd-plugin:2.0'
+        classpath 'de.aaschmid:gradle-cpd-plugin:3.3'
     }
 }
-apply plugin: 'cpd'
+apply plugin: 'de.aaschmid.cpd'
 ```
 
 **Attention:** The plugins groupId was changed from ```de.aaschmid.gradle.plugins``` to ```de.aaschmid``` in [v1.0][].
