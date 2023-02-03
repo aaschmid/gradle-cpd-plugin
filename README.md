@@ -66,7 +66,7 @@ This plugin is available using either the new [Gradle plugins DSL](https://gradl
 
 ```groovy
 plugins {
-    id 'de.aaschmid.cpd' version '2.0'
+    id 'de.aaschmid.cpd' version '3.3'
 }
 ```
 
