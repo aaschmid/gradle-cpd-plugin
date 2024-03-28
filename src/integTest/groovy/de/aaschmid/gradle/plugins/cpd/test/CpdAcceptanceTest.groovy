@@ -71,7 +71,7 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
         result.task(':cpdCheck').outcome == SUCCESS
         result.output.contains("BUILD SUCCESSFUL")
 
-        def report = testProjectDir.getRoot().toPath().resolve('build/reports/cpd/cpdCheck.xml').toFile()
+        def report = testProjectDir.resolve('build/reports/cpd/cpdCheck.xml').toFile()
         report.exists()
         report.text =~ /encoding="ISO-8859-1"/
         report.text =~ /<pmd-cpd\/>/
@@ -623,7 +623,7 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
         given:
         settingsFile << """
             buildCache {
-                local(DirectoryBuildCache) {
+                local {
                     directory = "\${rootDir}/build-cache"
                 }
             }

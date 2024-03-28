@@ -4,17 +4,18 @@ import de.aaschmid.gradle.plugins.cpd.test.TestFileResolver.Lang
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.UnexpectedBuildResultException
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
+
+import java.nio.file.Path
 
 import static de.aaschmid.gradle.plugins.cpd.test.TestFileResolver.*
 import static org.gradle.testkit.runner.internal.PluginUnderTestMetadataReading.*
 
 abstract class IntegrationBaseSpec extends Specification {
 
-    @Rule
-    protected final TemporaryFolder testProjectDir = new TemporaryFolder()
+    @TempDir
+    protected Path testProjectDir
 
     protected File buildFile
     protected File settingsFile
@@ -24,8 +25,8 @@ abstract class IntegrationBaseSpec extends Specification {
     }
 
     def setup() {
-        buildFile = testProjectDir.newFile('build.gradle')
-        settingsFile = testProjectDir.newFile('settings.gradle')
+        buildFile = testProjectDir.resolve('build.gradle').toFile()
+        settingsFile = testProjectDir.resolve('settings.gradle').toFile()
     }
 
     protected File withSubProjects(String... subProjects) {
@@ -56,13 +57,13 @@ abstract class IntegrationBaseSpec extends Specification {
     }
 
     protected File file(String pathWithinProjectFolder) {
-        return testProjectDir.getRoot().toPath().resolve(pathWithinProjectFolder).toFile()
+        return testProjectDir.resolve(pathWithinProjectFolder).toFile()
     }
 
     protected BuildResult runWithoutPluginClasspath(String... arguments) {
         try {
             return GradleRunner.create()
-                    .withProjectDir(testProjectDir.root)
+                    .withProjectDir(testProjectDir.toFile())
                     .withArguments(arguments)
                     .withDebug(true)
                     .build()
@@ -74,7 +75,7 @@ abstract class IntegrationBaseSpec extends Specification {
     protected BuildResult run(String... arguments) {
         try {
             return GradleRunner.create()
-                    .withProjectDir(testProjectDir.root)
+                    .withProjectDir(testProjectDir.toFile())
                     .withArguments(arguments)
                     .withPluginClasspath()
                     .withDebug(true)
@@ -87,7 +88,7 @@ abstract class IntegrationBaseSpec extends Specification {
     protected BuildResult runWithoutDebug(String... arguments) {
         try {
             return GradleRunner.create()
-                .withProjectDir(testProjectDir.root)
+                .withProjectDir(testProjectDir.toFile())
                 .withArguments(arguments)
                 .withPluginClasspath()
                 .withDebug(false) // `true` fails if `--configuration-cache`, see https://github.com/gradle/gradle/issues/14125

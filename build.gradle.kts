@@ -33,7 +33,7 @@ dependencies {
     compileOnly("net.sourceforge.pmd:pmd-dist:6.10.0")
 
     testImplementation("net.sourceforge.pmd:pmd-dist:6.10.0")
-    testImplementation("com.google.guava:guava:28.1-jre")
+    testImplementation("com.google.guava:guava:33.0.0-jre")
     testImplementation("org.junit.jupiter:junit-jupiter:5.5.2")
     testImplementation("org.assertj:assertj-core:3.13.2")
     testImplementation("org.mockito:mockito-core:3.1.0")
@@ -100,23 +100,21 @@ tasks {
 
         testClassesDirs = sourceSets.named("integTest").get().output.classesDirs
         classpath = sourceSets.named("integTest").get().runtimeClasspath
+
+        useJUnitPlatform()
     }
+
     check {
         dependsOn(integTest)
     }
 
-    val jacocoMerge = register("jacocoMerge", JacocoMerge::class) {
-        executionData(withType(Test::class).toSet())
-        dependsOn(test, integTest)
-    }
-
     jacocoTestReport {
-        executionData(jacocoMerge.get().destinationFile)
+        executionData(withType(Test::class).toSet())
         reports {
-            xml.isEnabled = true
-            html.isEnabled = false
+            xml.required.set(true)
+            html.required.set(false)
         }
-        dependsOn(jacocoMerge)
+        dependsOn(withType(Test::class))
     }
 }
 

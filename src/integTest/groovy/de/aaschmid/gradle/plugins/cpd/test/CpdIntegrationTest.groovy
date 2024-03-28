@@ -66,7 +66,7 @@ class CpdIntegrationTest extends IntegrationBaseSpec {
         result.output.contains("BUILD SUCCESSFUL")
         result.task(':cpdCheck') == null
 
-        def rootProjectName = testProjectDir.root.name
+        def rootProjectName = testProjectDir.fileName
         result.output.contains("WARNING: Due to the absence of 'LifecycleBasePlugin' on root project '${rootProjectName}' " +
                 "the task ':cpdCheck' could not be added to task graph. Therefore CPD will not be executed. To prevent " +
                 "this, manually add a task dependency of ':cpdCheck' to a 'check' task of a subproject.")
