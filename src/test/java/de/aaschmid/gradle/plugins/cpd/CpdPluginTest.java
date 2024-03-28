@@ -1,6 +1,7 @@
 package de.aaschmid.gradle.plugins.cpd;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -16,7 +17,7 @@ import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.plugins.GroovyPlugin;
 import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.api.plugins.JavaPlugin;
-import org.gradle.api.plugins.JavaPluginConvention;
+import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.plugins.ReportingBasePlugin;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskProvider;
@@ -27,7 +28,6 @@ import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import static de.aaschmid.gradle.plugins.cpd.test.TestFileResolver.Lang.JAVA;
@@ -35,7 +35,6 @@ import static de.aaschmid.gradle.plugins.cpd.test.TestFileResolver.createProject
 import static de.aaschmid.gradle.plugins.cpd.test.TestFileResolver.testFile;
 import static de.aaschmid.gradle.plugins.cpd.test.TestFileResolver.testFilesRecurseIn;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.params.provider.Arguments.*;
 
 @ExtendWith(GradleExtension.class)
 class CpdPluginTest {
@@ -81,7 +80,7 @@ class CpdPluginTest {
         assertThat(t.getGroup()).isNull();
 
         assertThat(t.getEncoding()).isNull();
-        assertThat(t.getEncodingOrFallback()).isEqualTo(System.getProperty("file.encoding"));
+        assertThat(t.getEncodingOrFallback()).isEqualTo(Charset.defaultCharset().displayName());
         assertThat(t.getIgnoreAnnotations()).isFalse();
         assertThat(t.getIgnoreFailures()).isFalse();
         assertThat(t.getIgnoreIdentifiers()).isFalse();
@@ -118,7 +117,7 @@ class CpdPluginTest {
         assertThat(t.getGroup()).isNull();
 
         assertThat(t.getEncoding()).isNull();
-        assertThat(t.getEncodingOrFallback()).isEqualTo(System.getProperty("file.encoding"));
+        assertThat(t.getEncodingOrFallback()).isEqualTo(Charset.defaultCharset().displayName());
         assertThat(t.getIgnoreAnnotations()).isFalse();
         assertThat(t.getIgnoreFailures()).isFalse();
         assertThat(t.getIgnoreIdentifiers()).isFalse();
@@ -145,7 +144,7 @@ class CpdPluginTest {
         assertThat(t.getSource()).isEmpty();
     }
 
-    static Stream<Class<? extends Plugin>> CpdPlugin_shouldAddCpdCheckTaskAsDependencyOfCheckLifecycleTaskIfPluginIsApplied() {
+    static Stream<Class<? extends Plugin<?>>> CpdPlugin_shouldAddCpdCheckTaskAsDependencyOfCheckLifecycleTaskIfPluginIsApplied() {
         return Stream.of(
                 LifecycleBasePlugin.class,
                 BasePlugin.class,
@@ -160,7 +159,7 @@ class CpdPluginTest {
 
     @ParameterizedTest
     @MethodSource
-    void CpdPlugin_shouldAddCpdCheckTaskAsDependencyOfCheckLifecycleTaskIfPluginIsApplied(Class<? extends Plugin> pluginClass, Project project, TaskProvider<Cpd> cpdCheck) {
+    void CpdPlugin_shouldAddCpdCheckTaskAsDependencyOfCheckLifecycleTaskIfPluginIsApplied(Class<? extends Plugin<?>> pluginClass, Project project, TaskProvider<Cpd> cpdCheck) {
         // When:
         project.getPlugins().apply(pluginClass);
 
@@ -177,7 +176,7 @@ class CpdPluginTest {
         // When:
         project.getPlugins().apply(JavaBasePlugin.class);
 
-        project.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().create("tmp", (SourceSet sourceSet) ->
+        project.getExtensions().getByType(JavaPluginExtension.class).getSourceSets().create("tmp", (SourceSet sourceSet) ->
                 sourceSet.getJava().srcDir(testFile(JAVA, ".")));
 
         Task checkTask = project.getTasks().getByName("check");
@@ -197,12 +196,12 @@ class CpdPluginTest {
         project.getPlugins().apply(JavaPlugin.class);
         createProjectFiles(project, mainFile, "src/resources/java/message.properties", testFile);
 
-        project.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME, sourceSet -> {
+        project.getExtensions().getByType(JavaPluginExtension.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME, sourceSet -> {
             sourceSet.getJava().srcDir(testFile(JAVA, "de/aaschmid/annotation"));
             sourceSet.getAllJava().srcDir(testFile(JAVA, "de/aaschmid/clazz"));
             sourceSet.getResources().srcDir(testFile(JAVA, "de/aaschmid/foo"));
         });
-        project.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.TEST_SOURCE_SET_NAME, sourceSet ->
+        project.getExtensions().getByType(JavaPluginExtension.class).getSourceSets().getByName(SourceSet.TEST_SOURCE_SET_NAME, sourceSet ->
                 sourceSet.getJava().srcDir(testFile(JAVA, "de/aaschmid/test")));
 
         // Then:
@@ -224,12 +223,12 @@ class CpdPluginTest {
         subProject2.getPlugins().apply(GroovyPlugin.class);
         createProjectFiles(subProject2, "src/main/groovy/Clazz.groovy", "src/main/resources/clazz.properties");
 
-        subProject1.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME, sourceSet -> {
+        subProject1.getExtensions().getByType(JavaPluginExtension.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME, sourceSet -> {
             sourceSet.getJava().srcDir(testFile(JAVA, "de/aaschmid/annotation"));
             sourceSet.getAllJava().srcDir(testFile(JAVA, "de/aaschmid/clazz"));
             sourceSet.getResources().srcDir(testFile(JAVA, "de/aaschmid/foo"));
         });
-        subProject2.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.TEST_SOURCE_SET_NAME, sourceSet ->
+        subProject2.getExtensions().getByType(JavaPluginExtension.class).getSourceSets().getByName(SourceSet.TEST_SOURCE_SET_NAME, sourceSet ->
                 sourceSet.getJava().srcDir(testFile(JAVA, "de/aaschmid/test")));
 
         // Then:

@@ -1,6 +1,7 @@
 package de.aaschmid.gradle.plugins.cpd;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import de.aaschmid.gradle.plugins.cpd.internal.CpdXmlFileReportImpl;
@@ -8,11 +9,6 @@ import de.aaschmid.gradle.plugins.cpd.test.GradleExtension;
 import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
-import org.gradle.api.file.FileSystemLocation;
-import org.gradle.api.file.FileSystemLocationProperty;
-import org.gradle.api.file.RegularFileProperty;
-import org.gradle.api.provider.Property;
-import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.TaskProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -231,7 +227,7 @@ class CpdTest {
                 of(null,            "ISO-8859-1",   "ISO-8859-1"),
                 of("ISO-8859-15",   null,           "ISO-8859-15"),
                 of("ISO-8859-15",   null,           "ISO-8859-15"),
-                of(null,            null,           System.getProperty("file.encoding")),
+                of(null,            null,           Charset.defaultCharset().displayName()),
                 // @formatter:on
         };
     }

@@ -41,7 +41,7 @@ dependencies {
 
     "integTestImplementation"("org.assertj:assertj-core:3.13.2")
     "integTestImplementation"("org.junit.vintage:junit-vintage-engine:5.5.2")
-    "integTestImplementation"("org.spockframework:spock-core:1.3-groovy-2.5") {
+    "integTestImplementation"("org.spockframework:spock-core:2.3-groovy-3.0") {
         exclude(module = "groovy-all")
     }
 }

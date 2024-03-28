@@ -1,9 +1,8 @@
 package de.aaschmid.gradle.plugins.cpd;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.inject.Inject;
 
 import de.aaschmid.gradle.plugins.cpd.internal.CpdReportsImpl;
 import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdAction;
@@ -16,7 +15,6 @@ import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.model.ObjectFactory;
-import org.gradle.api.plugins.quality.PmdReports;
 import org.gradle.api.provider.ProviderFactory;
 import org.gradle.api.reporting.Reporting;
 import org.gradle.api.reporting.SingleFileReport;
@@ -33,7 +31,7 @@ import org.gradle.api.tasks.SkipWhenEmpty;
 import org.gradle.api.tasks.SourceTask;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.VerificationTask;
-import org.gradle.util.ClosureBackedAction;
+import org.gradle.util.internal.ConfigureUtil;
 import org.gradle.workers.WorkerExecutor;
 
 
@@ -172,7 +170,7 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
     String getEncodingOrFallback() {
         String encoding = getEncoding();
         if (encoding == null) {
-            encoding = providerFactory.systemProperty("file.encoding").forUseAtConfigurationTime().get();
+            encoding = providerFactory.systemProperty("file.encoding").get();
         }
         return encoding;
     }
@@ -196,7 +194,7 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
 
     @Override
     public CpdReports reports(@DelegatesTo(value = CpdReports.class, strategy = Closure.DELEGATE_FIRST) Closure closure) {
-        return reports(new ClosureBackedAction<>(closure));
+        return reports(ConfigureUtil.configureUsing(closure));
     }
 
     @Override

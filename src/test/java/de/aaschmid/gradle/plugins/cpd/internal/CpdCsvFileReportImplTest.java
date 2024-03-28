@@ -4,8 +4,6 @@ import de.aaschmid.gradle.plugins.cpd.Cpd;
 import de.aaschmid.gradle.plugins.cpd.CpdCsvFileReport;
 import de.aaschmid.gradle.plugins.cpd.test.GradleExtension;
 import org.gradle.api.InvalidUserDataException;
-import org.gradle.api.file.FileSystemLocation;
-import org.gradle.api.file.FileSystemLocationProperty;
 import org.gradle.api.file.ProjectLayout;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;

@@ -25,12 +25,12 @@ public interface CpdCsvFileReport extends SingleFileReport {
     /**
      * @param separator to be used when generating the CSV report; defaults to {@link #DEFAULT_SEPARATOR}.
      * @throws org.gradle.api.InvalidUserDataException iif supplied {@code separator} is {@code null} ({@code char} cannot be wrapped by
-     * Gradle interally, such that unboxable {@code null}s must be checked in setter)
+     * Gradle internally, such that unboxable {@code null}s must be checked in setter)
      */
     void setSeparator(Character separator);
 
     /**
-     * Note: Property is originally named {@code lineCountPerFile} and meaning is inverted, see https://github.com/pmd/pmd/blob/master/pmd-core/src/main/java/net/sourceforge/pmd/cpd/CSVRenderer.java#L63.
+     * Note: Property is originally named {@code lineCountPerFile} and meaning is inverted, see <a href="https://github.com/pmd/pmd/blob/master/pmd-core/src/main/java/net/sourceforge/pmd/cpd/CSVRenderer.java#L63">...</a>.
      *
      * @return if line count column should be included; defaults to {@link #DEFAULT_INCLUDE_LINE_COUNT}.
      */
