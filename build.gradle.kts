@@ -33,14 +33,14 @@ dependencies {
     compileOnly("net.sourceforge.pmd:pmd-dist:6.10.0")
 
     testImplementation("net.sourceforge.pmd:pmd-dist:6.10.0")
-    testImplementation("com.google.guava:guava:33.0.0-jre")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.5.2")
-    testImplementation("org.assertj:assertj-core:3.13.2")
-    testImplementation("org.mockito:mockito-core:3.1.0")
-    testImplementation("org.mockito:mockito-junit-jupiter:3.1.0")
+    testImplementation("com.google.guava:guava:33.1.0-jre")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+    testImplementation("org.assertj:assertj-core:3.25.3")
+    testImplementation("org.mockito:mockito-core:5.11.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.11.0")
 
-    "integTestImplementation"("org.assertj:assertj-core:3.13.2")
-    "integTestImplementation"("org.junit.vintage:junit-vintage-engine:5.5.2")
+    "integTestImplementation"("org.assertj:assertj-core:3.25.3")
+    "integTestImplementation"("org.junit.vintage:junit-vintage-engine:5.10.2")
     "integTestImplementation"("org.spockframework:spock-core:2.3-groovy-3.0") {
         exclude(module = "groovy-all")
     }
@@ -55,7 +55,7 @@ java {
 }
 
 jacoco {
-    toolVersion = "0.8.6"
+    toolVersion = "0.8.12"
 }
 
 tasks {
