@@ -11,10 +11,10 @@ build-job: &build-job
 
         - run: ./gradlew --build-cache build
 
-        - run:
-            command: |
-                ./gradlew jacocoTestReport
-                bash <(curl -s https://codecov.io/bash)
+        # - run:
+        #     command: |
+        #         ./gradlew jacocoTestReport
+        #         bash <(curl -s https://codecov.io/bash)
 
         - save_cache:
             paths:
@@ -25,38 +25,28 @@ build-job: &build-job
             path: ./build/test-results
 
 jobs:
-    jdk8:
-        docker:
-            - image: circleci/openjdk:8-jdk
-        <<: *build-job
     jdk11:
         docker:
-            - image: circleci/openjdk:11-jdk
+            - image: cimg/openjdk:11.0
         <<: *build-job
-    jdk13:
+    jdk17:
         docker:
-            - image: circleci/openjdk:13-jdk-buster
+            - image: cimg/openjdk:17.0
         <<: *build-job
-    jdk14:
+    jdk21:
         docker:
-            - image: circleci/openjdk:14-jdk-buster
+            - image: cimg/openjdk:21.0
         <<: *build-job
-    jdk15:
+    jdk22:
         docker:
-            - image: circleci/openjdk:15-jdk-buster
-        <<: *build-job
-    jdk16:
-        docker:
-            - image: circleci/openjdk:16-jdk-buster
+            - image: cimg/openjdk:22.0
         <<: *build-job
 
 workflows:
     version: 2
     build:
         jobs:
-            - jdk8
             - jdk11
-            - jdk13
-            - jdk14
-            - jdk15
-            # - jdk16  # Not supported by Gradle 6.6
+            - jdk17
+            # - jdk21 -> Gradle's groovy not compatible
+            # - jdk22 -> no jdk available yet
