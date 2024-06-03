@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import de.aaschmid.gradle.plugins.cpd.test.GradleExtension;
-import net.sourceforge.pmd.cpd.Tokenizer;
+import net.sourceforge.pmd.cpd.internal.CpdLanguagePropertiesDefaults;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
@@ -56,8 +56,8 @@ class CpdPluginTest {
         assertThat(cpd.isSkipDuplicateFiles()).isFalse();
         assertThat(cpd.isSkipLexicalErrors()).isFalse();
         assertThat(cpd.isSkipBlocks()).isTrue();
-        assertThat(cpd.getSkipBlocksPattern()).isEqualTo(Tokenizer.DEFAULT_SKIP_BLOCKS_PATTERN);
-        assertThat(cpd.getToolVersion()).isEqualTo("6.14.0");
+        assertThat(cpd.getSkipBlocksPattern()).isEqualTo(CpdLanguagePropertiesDefaults.DEFAULT_SKIP_BLOCKS_PATTERN);
+        assertThat(cpd.getToolVersion()).isEqualTo("7.2.0");
     }
 
     @Test
@@ -102,7 +102,7 @@ class CpdPluginTest {
         assertThat(t.getSkipDuplicateFiles()).isFalse();
         assertThat(t.getSkipLexicalErrors()).isFalse();
         assertThat(t.getSkipBlocks()).isTrue();
-        assertThat(t.getSkipBlocksPattern()).isEqualTo(Tokenizer.DEFAULT_SKIP_BLOCKS_PATTERN);
+        assertThat(t.getSkipBlocksPattern()).isEqualTo(CpdLanguagePropertiesDefaults.DEFAULT_SKIP_BLOCKS_PATTERN);
 
         assertThat(t.getSource()).isEmpty();
     }
@@ -139,11 +139,12 @@ class CpdPluginTest {
         assertThat(t.getSkipDuplicateFiles()).isFalse();
         assertThat(t.getSkipLexicalErrors()).isFalse();
         assertThat(t.getSkipBlocks()).isTrue();
-        assertThat(t.getSkipBlocksPattern()).isEqualTo(Tokenizer.DEFAULT_SKIP_BLOCKS_PATTERN);
+        assertThat(t.getSkipBlocksPattern()).isEqualTo(CpdLanguagePropertiesDefaults.DEFAULT_SKIP_BLOCKS_PATTERN);
 
         assertThat(t.getSource()).isEmpty();
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     static Stream<Class<? extends Plugin<?>>> CpdPlugin_shouldAddCpdCheckTaskAsDependencyOfCheckLifecycleTaskIfPluginIsApplied() {
         return Stream.of(
                 LifecycleBasePlugin.class,
@@ -182,8 +183,10 @@ class CpdPluginTest {
         Task checkTask = project.getTasks().getByName("check");
 
         // Then:
-        assertThat((Set<Task>) checkTask.getTaskDependencies().getDependencies(checkTask)).contains(cpdCheck.get());
-        assertThat(cpdCheck.get().getSource()).containsExactlyInAnyOrderElementsOf(testFilesRecurseIn(JAVA, "."));
+        Cpd cpdTask = cpdCheck.get();
+        //noinspection unchecked
+        assertThat((Set<Task>) checkTask.getTaskDependencies().getDependencies(checkTask)).contains(cpdTask);
+        assertThat(cpdTask.getSource()).containsExactlyInAnyOrderElementsOf(testFilesRecurseIn(JAVA, "."));
     }
 
     @Test

@@ -4,7 +4,7 @@ import javax.persistence.*;
 
 
 @Entity
-@Table(uniqueConstraints = {@UniqueConstraint(columnNames = { "name" })}
+@Table(uniqueConstraints = {@UniqueConstraint(columnNames = { "name" })},
         indexes= {
         @Index(name = "idx_name", columnNames = { "name" }),
         @Index(name = "idx_dayOfBirth", columnNames = { "dayOfBirth" }),

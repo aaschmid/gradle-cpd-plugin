@@ -33,29 +33,29 @@ https://plugins.gradle.org/plugin/de.aaschmid.cpd.
 Requirements
 ------------
 
-Currently this plugin requires [PMD](https://pmd.github.io/) greater or equal to version 6.1.0 such that ```toolVersion >= '6.1.0'```.
+This plugin requires [PMD](https://pmd.github.io/) greater or equal to version 7.0.0 such that ```toolVersion >= '7.0.0'```.
 
-Explanation: v2.0 removes deprecated rendering API (= `net.sourceforge.pmd.cpd.Renderer`) and replace it with new
-`net.sourceforge.pmd.cpd.renderer.CPDRenderer` which was introduced with v6.1.0, see
-[PMD release notes](https://pmd.github.io/2018/02/25/PMD-6.1.0/#api-changes).
+Explanation: v7.0.0 changed the internal API, see [PMD release notes](https://pmd.github.io/pmd/pmd_release_notes_pmd7.html#-api).
+
+You can use older versions of this plugin if you want to use older versions of PMD (see table below).
 
 ### Supported versions
 
-| G. CPD plugin  | Gradle       | PMD         | Java¹  |
-|:-------------- |:------------ |:----------- |:------ |
-| [v0.1][]       | 1.10 - 4.x   | 5.0.0 - 5.x | 6 - 8  |
-| [v0.2][]       | 2.0 - 4.x    | 5.0.0 - 5.x | 6 - 8  |
-| [v0.4][]       | 2.3 - 4.x    | 5.2.0 - 5.x | 6 - 8  |
-| [v1.0][]       | 2.14 - 5.0   | 5.2.0 - 5.x | 6 - 8  |
-| [v1.1][]       | 2.14 - 5.0   | 5.2.2 - 6.x | 6 - 9  |
-| [v1.2][]       | >= 3.5.1     | >= 5.2.2    | >= 8   |
-| [v1.3][]       | >= 4.10.3    | >= 5.2.2    | >= 8   |
-| [v2.0][]       | 4.10.3 - 5.5 | >= 6.1.0    | >= 8   |
-| [v3.0][]       | 5.6 - 5.x    | >= 6.10.0   | >= 8   |
-| [v3.1][]       | >= 5.6       | >= 6.10.0   | >= 8   |
-| [v3.2][]       | >= 6.6       | >= 6.10.0   | >= 8   |
-| [v3.3][]       | >= 6.6       | >= 6.10.0   | >= 8   |
-| [v3.4][]       | >= 7.4       | >= 6.10.0   | >= 8   |
+| G. CPD plugin | Gradle       | PMD         | Java¹  |
+|:--------------|:------------ |:------------|:------ |
+| [v0.1][]      | 1.10 - 4.x   | 5.0.0 - 5.x | 6 - 8  |
+| [v0.2][]      | 2.0 - 4.x    | 5.0.0 - 5.x | 6 - 8  |
+| [v0.4][]      | 2.3 - 4.x    | 5.2.0 - 5.x | 6 - 8  |
+| [v1.0][]      | 2.14 - 5.0   | 5.2.0 - 5.x | 6 - 8  |
+| [v1.1][]      | 2.14 - 5.0   | 5.2.2 - 6.x | 6 - 9  |
+| [v1.2][]      | >= 3.5.1     | >= 5.2.2    | >= 8   |
+| [v1.3][]      | >= 4.10.3    | >= 5.2.2    | >= 8   |
+| [v2.0][]      | 4.10.3 - 5.5 | >= 6.1.0    | >= 8   |
+| [v3.0][]      | 5.6 - 5.x    | >= 6.10.0   | >= 8   |
+| [v3.1][]      | >= 5.6       | >= 6.10.0   | >= 8   |
+| [v3.2][]      | >= 6.6       | >= 6.10.0   | >= 8   |
+| [v3.3][]      | >= 6.6       | >= 6.10.0   | >= 8   |
+| [v3.4][]      | >= 7.4       | >= 7.0.0    | >= 8   |
 
 ¹: Java version may additionally depend on [PMD][]s version which is might not be properly reflected here.
 
@@ -67,7 +67,7 @@ This plugin is available using either the new [Gradle plugins DSL](https://gradl
 
 ```groovy
 plugins {
-    id 'de.aaschmid.cpd' version '3.3'
+    id 'de.aaschmid.cpd' version '3.4'
 }
 ```
 
@@ -77,27 +77,27 @@ from [Maven Central](http://search.maven.org/#search|ga|1|gradle-cpd-plugin) or
 ```groovy
 buildscript {
     repositories {
-        // choose your prefered one
+        // choose your preferred one
         mavenCentral()
         jcenter()
     }
 
     dependencies {
-        classpath 'de.aaschmid:gradle-cpd-plugin:3.3'
+        classpath 'de.aaschmid:gradle-cpd-plugin:3.4'
     }
 }
 apply plugin: 'de.aaschmid.cpd'
 ```
 
-**Attention:** The plugins groupId was changed from ```de.aaschmid.gradle.plugins``` to ```de.aaschmid``` in [v1.0][].
+**Attention:** The plugin's groupId was changed from ```de.aaschmid.gradle.plugins``` to ```de.aaschmid``` in [v1.0][].
 
-By default the copy-paste-detection looks at all source code of all projects which at least apply ```LifecycleBasePlugin```.
+By default, the copy-paste-detection looks at all source code of all projects which at least apply ```LifecycleBasePlugin```.
 If you use a different programming language and want to get it configured out of the box, please open an issue :-)
 
 ### Single module project
 
 If you have a single module project you just need to make sure that the ```LifecycleBasePlugin``` is also applied to it
-(explicitly or implicitly through e.g. Java or Groovy plugin). Otherwise you can simply add a dependency to a task you like by
+(explicitly or implicitly through e.g. Java or Groovy plugin). Otherwise, you can simply add a dependency to a task you like by
 
 ```groovy
 analyze.dependsOn(cpdCheck)
@@ -123,7 +123,7 @@ subprojects {
 
 ### Custom sourceSets
 
-If your are adding custom sourceSets (even in subProjects), it may occur that you either need to configure `cpdCheck`
+If you are adding custom sourceSets (even in subProjects), it may occur that you either need to configure `cpdCheck`
 afterwards or even manually configure `source`. Unfortunately, I have had problems with this case in the
 [CpdAcceptanceTest](https://github.com/aaschmid/gradle-cpd-plugin/blob/master/src/integTest/groovy/de/aaschmid/gradle/plugins/cpd/test/CpdAcceptanceTest.groovy)
 tests using Gradle [TestKit](https://docs.gradle.org/current/userguide/test_kit.html).
@@ -137,7 +137,7 @@ This example shows a project where only ```main``` sources should be checked for
 // optional - settings for every CPD task
 cpd {
     language = 'cpp'
-    toolVersion = '6.1.0' // defaults to '6.13.0'; just available for v6.1.0 and higher (see explanation above)
+    toolVersion = '7.0.0' // defaults to '7.2.0'; just available for v7.0.0 and higher (see explanation above)
 }
 
 // optional - default report is xml and default sources are 'main' and 'test'
@@ -150,7 +150,7 @@ cpdCheck {
 }
 ```
 
-*Note:* With v0.2, I have renamed the default task from ```cpd``` to ```cpdCheck``` that it does not have a name clash anymore.
+*Note:* With v0.2, I have renamed the default task from ```cpd``` to ```cpdCheck``` so that it does not have a name clash anymore.
 
 ### Property `source`
 
@@ -174,7 +174,7 @@ cpdCheck {
     }
 }
 ```
-or same using kotlin DSL (Note: That works only if all `subprojects` have `sourceSets` `main` and `test` e.g. by appling the `java` plugins. Otherwise you can just filter for `JavaBasePlugin` before)
+or same using kotlin DSL (Note: That works only if all `subprojects` have `sourceSets` `main` and `test` e.g. by appling the `java` plugins. Otherwise, you can just filter for `JavaBasePlugin` before)
 ```kotlin
 setSource(files(
     // only check java source code
@@ -229,8 +229,7 @@ e.g. using ```cpdCheck { }```:
 | skipBlocks         | ```true```           | ```'cpp'```                | [v0.4][] |
 | skipBlocksPattern  | ```'#if 0\|#endif'``` | ```'cpp'```               | [v0.4][] |
 
-If a specified `language` cannot be found, a fallback mechanism uses `net.sourceforge.pmd.cpd.AnyLanguage` instead. This
-fallback language does not run ANTLR and therefore also checks duplicates in comments.
+If a specified `language` cannot be found, analysis fails.
 
 For more information about options and their descriptions, see [here](https://pmd.github.io/latest/pmd_userdocs_cpd.html#attribute-reference),
 and for the available programming languages have a look on [CPD documentation](https://pmd.github.io/latest/pmd_userdocs_cpd.html#supported-languages).
@@ -278,3 +277,4 @@ get these dependencies in your ```localMaven()``` repository as the test cases l
 [v3.1]: /../../releases/tag/v3.1
 [v3.2]: /../../releases/tag/v3.2
 [v3.3]: /../../releases/tag/v3.3
+[v3.4]: /../../releases/tag/v3.4

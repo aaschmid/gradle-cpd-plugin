@@ -1,18 +1,11 @@
 package de.aaschmid.gradle.plugins.cpd.internal.worker;
 
-import java.io.File;
-import java.util.List;
-import java.util.Set;
-
 import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdWorkParameters.Report;
 import de.aaschmid.gradle.plugins.cpd.test.GradleExtension;
 import net.sourceforge.pmd.cpd.CPDConfiguration;
-import net.sourceforge.pmd.cpd.CPPLanguage;
-import net.sourceforge.pmd.cpd.CPPTokenizer;
-import net.sourceforge.pmd.cpd.JavaLanguage;
-import net.sourceforge.pmd.cpd.JavaTokenizer;
-import net.sourceforge.pmd.cpd.KotlinLanguage;
+import net.sourceforge.pmd.cpd.CPDReport;
 import net.sourceforge.pmd.cpd.Match;
+import net.sourceforge.pmd.lang.LanguageVersionDiscoverer;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +17,11 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Set;
 
 import static de.aaschmid.gradle.plugins.cpd.test.PropertyUtils.listProperty;
 import static de.aaschmid.gradle.plugins.cpd.test.PropertyUtils.property;
@@ -63,6 +61,7 @@ class CpdActionTest {
                 return parameters;
             }
         };
+        when(executor.run(any(), any())).thenReturn(mock(CPDReport.class));
     }
 
     @Test
@@ -71,8 +70,8 @@ class CpdActionTest {
         Set<File> sourceFiles = singleton(testFile(JAVA, "de/aaschmid/clazz/Clazz.java"));
         List<Report> reports = singletonList(new Report.Csv(new File("cpd.csv"), ';', true));
 
-        List<Match> matches = singletonList(mock(Match.class));
-        when(executor.run(any(), eq(sourceFiles))).thenReturn(matches);
+        CPDReport cpdReport = mockReportFor(mock(Match.class));
+        when(executor.run(any(), eq(sourceFiles))).thenReturn(cpdReport);
 
         stubParametersWithDefaults(project);
         when(parameters.getIgnoreFailures()).thenReturn(property(true));
@@ -85,7 +84,7 @@ class CpdActionTest {
         // Then:
         InOrder inOrder = Mockito.inOrder(executor, reporter);
         inOrder.verify(executor).run(cpdConfiguration.capture(), eq(sourceFiles));
-        inOrder.verify(reporter).generate(reports, matches);
+        inOrder.verify(reporter).generate(reports, cpdReport);
         inOrder.verifyNoMoreInteractions();
     }
 
@@ -94,8 +93,8 @@ class CpdActionTest {
         // Given:
         Report.Xml report = new Report.Xml(new File("cpd.xml"), "UTF-8");
 
-        List<Match> matches = singletonList(mock(Match.class));
-        when(executor.run(any(), any())).thenReturn(matches);
+        CPDReport cpdReport = mockReportFor(mock(Match.class));
+        when(executor.run(any(), any())).thenReturn(cpdReport);
 
         stubParametersWithDefaults(project);
         when(parameters.getIgnoreFailures()).thenReturn(property(false));
@@ -124,8 +123,8 @@ class CpdActionTest {
         verify(executor).run(cpdConfiguration.capture(), any());
 
         CPDConfiguration actualCpdConfig = cpdConfiguration.getValue();
-        assertThat(actualCpdConfig.getEncoding()).isEqualTo("US-ASCII");
-        assertThat(actualCpdConfig.getLanguage()).isInstanceOf(KotlinLanguage.class);
+        assertThat(actualCpdConfig.getSourceEncoding()).isEqualTo(StandardCharsets.US_ASCII);
+        assertLanguage(actualCpdConfig, "kotlin");
         assertThat(actualCpdConfig.getMinimumTileSize()).isEqualTo(15);
         assertThat(actualCpdConfig.isSkipDuplicates()).isTrue();
         assertThat(actualCpdConfig.isSkipLexicalErrors()).isTrue();
@@ -147,12 +146,10 @@ class CpdActionTest {
         verify(executor).run(cpdConfiguration.capture(), any());
 
         CPDConfiguration actualCpdConfig = cpdConfiguration.getValue();
-        assertThat(actualCpdConfig.getLanguage()).isInstanceOf(JavaLanguage.class);
-        assertThat(actualCpdConfig.getLanguage().getTokenizer())
-                .isInstanceOf(JavaTokenizer.class)
-                .hasFieldOrPropertyWithValue("ignoreAnnotations", true)
-                .hasFieldOrPropertyWithValue("ignoreIdentifiers", true)
-                .hasFieldOrPropertyWithValue("ignoreLiterals", true);
+        assertLanguage(actualCpdConfig, "java");
+        assertThat(actualCpdConfig.isIgnoreAnnotations()).isTrue();
+        assertThat(actualCpdConfig.isIgnoreIdentifiers()).isTrue();
+        assertThat(actualCpdConfig.isIgnoreLiterals()).isTrue();
     }
 
     @Test
@@ -170,12 +167,9 @@ class CpdActionTest {
         verify(executor).run(cpdConfiguration.capture(), any());
 
         CPDConfiguration actualCpdConfig = cpdConfiguration.getValue();
-        assertThat(actualCpdConfig.getLanguage()).isInstanceOf(CPPLanguage.class);
-        assertThat(actualCpdConfig.getLanguage().getTokenizer())
-                .isInstanceOf(CPPTokenizer.class)
-                .hasFieldOrPropertyWithValue("skipBlocks", true)
-                .hasFieldOrPropertyWithValue("skipBlocksStart", "template<")
-                .hasFieldOrPropertyWithValue("skipBlocksEnd", ">");
+        assertLanguage(actualCpdConfig, "cpp");
+        assertThat(actualCpdConfig.isNoSkipBlocks()).isFalse();
+        assertThat(actualCpdConfig.getSkipBlocksPattern()).isEqualTo("template<|>");
     }
 
     private void stubParametersWithDefaults(Project project) {
@@ -194,5 +188,33 @@ class CpdActionTest {
         when(parameters.getSkipLexicalErrors()).thenReturn(property(false));
         when(parameters.getSourceFiles()).thenReturn(project.files(sourceFiles));
         when(parameters.getReportParameters()).thenReturn(listProperty(Report.class, singletonList(report)));
+    }
+
+    private CPDReport mockReportFor(Match match) {
+        List<Match> matches = singletonList(match);
+        CPDReport cpdReport = mock(CPDReport.class);
+        when(cpdReport.getMatches()).thenReturn(matches);
+        return cpdReport;
+    }
+
+    private void assertLanguage(CPDConfiguration configuration, String languageId) {
+        String fileThatShouldMatch;
+        String fileThatShouldNotMatch = "foo.txt";
+        switch (languageId) {
+            case "java":
+                fileThatShouldMatch = "foo.java";
+                break;
+            case "kotlin":
+                fileThatShouldMatch = "foo.kt";
+                break;
+            case "cpp":
+                fileThatShouldMatch = "foo.cpp";
+                break;
+            default:
+                throw new UnsupportedOperationException("Unsupported language: " + languageId);
+        }
+        LanguageVersionDiscoverer languageVersionDiscoverer = configuration.getLanguageVersionDiscoverer();
+        assertThat(languageVersionDiscoverer.getLanguagesForFile(fileThatShouldMatch)).isNotEmpty();
+        assertThat(languageVersionDiscoverer.getLanguagesForFile(fileThatShouldNotMatch)).isEmpty();
     }
 }

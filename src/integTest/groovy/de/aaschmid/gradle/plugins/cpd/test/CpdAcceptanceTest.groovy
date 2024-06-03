@@ -54,7 +54,7 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
         !file('build/reports/cpdCheck.csv').exists()
     }
 
-    def "Cpd will produce empty 'cpdCheck.xml' on non-duplicate 'java' source"() {
+    def "Cpd will produce 'cpdCheck.xml' without duplication information on non-duplicate 'java' source"() {
         given:
         buildFileWithPluginAndRepos() << """
             cpd{
@@ -74,7 +74,7 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
         def report = testProjectDir.resolve('build/reports/cpd/cpdCheck.xml').toFile()
         report.exists()
         report.text =~ /encoding="ISO-8859-1"/
-        report.text =~ /<pmd-cpd\/>/
+        !(report.text =~ /<duplication/)
     }
 
     @Issue("https://github.com/aaschmid/gradle-cpd-plugin/issues/38")
@@ -282,12 +282,12 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
         !csv.exists()
 
         txt.exists()
+        txt.text.contains("Found a 3 line (9 tokens) duplication in the following files:")
         txt.text.contains("Found a 4 line (9 tokens) duplication in the following files:")
-        txt.text.contains("Found a 2 line (8 tokens) duplication in the following files:")
 
         xml.exists()
+        xml.text.contains('<duplication lines="3" tokens="9">')
         xml.text.contains('<duplication lines="4" tokens="9">')
-        xml.text.contains('<duplication lines="2" tokens="8">')
     }
 
     @Issue("https://github.com/aaschmid/gradle-cpd-plugin/issues/39")
@@ -337,8 +337,8 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
 
         def kotlinReport = file('kotlin-cpd.xml')
         kotlinReport.exists()
+        kotlinReport.text.contains('<duplication lines="3" tokens="9">')
         kotlinReport.text.contains('<duplication lines="4" tokens="9">')
-        kotlinReport.text.contains('<duplication lines="2" tokens="8">')
     }
 
     def "Cpd should fail if not ignoreAnnotations on duplicate annotations"() {
@@ -366,7 +366,7 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
         def report = file('build/reports/cpd/cpdCheck.csv')
         report.exists()
         // locally Person.java comes before Employee, on travis-ci is Employee first => make it irrelevant
-        report.text =~ /8,53,2,6,.*(Person|Employee)\.java,6,.*(Person|Employee)\.java/
+        report.text =~ /8,54,2,6,.*(Person|Employee)\.java,6,.*(Person|Employee)\.java/
         report.text =~ /14,45,2,13,.*(Person|Employee)\.java,13,.*(Person|Employee)\.java/
     }
 
@@ -443,7 +443,7 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
 
         def report = file('build/reports/cpd/cpdCheck.xml')
         report.exists()
-        report.text =~ /<pmd-cpd\/>/
+        !(report.text =~ /<duplication/)
     }
 
     def "Cpd should fail if ignoreLiterals on different literals"() {
@@ -469,11 +469,11 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
 
         def vsReport = file('build/reports/cpd/cpdCheck.vs')
         vsReport.exists()
-        vsReport.text =~ /Literal[12].java\(5\): Between lines 5 and 14/
+        vsReport.text =~ /Literal[12].java\(5\): Between lines 5 and 13/
 
         def xmlReport = file('build/reports/cpd/cpdCheck.xml')
         xmlReport.exists()
-        xmlReport.text =~ /<duplication lines="9" tokens="27">\s+<file line="5"\s+path=".*Literal[12].java"\/>/
+        xmlReport.text =~ /<duplication lines="9" tokens="27">\s+<file[^>]*line="5"\s+path=".*Literal[12].java"\/>/
     }
 
     def "Cpd should not fail if not ignoreLiterals on different literals"() {
@@ -495,7 +495,7 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
 
         def report = file('build/reports/cpd/cpdCheck.xml')
         report.exists()
-        report.text =~ /<pmd-cpd\/>/
+        !(report.text =~ /<duplication/)
     }
 
     def "Cpd should fail if not skipDuplicateFiles on duplicate files"() {
@@ -544,7 +544,7 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
 
         def report = file('build/reports/cpd/cpdCheck.xml')
         report.exists()
-        report.text =~ /<pmd-cpd\/>/
+        !(report.text =~ /<duplication/)
     }
 
 
@@ -563,7 +563,7 @@ class CpdAcceptanceTest extends IntegrationBaseSpec {
         then:
         result.task(':cpdCheck').outcome == FAILED
         result.output.contains("BUILD FAILED")
-        result.output =~ /Lexical error in file .*Error.java at/
+        result.output =~ /Lexical error in file '.*Error.java' at/
 
         def report = file('build/reports/cpd/cpdCheck.csv')
         !report.exists()
