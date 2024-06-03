@@ -2,7 +2,7 @@
 
 Contributions are very welcome. The following will provide some helpful guidelines.
 
-## JUnit dataprovider Contributor License Agreement
+## Gradle CPD plugin Contributor License Agreement
 
 * You will only submit contributions where you have authored 100% of the content.
 * You will only submit contributions to which you have the necessary rights.
