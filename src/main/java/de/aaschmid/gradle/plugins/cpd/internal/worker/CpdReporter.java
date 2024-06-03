@@ -7,12 +7,12 @@ import java.util.List;
 
 import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdWorkParameters.Report;
 import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdWorkParameters.Report.Xml;
+import net.sourceforge.pmd.cpd.CPDReport;
+import net.sourceforge.pmd.cpd.CPDReportRenderer;
 import net.sourceforge.pmd.cpd.CSVRenderer;
-import net.sourceforge.pmd.cpd.Match;
 import net.sourceforge.pmd.cpd.SimpleRenderer;
 import net.sourceforge.pmd.cpd.VSRenderer;
 import net.sourceforge.pmd.cpd.XMLRenderer;
-import net.sourceforge.pmd.cpd.renderer.CPDRenderer;
 import org.gradle.api.GradleException;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
@@ -21,12 +21,12 @@ class CpdReporter {
 
     private static final Logger logger = Logging.getLogger(CpdReporter.class);
 
-    void generate(List<Report> reports, List<Match> matches) {
+    void generate(List<Report> reports, CPDReport cpdReport) {
         if (logger.isInfoEnabled()) {
             logger.info("Generating reports");
         }
         for (Report report : reports) {
-            CPDRenderer renderer = createRendererFor(report);
+            CPDReportRenderer renderer = createRendererFor(report);
             try (FileWriter fileWriter = new FileWriter(report.getDestination())) {
 
                 ClassLoader previousContextClassLoader = Thread.currentThread().getContextClassLoader();
@@ -34,7 +34,7 @@ class CpdReporter {
                     // Workaround for Gradle Worker API using special class loader which Xerces dynamic implementation loading does not like
                     Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
 
-                    renderer.render(matches.iterator(), fileWriter);
+                    renderer.render(cpdReport, fileWriter);
                 } finally {
                     Thread.currentThread().setContextClassLoader(previousContextClassLoader);
                 }
@@ -46,12 +46,12 @@ class CpdReporter {
 
     /**
      * Note: This cannot be implemented in {@link Report} subclasses because they must be independent of {@link
-     * CPDRenderer} because only worker classloader knows about PMD / CPD library.
+     * CPDReportRenderer} because only worker classloader knows about PMD / CPD library.
      *
      * @param report the configured reports used
-     * @return a full configured {@link CPDRenderer} to generate a CPD single file reports.
+     * @return a full configured {@link CPDReportRenderer} to generate a CPD single file reports.
      */
-    CPDRenderer createRendererFor(Report report) {
+    CPDReportRenderer createRendererFor(Report report) {
         if (report instanceof Report.Csv) {
             char separator = ((Report.Csv) report).getSeparator();
             boolean lineCountPerFile = !((Report.Csv) report).isIncludeLineCount();
@@ -92,7 +92,7 @@ class CpdReporter {
      * <i>Information:</i> Use reflection because neither proper constructor for setting both fields nor setter are
      * available.
      */
-    private void setTrimLeadingWhitespacesByReflection(CPDRenderer result, boolean trimLeadingCommonSourceWhitespaces) {
+    private void setTrimLeadingWhitespacesByReflection(CPDReportRenderer result, boolean trimLeadingCommonSourceWhitespaces) {
         String fieldName = "trimLeadingWhitespace";
         if (logger.isDebugEnabled()) {
             logger.debug("Try setting '{}' field to '{}' for '{}' by reflection.", fieldName, trimLeadingCommonSourceWhitespaces, result);

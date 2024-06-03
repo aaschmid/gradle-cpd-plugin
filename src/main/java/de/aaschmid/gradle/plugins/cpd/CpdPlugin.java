@@ -16,6 +16,7 @@ import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.api.plugins.JavaPluginExtension;
+import org.gradle.api.plugins.JvmEcosystemPlugin;
 import org.gradle.api.plugins.ReportingBasePlugin;
 import org.gradle.api.provider.ProviderFactory;
 import org.gradle.api.reporting.ReportingExtension;
@@ -74,6 +75,7 @@ public class CpdPlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
         project.getPlugins().apply(ReportingBasePlugin.class);
+        project.getPlugins().apply(JvmEcosystemPlugin.class);
 
         CpdExtension extension = createExtension(project);
         createConfiguration(project, extension);
@@ -86,7 +88,7 @@ public class CpdPlugin implements Plugin<Project> {
 
     private CpdExtension createExtension(Project project) {
         CpdExtension extension = project.getExtensions().create("cpd", CpdExtension.class);
-        extension.setToolVersion("6.14.0");
+        extension.setToolVersion("7.2.0");
         return extension;
     }
 

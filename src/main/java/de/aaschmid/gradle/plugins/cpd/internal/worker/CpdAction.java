@@ -4,18 +4,17 @@ import java.io.File;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.List;
-import java.util.Properties;
 
 import javax.inject.Inject;
 
 import de.aaschmid.gradle.plugins.cpd.internal.worker.CpdWorkParameters.Report;
-import net.sourceforge.pmd.cpd.AnyLanguage;
 import net.sourceforge.pmd.cpd.CPDConfiguration;
-import net.sourceforge.pmd.cpd.Language;
-import net.sourceforge.pmd.cpd.LanguageFactory;
+import net.sourceforge.pmd.cpd.CPDReport;
+import net.sourceforge.pmd.lang.Language;
 import net.sourceforge.pmd.cpd.Match;
-import net.sourceforge.pmd.cpd.Tokenizer;
+import net.sourceforge.pmd.lang.LanguageRegistry;
 import org.gradle.api.GradleException;
 import org.gradle.workers.WorkAction;
 import org.slf4j.Logger;
@@ -42,15 +41,20 @@ public abstract class CpdAction implements WorkAction<CpdWorkParameters> {
 
     @Override
     public void execute() {
-        List<Match> matches = executor.run(createCpdConfiguration(getParameters()), getParameters().getSourceFiles().getFiles());
-        reporter.generate(getParameters().getReportParameters().get(), matches);
-        logResult(matches);
+        CPDReport cpdReport = executor.run(createCpdConfiguration(getParameters()), getParameters().getSourceFiles().getFiles());
+        reporter.generate(getParameters().getReportParameters().get(), cpdReport);
+        logResult(cpdReport.getMatches());
     }
 
     private CPDConfiguration createCpdConfiguration(CpdWorkParameters config) {
         CPDConfiguration result = new CPDConfiguration();
-        result.setEncoding(config.getEncoding().get());
-        result.setLanguage(createLanguage(config.getLanguage().get(), createLanguageProperties(config)));
+        result.setSourceEncoding(getEncoding(config));
+        result.setIgnoreAnnotations(config.getIgnoreAnnotations().get());
+        result.setIgnoreIdentifiers(config.getIgnoreIdentifiers().get());
+        result.setIgnoreLiterals(config.getIgnoreLiterals().get());
+        result.setNoSkipBlocks(!config.getSkipBlocks().get());
+        result.setSkipBlocksPattern(config.getSkipBlocksPattern().get());
+        result.setOnlyRecognizeLanguage(createLanguage(config.getLanguage().get()));
         result.setMinimumTileSize(config.getMinimumTokenCount().get());
         result.setSkipDuplicates(config.getSkipDuplicateFiles().get());
         result.setSkipLexicalErrors(config.getSkipLexicalErrors().get());
@@ -79,40 +83,28 @@ public abstract class CpdAction implements WorkAction<CpdWorkParameters> {
         }
     }
 
-    private Properties createLanguageProperties(CpdWorkParameters config) {
-        Properties languageProperties = new Properties();
-
-        if (config.getIgnoreAnnotations().get()) {
-            languageProperties.setProperty(Tokenizer.IGNORE_ANNOTATIONS, "true");
+    private Language createLanguage(String language) {
+        Language result = LanguageRegistry.CPD.getLanguageById(language);
+        if (result == null) {
+            throw new GradleException(String.format("Could not detect CPD language for '%s'.", language));
         }
-        if (config.getIgnoreIdentifiers().get()) {
-            languageProperties.setProperty(Tokenizer.IGNORE_IDENTIFIERS, "true");
-        }
-        if (config.getIgnoreLiterals().get()) {
-            languageProperties.setProperty(Tokenizer.IGNORE_LITERALS, "true");
-        }
-        languageProperties.setProperty(Tokenizer.OPTION_SKIP_BLOCKS, Boolean.toString(config.getSkipBlocks().get()));
-        languageProperties.setProperty(Tokenizer.OPTION_SKIP_BLOCKS_PATTERN, config.getSkipBlocksPattern().get());
-        return languageProperties;
-    }
-
-    private Language createLanguage(String language, Properties languageProperties) {
-        Language result = LanguageFactory.createLanguage(language, languageProperties);
         logger.info("Using CPD language class '{}' for checking duplicates.", result);
-        if (result instanceof AnyLanguage) {
-            logger.warn("Could not detect CPD language for '{}', using 'any' as fallback language.", language);
-        }
         return result;
     }
 
     private String asClickableFileUrl(File path) {
         // File.toURI().toString() leads to an URL like this on Mac: file:/reports/index.html
         // This URL is not recognized by the Mac console (too few leading slashes). We solve
-        // this be creating an URI with an empty authority.
+        // this be creating a URI with an empty authority.
         try {
             return new URI("file", "", path.toURI().getPath(), null, null).toString();
         } catch (URISyntaxException e) {
             throw new UndeclaredThrowableException(e);
         }
+    }
+
+    private Charset getEncoding(CpdWorkParameters config) {
+        String encodingString = config.getEncoding().get();
+        return Charset.forName(encodingString);
     }
 }

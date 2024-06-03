@@ -182,15 +182,15 @@ class CpdIntegrationTest extends IntegrationBaseSpec {
 
         def report = file('build/reports/cpd/cpdCheck.xml')
         report.exists()
+        report.text.contains('<duplication lines="3" tokens="9">')
         report.text.contains('<duplication lines="4" tokens="9">')
-        report.text.contains('<duplication lines="2" tokens="8">')
     }
 
     def "executing 'Cpd' task on duplicate 'java' source with minimal supported PMD version should produce 'cpdCheck.xml'"() {
         given:
         buildFileWithPluginAndRepos() << """
             cpd{
-                toolVersion = '6.10.0'
+                toolVersion = '7.0.0'
             }
             cpdCheck{
                 ignoreFailures = true
@@ -215,16 +215,13 @@ class CpdIntegrationTest extends IntegrationBaseSpec {
         report.text =~ /4,15,2,[79],.*Clazz[12]\.java,[79],.*Clazz[12]\.java/
     }
 
-    def "executing 'Cpd' task on duplicates should fallback to any language if language does not exist"() {
+    def "executing 'Cpd' task on duplicates should fail if language does not exist"() {
         given:
         buildFile << createBuildScriptWithClasspathOfGradleTestKitMechanism() << """
             apply plugin: 'de.aaschmid.cpd'
             repositories {
                 mavenLocal()
                 mavenCentral()
-            }
-            cpd{
-                toolVersion = '6.1.0'
             }
             cpdCheck{
                 language = 'my-lang'
@@ -237,11 +234,6 @@ class CpdIntegrationTest extends IntegrationBaseSpec {
 
         then:
         result.output.contains("BUILD FAILED")
-        result.output.contains("Could not detect CPD language for 'my-lang', using 'any' as fallback language.")
-        result.output =~ /CPD found duplicate code. See the report at file:\/.*\/cpdCheck.xml/
-
-        def report = file('build/reports/cpd/cpdCheck.xml')
-        report.exists()
-        report.text.contains('<duplication lines="19" tokens="118">')
+        result.output.contains("Could not detect CPD language for 'my-lang'.")
     }
 }

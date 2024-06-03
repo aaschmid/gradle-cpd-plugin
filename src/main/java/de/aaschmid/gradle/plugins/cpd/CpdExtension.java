@@ -183,7 +183,7 @@ public class CpdExtension extends CodeQualityExtension {
     /**
      * CConfigures the pattern, to find the blocks to skip if enabled using {@link #skipBlocks}. It is a {@link String} property and
      * contains of two parts, separated by {@code '|'}. The first part is the start pattern, the second part is the ending pattern. defaults
-     * to {@code '#if 0|#endif'} (which should be the same as {@link net.sourceforge.pmd.cpd.Tokenizer#DEFAULT_SKIP_BLOCKS_PATTERN}).
+     * to {@code '#if 0|#endif'} (which should be the same as {@link net.sourceforge.pmd.cpd.internal.CpdLanguagePropertiesDefaults#DEFAULT_SKIP_BLOCKS_PATTERN}).
      * <p>
      * Example: {@code skipBlocksPattern = '#include <|>'}
      *
