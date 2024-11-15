@@ -1,5 +1,6 @@
 package de.aaschmid.gradle.plugins.cpd;
 
+import org.gradle.api.Action;
 import org.gradle.api.reporting.ReportContainer;
 import org.gradle.api.reporting.SingleFileReport;
 import org.gradle.api.tasks.Nested;
@@ -55,4 +56,32 @@ public interface CpdReports extends ReportContainer<SingleFileReport> {
      */
     @Nested
     CpdXmlFileReport getXml();
+
+    /**
+     * Configures the csv report.
+     *
+     * @param action The Configuration closure/action.
+     */
+    void csv(Action<CpdCsvFileReport> action);
+
+    /**
+     * Configures the text report.
+     *
+     * @param action The Configuration closure/action.
+     */
+    void text(Action<CpdTextFileReport> action);
+
+    /**
+     * Configures the vs report.
+     *
+     * @param action The Configuration closure/action.
+     */
+    void vs(Action<SingleFileReport> action);
+
+    /**
+     * Configures the xml report.
+     *
+     * @param action The Configuration closure/action.
+     */
+    void xml(Action<CpdXmlFileReport> action);
 }

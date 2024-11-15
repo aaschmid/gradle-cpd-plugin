@@ -4,9 +4,8 @@ import javax.inject.Inject;
 
 import de.aaschmid.gradle.plugins.cpd.CpdTextFileReport;
 import org.gradle.api.Task;
-import org.gradle.api.reporting.internal.TaskGeneratedSingleFileReport;
 
-public abstract class CpdTextFileReportImpl extends TaskGeneratedSingleFileReport implements CpdTextFileReport {
+public abstract class CpdTextFileReportImpl extends CpdReportInternal implements CpdTextFileReport {
 
     private String lineSeparator = CpdTextFileReport.DEFAULT_LINE_SEPARATOR;
     private boolean trimLeadingCommonSourceWhitespaces = CpdTextFileReport.DEFAULT_TRIM_LEADING_COMMON_SOURCE_WHITESPACE;
