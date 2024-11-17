@@ -4,9 +4,8 @@ import javax.inject.Inject;
 
 import de.aaschmid.gradle.plugins.cpd.CpdXmlFileReport;
 import org.gradle.api.Task;
-import org.gradle.api.reporting.internal.TaskGeneratedSingleFileReport;
 
-public abstract class CpdXmlFileReportImpl extends TaskGeneratedSingleFileReport implements CpdXmlFileReport {
+public abstract class CpdXmlFileReportImpl extends CpdReportInternal implements CpdXmlFileReport {
 
     private String encoding;
 

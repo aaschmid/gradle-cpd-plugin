@@ -5,9 +5,8 @@ import javax.inject.Inject;
 import de.aaschmid.gradle.plugins.cpd.CpdCsvFileReport;
 import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.Task;
-import org.gradle.api.reporting.internal.TaskGeneratedSingleFileReport;
 
-public abstract class CpdCsvFileReportImpl extends TaskGeneratedSingleFileReport implements CpdCsvFileReport {
+public abstract class CpdCsvFileReportImpl extends CpdReportInternal implements CpdCsvFileReport {
 
     private char separator = CpdCsvFileReport.DEFAULT_SEPARATOR;
     private boolean includeLineCount = CpdCsvFileReport.DEFAULT_INCLUDE_LINE_COUNT;
