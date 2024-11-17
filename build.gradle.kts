@@ -14,7 +14,7 @@ plugins {
 
 description = "Gradle plugin to find duplicate code using PMDs copy/paste detection (= CPD)"
 group = "de.aaschmid"
-version = "3.5-SNAPSHOT"
+version = "3.5"
 
 val isBuildOnJenkins by extra(System.getenv("BUILD_TAG")?.startsWith("jenkins-") ?: false)
 
