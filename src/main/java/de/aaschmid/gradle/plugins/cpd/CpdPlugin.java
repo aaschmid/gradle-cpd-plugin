@@ -88,7 +88,7 @@ public class CpdPlugin implements Plugin<Project> {
 
     private CpdExtension createExtension(Project project) {
         CpdExtension extension = project.getExtensions().create("cpd", CpdExtension.class);
-        extension.setToolVersion("7.2.0");
+        extension.setToolVersion("7.7.0");
         return extension;
     }
 
@@ -107,6 +107,8 @@ public class CpdPlugin implements Plugin<Project> {
         project.getTasks().withType(Cpd.class).configureEach(task -> {
             ConventionMapping taskMapping = task.getConventionMapping();
             taskMapping.map("encoding", extension::getEncoding);
+            taskMapping.map("failOnError", extension::isFailOnError);
+            taskMapping.map("failOnViolation", extension::isFailOnViolation);
             taskMapping.map("ignoreAnnotations", extension::isIgnoreAnnotations);
             taskMapping.map("ignoreIdentifiers", extension::isIgnoreIdentifiers);
             taskMapping.map("ignoreFailures", extension::isIgnoreFailures);
@@ -115,7 +117,6 @@ public class CpdPlugin implements Plugin<Project> {
             taskMapping.map("minimumTokenCount", extension::getMinimumTokenCount);
             taskMapping.map("pmdClasspath", () -> project.getConfigurations().findByName("cpd"));
             taskMapping.map("skipDuplicateFiles", extension::isSkipDuplicateFiles);
-            taskMapping.map("skipLexicalErrors", extension::isSkipLexicalErrors);
             taskMapping.map("skipBlocks", extension::isSkipBlocks);
             taskMapping.map("skipBlocksPattern", extension::getSkipBlocksPattern);
 

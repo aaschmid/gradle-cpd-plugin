@@ -111,10 +111,11 @@ class CpdActionTest {
         // Given:
         stubParametersWithDefaults(project);
         when(parameters.getEncoding()).thenReturn(property("US-ASCII"));
+        when(parameters.getFailOnError()).thenReturn(property(false));
+        when(parameters.getFailOnViolation()).thenReturn(property(false));
         when(parameters.getLanguage()).thenReturn(property("kotlin"));
         when(parameters.getMinimumTokenCount()).thenReturn(property(15));
         when(parameters.getSkipDuplicateFiles()).thenReturn(property(true));
-        when(parameters.getSkipLexicalErrors()).thenReturn(property(true));
 
         // When:
         underTest.execute();
@@ -123,11 +124,12 @@ class CpdActionTest {
         verify(executor).run(cpdConfiguration.capture(), any());
 
         CPDConfiguration actualCpdConfig = cpdConfiguration.getValue();
+        assertThat(actualCpdConfig.isFailOnError()).isFalse();
+        assertThat(actualCpdConfig.isFailOnViolation()).isFalse();
         assertThat(actualCpdConfig.getSourceEncoding()).isEqualTo(StandardCharsets.US_ASCII);
         assertLanguage(actualCpdConfig, "kotlin");
         assertThat(actualCpdConfig.getMinimumTileSize()).isEqualTo(15);
         assertThat(actualCpdConfig.isSkipDuplicates()).isTrue();
-        assertThat(actualCpdConfig.isSkipLexicalErrors()).isTrue();
     }
 
     @Test
@@ -177,6 +179,8 @@ class CpdActionTest {
         Report.Text report = new Report.Text(new File("cpd.text"), "\n", false);
 
         when(parameters.getEncoding()).thenReturn(property("US-ASCII"));
+        when(parameters.getFailOnError()).thenReturn(property(true));
+        when(parameters.getFailOnViolation()).thenReturn(property(true));
         when(parameters.getIgnoreAnnotations()).thenReturn(property(false));
         when(parameters.getIgnoreIdentifiers()).thenReturn(property(false));
         when(parameters.getIgnoreLiterals()).thenReturn(property(false));
@@ -185,7 +189,6 @@ class CpdActionTest {
         when(parameters.getSkipBlocks()).thenReturn(property(false));
         when(parameters.getSkipBlocksPattern()).thenReturn(property(" "));
         when(parameters.getSkipDuplicateFiles()).thenReturn(property(false));
-        when(parameters.getSkipLexicalErrors()).thenReturn(property(false));
         when(parameters.getSourceFiles()).thenReturn(project.files(sourceFiles));
         when(parameters.getReportParameters()).thenReturn(listProperty(Report.class, singletonList(report)));
     }

@@ -49,6 +49,8 @@ public abstract class CpdAction implements WorkAction<CpdWorkParameters> {
     private CPDConfiguration createCpdConfiguration(CpdWorkParameters config) {
         CPDConfiguration result = new CPDConfiguration();
         result.setSourceEncoding(getEncoding(config));
+        result.setFailOnError(config.getFailOnError().get());
+        result.setFailOnViolation(config.getFailOnViolation().get());
         result.setIgnoreAnnotations(config.getIgnoreAnnotations().get());
         result.setIgnoreIdentifiers(config.getIgnoreIdentifiers().get());
         result.setIgnoreLiterals(config.getIgnoreLiterals().get());
@@ -57,7 +59,6 @@ public abstract class CpdAction implements WorkAction<CpdWorkParameters> {
         result.setOnlyRecognizeLanguage(createLanguage(config.getLanguage().get()));
         result.setMinimumTileSize(config.getMinimumTokenCount().get());
         result.setSkipDuplicates(config.getSkipDuplicateFiles().get());
-        result.setSkipLexicalErrors(config.getSkipLexicalErrors().get());
         return result;
     }
 

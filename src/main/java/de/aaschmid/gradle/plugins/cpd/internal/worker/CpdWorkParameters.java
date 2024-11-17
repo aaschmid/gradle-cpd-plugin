@@ -14,6 +14,10 @@ public interface CpdWorkParameters extends WorkParameters {
 
     Property<String> getEncoding();
 
+    Property<Boolean> getFailOnError();
+
+    Property<Boolean> getFailOnViolation();
+
     Property<Boolean> getIgnoreAnnotations();
 
     Property<Boolean> getIgnoreFailures();
@@ -31,8 +35,6 @@ public interface CpdWorkParameters extends WorkParameters {
     Property<String> getSkipBlocksPattern();
 
     Property<Boolean> getSkipDuplicateFiles();
-
-    Property<Boolean> getSkipLexicalErrors();
 
     ConfigurableFileCollection getSourceFiles();
 

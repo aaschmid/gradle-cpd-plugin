@@ -47,6 +47,8 @@ class CpdPluginTest {
     @Test
     void CpdPlugin_shouldCreateAndConfigureCpdExtension(CpdExtension cpd) {
         assertThat(cpd.getEncoding()).isNull();
+        assertThat(cpd.isFailOnError()).isTrue();
+        assertThat(cpd.isFailOnViolation()).isTrue();
         assertThat(cpd.isIgnoreAnnotations()).isFalse();
         assertThat(cpd.isIgnoreIdentifiers()).isFalse();
         assertThat(cpd.isIgnoreFailures()).isFalse();
@@ -54,10 +56,9 @@ class CpdPluginTest {
         assertThat(cpd.getLanguage()).isEqualTo("java");
         assertThat(cpd.getMinimumTokenCount()).isEqualTo(50);
         assertThat(cpd.isSkipDuplicateFiles()).isFalse();
-        assertThat(cpd.isSkipLexicalErrors()).isFalse();
         assertThat(cpd.isSkipBlocks()).isTrue();
         assertThat(cpd.getSkipBlocksPattern()).isEqualTo(CpdLanguagePropertiesDefaults.DEFAULT_SKIP_BLOCKS_PATTERN);
-        assertThat(cpd.getToolVersion()).isEqualTo("7.2.0");
+        assertThat(cpd.getToolVersion()).isEqualTo("7.7.0");
     }
 
     @Test
@@ -81,6 +82,8 @@ class CpdPluginTest {
 
         assertThat(t.getEncoding()).isNull();
         assertThat(t.getEncodingOrFallback()).isEqualTo(Charset.defaultCharset().displayName());
+        assertThat(t.getFailOnError()).isTrue();
+        assertThat(t.getFailOnViolation()).isTrue();
         assertThat(t.getIgnoreAnnotations()).isFalse();
         assertThat(t.getIgnoreFailures()).isFalse();
         assertThat(t.getIgnoreIdentifiers()).isFalse();
@@ -100,7 +103,6 @@ class CpdPluginTest {
         assertThat(t.getReports().getXml().getRequired().get()).isTrue();
 
         assertThat(t.getSkipDuplicateFiles()).isFalse();
-        assertThat(t.getSkipLexicalErrors()).isFalse();
         assertThat(t.getSkipBlocks()).isTrue();
         assertThat(t.getSkipBlocksPattern()).isEqualTo(CpdLanguagePropertiesDefaults.DEFAULT_SKIP_BLOCKS_PATTERN);
 
@@ -118,6 +120,8 @@ class CpdPluginTest {
 
         assertThat(t.getEncoding()).isNull();
         assertThat(t.getEncodingOrFallback()).isEqualTo(Charset.defaultCharset().displayName());
+        assertThat(t.getFailOnError()).isTrue();
+        assertThat(t.getFailOnViolation()).isTrue();
         assertThat(t.getIgnoreAnnotations()).isFalse();
         assertThat(t.getIgnoreFailures()).isFalse();
         assertThat(t.getIgnoreIdentifiers()).isFalse();
@@ -137,7 +141,6 @@ class CpdPluginTest {
         assertThat(t.getReports().getXml().getRequired().get()).isTrue();
 
         assertThat(t.getSkipDuplicateFiles()).isFalse();
-        assertThat(t.getSkipLexicalErrors()).isFalse();
         assertThat(t.getSkipBlocks()).isTrue();
         assertThat(t.getSkipBlocksPattern()).isEqualTo(CpdLanguagePropertiesDefaults.DEFAULT_SKIP_BLOCKS_PATTERN);
 
@@ -278,6 +281,8 @@ class CpdPluginTest {
     void CpdPlugin_shouldAllowConfigureCpdCheckTaskViaCpdExtension(Project project, CpdExtension cpd, TaskProvider<Cpd> cpdCheck) {
         // Given:
         cpd.setEncoding("UTF-8");
+        cpd.setFailOnError(false);
+        cpd.setFailOnViolation(false);
         cpd.setIgnoreAnnotations(true);
         cpd.setIgnoreFailures(true);
         cpd.setIgnoreIdentifiers(true);
@@ -286,7 +291,6 @@ class CpdPluginTest {
         cpd.setMinimumTokenCount(25);
         cpd.setReportsDir(project.file("cpd-reports"));
         cpd.setSkipDuplicateFiles(true);
-        cpd.setSkipLexicalErrors(true);
         cpd.setSkipBlocks(false);
         cpd.setSkipBlocksPattern("<|>");
 
@@ -295,6 +299,8 @@ class CpdPluginTest {
 
         // Then:
         assertThat(task.getEncoding()).isEqualTo("UTF-8");
+        assertThat(task.getFailOnError()).isFalse();
+        assertThat(task.getFailOnViolation()).isFalse();
         assertThat(task.getIgnoreAnnotations()).isTrue();
         assertThat(task.getIgnoreFailures()).isTrue();
         assertThat(task.getIgnoreIdentifiers()).isTrue();
@@ -306,7 +312,6 @@ class CpdPluginTest {
         assertThat(task.getReports().getVs().getOutputLocation().get().getAsFile()).isEqualTo(project.file("cpd-reports/cpdCheck.vs"));
         assertThat(task.getReports().getXml().getOutputLocation().get().getAsFile()).isEqualTo(project.file("cpd-reports/cpdCheck.xml"));
         assertThat(task.getSkipDuplicateFiles()).isTrue();
-        assertThat(task.getSkipLexicalErrors()).isTrue();
         assertThat(task.getSkipBlocks()).isFalse();
         assertThat(task.getSkipBlocksPattern()).isEqualTo("<|>");
     }

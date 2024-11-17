@@ -79,6 +79,8 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
     private final CpdReports reports;
 
     private String encoding;
+    private boolean failOnError;
+    private boolean failOnViolation;
     private boolean ignoreAnnotations;
     private boolean ignoreFailures;
     private boolean ignoreIdentifiers;
@@ -87,7 +89,6 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
     private Integer minimumTokenCount;
     private FileCollection pmdClasspath;
     private boolean skipDuplicateFiles;
-    private boolean skipLexicalErrors;
     private boolean skipBlocks;
     private String skipBlocksPattern;
 
@@ -119,6 +120,8 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
     private Action<CpdWorkParameters> getCpdWorkParameters() {
         return parameters -> {
             parameters.getEncoding().set(getEncodingOrFallback());
+            parameters.getFailOnError().set(getFailOnError());
+            parameters.getFailOnViolation().set(getFailOnViolation());
             parameters.getIgnoreAnnotations().set(getIgnoreAnnotations());
             parameters.getIgnoreFailures().set(getIgnoreFailures());
             parameters.getIgnoreIdentifiers().set(getIgnoreIdentifiers());
@@ -128,7 +131,6 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
             parameters.getSkipBlocks().set(getSkipBlocks());
             parameters.getSkipBlocksPattern().set(getSkipBlocksPattern());
             parameters.getSkipDuplicateFiles().set(getSkipDuplicateFiles());
-            parameters.getSkipLexicalErrors().set(getSkipLexicalErrors());
             parameters.getSourceFiles().setFrom(getSource().getFiles());
             parameters.getReportParameters().set(createReportParameters(getReports()));
         };
@@ -358,19 +360,38 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
     }
 
     /**
-     * Skip files which cannot be tokenized due to invalid characters instead of aborting CPD.
+     * Whether CPD should exit with status 4 (the default behavior, true)
+     * if violations are found or just with 0 (to not break the build, e.g.).
      * <p>
-     * Example: {@code skipLexicalErrors = true}
+     * Example: {@code failOnError = false}
      *
-     * @return whether lexical errors should be skipped
+     * @return whether CPD should fail on error
      */
     @Input
-    public boolean getSkipLexicalErrors() {
-        return skipLexicalErrors;
+    public boolean getFailOnError() {
+        return failOnError;
     }
 
-    public void setSkipLexicalErrors(boolean skipLexicalErrors) {
-        this.skipLexicalErrors = skipLexicalErrors;
+    public void setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
+    }
+
+    /**
+     * Whether PMD should exit with status 5 (the default behavior, true) if
+     * recoverable errors occurred or just with 0 (to not break the build,
+     * e.g. if the validation check fails).
+     * <p>
+     * Example: {@code failOnViolation = false}
+     *
+     * @return whether CPD should fail on violation
+     */
+    @Input
+    public boolean getFailOnViolation() {
+        return failOnViolation;
+    }
+
+    public void setFailOnViolation(boolean failOnViolation) {
+        this.failOnViolation = failOnViolation;
     }
 
     /**

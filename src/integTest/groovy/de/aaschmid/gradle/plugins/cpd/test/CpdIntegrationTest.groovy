@@ -190,7 +190,7 @@ class CpdIntegrationTest extends IntegrationBaseSpec {
         given:
         buildFileWithPluginAndRepos() << """
             cpd{
-                toolVersion = '7.0.0'
+                toolVersion = '7.7.0'
             }
             cpdCheck{
                 ignoreFailures = true

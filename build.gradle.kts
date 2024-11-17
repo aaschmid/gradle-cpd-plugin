@@ -30,9 +30,9 @@ sourceSets {
 }
 
 dependencies {
-    compileOnly("net.sourceforge.pmd:pmd-dist:7.2.0")
+    compileOnly("net.sourceforge.pmd:pmd-dist:7.7.0")
 
-    testImplementation("net.sourceforge.pmd:pmd-dist:7.2.0")
+    testImplementation("net.sourceforge.pmd:pmd-dist:7.7.0")
     testImplementation("com.google.guava:guava:33.1.0-jre")
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
     testImplementation("org.assertj:assertj-core:3.25.3")

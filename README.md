@@ -33,9 +33,7 @@ https://plugins.gradle.org/plugin/de.aaschmid.cpd.
 Requirements
 ------------
 
-This plugin requires [PMD](https://pmd.github.io/) greater or equal to version 7.0.0 such that ```toolVersion >= '7.0.0'```.
-
-Explanation: v7.0.0 changed the internal API, see [PMD release notes](https://pmd.github.io/pmd/pmd_release_notes_pmd7.html#-api).
+This plugin requires [PMD](https://pmd.github.io/) greater or equal to version 7.4.0 such that ```toolVersion >= '7.4.0'```.
 
 You can use older versions of this plugin if you want to use older versions of PMD (see table below).
 
@@ -56,6 +54,7 @@ You can use older versions of this plugin if you want to use older versions of P
 | [v3.2][]      | >= 6.6       | 6.10.0 - 6.x | >= 8   |
 | [v3.3][]      | >= 6.6       | 6.10.0 - 6.x | >= 8   |
 | [v3.4][]      | >= 7.4       | >= 7.0.0     | >= 8   |
+| [v3.5][]      | >= 7.4       | >= 7.4.0     | >= 8   |
 
 ¹: Java version may additionally depend on [PMD][]s version which is might not be properly reflected here.
 
@@ -137,7 +136,7 @@ This example shows a project where only ```main``` sources should be checked for
 // optional - settings for every CPD task
 cpd {
     language = 'cpp'
-    toolVersion = '7.0.0' // defaults to '7.2.0'; just available for v7.0.0 and higher (see explanation above)
+    toolVersion = '7.4.0' // defaults to '7.7.0'; just available for v7.4.0 and higher (see explanation above)
 }
 
 // optional - default report is xml and default sources are 'main' and 'test'
@@ -218,6 +217,8 @@ e.g. using ```cpdCheck { }```:
 | Attribute          | Default              | Applies for ```language``` | since    |
 | ------------------ |:--------------------:|:--------------------------:|:--------:|
 | encoding           | System default       |                            | [v0.1][] |
+| failOnError        |      ```true```      |                            | [v3.5][] |
+| failOnViolation    |      ```true```      |                            | [v3.5][] |
 | ignoreAnnotations  | ```false```          | ```'java'```               | [v0.4][] |
 | ignoreFailures     | ```false```          |                            | [v0.1][] |
 | ignoreIdentifiers  | ```false```          | ```'java'```               | [v0.4][] |

@@ -1,4 +1,4 @@
-package de.aachmid.lexical;
+package de.aaschmid.lexical;
 
 class Error {
 
